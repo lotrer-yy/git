@@ -1,0 +1,16 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/input/map_browser_input.gd" id="input"]
+[ext_resource type="Script" path="res://modules/camera/map_browser_camera.gd" id="camera"]
+[ext_resource type="Script" path="res://modules/map/map_texture_streamer.gd" id="streamer"]
+[ext_resource type="PackedScene" path="res://scenes/map/world_map.tscn" id="map"]
+[node name="MapBrowser" type="Node2D"]
+[node name="Input" type="Node" parent="."]
+script=ExtResource("input")
+[node name="Camera" type="Camera2D" parent="."]
+position=Vector2(960,51460)
+script=ExtResource("camera")
+[node name="Map" parent="." instance=ExtResource("map")]
+[node name="TextureStreamer" type="Node" parent="."]
+script=ExtResource("streamer")
+[node name="CharacterMount" type="Node2D" parent="."]
+metadata/note="角色模块以后组装到这里；当前只实现地图浏览。"

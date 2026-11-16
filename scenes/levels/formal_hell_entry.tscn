@@ -1,0 +1,47 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://scenes/map/formal_world_map.tscn" id="map"]
+[ext_resource type="PackedScene" path="res://scenes/actors/soul.tscn" id="soul"]
+[ext_resource type="Script" path="res://modules/camera/follow_camera.gd" id="camera"]
+[ext_resource type="Script" path="res://modules/map/map_texture_streamer.gd" id="streamer"]
+[ext_resource type="Script" path="res://modules/cinematic/soul_wall_entry.gd" id="entry"]
+[ext_resource type="Script" path="res://modules/camera/follow_camera_output.gd" id="camera_output"]
+[sub_resource type="RectangleShape2D" id="ground"]
+size=Vector2(1920,200)
+[sub_resource type="RectangleShape2D" id="wall"]
+size=Vector2(190,10602)
+[node name="FormalHellEntry" type="Node2D"]
+[node name="Map" parent="." instance=ExtResource("map")]
+[node name="Soul" parent="." instance=ExtResource("soul")]
+position=Vector2(140,51620)
+[node name="Camera" type="Camera2D" parent="."]
+enabled=false
+script=ExtResource("camera")
+target_path=NodePath("../Soul")
+world_bounds=Rect2(0,0,1920,52000)
+max_impulse_pixels=0.0
+[node name="TextureStreamer" type="Node" parent="."]
+script=ExtResource("streamer")
+[node name="Ground" type="StaticBody2D" parent="."]
+collision_layer=1
+collision_mask=4
+[node name="Collision" type="CollisionShape2D" parent="Ground"]
+position=Vector2(960,51970)
+shape=SubResource("ground")
+[node name="Walls" type="StaticBody2D" parent="."]
+collision_layer=16
+collision_mask=4
+[node name="Left" type="CollisionShape2D" parent="Walls"]
+position=Vector2(95,46699)
+shape=SubResource("wall")
+[node name="Right" type="CollisionShape2D" parent="Walls"]
+position=Vector2(1825,46699)
+shape=SubResource("wall")
+[node name="WallSpawn" type="Marker2D" parent="."]
+position=Vector2(140,51620)
+[node name="LandingPoint" type="Marker2D" parent="."]
+position=Vector2(660,51870)
+[node name="WallEntry" type="Node" parent="."]
+script=ExtResource("entry")
+
+[node name="CameraOutput" type="Node" parent="."]
+script=ExtResource("camera_output")

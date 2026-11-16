@@ -107,3 +107,12 @@ func _clamp_center(point: Vector2) -> Vector2:
 	var low := world_bounds.position + half_view
 	var high := world_bounds.end - half_view
 	return Vector2(clampf(point.x, low.x, high.x) if low.x <= high.x else world_bounds.get_center().x, clampf(point.y, low.y, high.y) if low.y <= high.y else world_bounds.get_center().y)
+
+
+func adopt_view(center: Vector2, view_zoom: Vector2) -> void:
+	## 连续镜头交接时接收已有视野，避免重新对准角色造成跳帧。
+	zoom = view_zoom
+	_center = _clamp_center(center)
+	global_position = _center
+	offset = Vector2.ZERO
+	_trauma = 0.0

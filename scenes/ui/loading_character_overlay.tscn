@@ -1,0 +1,108 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/ui/loading_character_overlay.gd" id="overlay"]
+[ext_resource type="Script" path="res://modules/visual/loading_character_bounce.gd" id="bounce"]
+[ext_resource type="Script" path="res://modules/visual/elastic_pulse.gd" id="pulse"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/loading_characters/ghost.png" id="ghost"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/loading_characters/demon.png" id="demon"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/loading_characters/fish.png" id="fish"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/loading_characters/squirrel.png" id="squirrel"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/loading_characters/bird.png" id="bird"]
+[node name="LoadingOverlay" type="CanvasLayer"]
+layer=100
+script=ExtResource("overlay")
+[node name="Layout" type="Control" parent="."]
+layout_mode=3
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+grow_horizontal=2
+grow_vertical=2
+mouse_filter=2
+[node name="Dim" type="ColorRect" parent="Layout"]
+layout_mode=1
+anchors_preset=15
+anchor_right=1.0
+anchor_bottom=1.0
+grow_horizontal=2
+grow_vertical=2
+mouse_filter=2
+color=Color(0,0,0,0)
+[node name="Corner" type="Control" parent="Layout"]
+layout_mode=1
+anchors_preset=3
+anchor_left=1.0
+anchor_top=1.0
+anchor_right=1.0
+anchor_bottom=1.0
+offset_left=-650.0
+offset_top=-195.0
+offset_right=-45.0
+offset_bottom=-40.0
+grow_horizontal=0
+grow_vertical=0
+mouse_filter=2
+[node name="Ghost" type="Node2D" parent="Layout/Corner"]
+position=Vector2(60,155)
+script=ExtResource("bounce")
+[node name="Visual" type="Node2D" parent="Layout/Corner/Ghost"]
+[node name="Sprite" type="Sprite2D" parent="Layout/Corner/Ghost/Visual"]
+position=Vector2(0,-55)
+scale=Vector2(0.7142857143,0.7142857143)
+texture=ExtResource("ghost")
+[node name="Pulse" type="Node" parent="Layout/Corner/Ghost/Visual"]
+script=ExtResource("pulse")
+strength=0.11
+stiffness=200.0
+damping=12.0
+[node name="Demon" type="Node2D" parent="Layout/Corner"]
+position=Vector2(180,155)
+script=ExtResource("bounce")
+[node name="Visual" type="Node2D" parent="Layout/Corner/Demon"]
+[node name="Sprite" type="Sprite2D" parent="Layout/Corner/Demon/Visual"]
+position=Vector2(0,-55)
+scale=Vector2(0.6790123457,0.6790123457)
+texture=ExtResource("demon")
+[node name="Pulse" type="Node" parent="Layout/Corner/Demon/Visual"]
+script=ExtResource("pulse")
+strength=0.11
+stiffness=200.0
+damping=12.0
+[node name="Fish" type="Node2D" parent="Layout/Corner"]
+position=Vector2(300,155)
+script=ExtResource("bounce")
+[node name="Visual" type="Node2D" parent="Layout/Corner/Fish"]
+[node name="Sprite" type="Sprite2D" parent="Layout/Corner/Fish/Visual"]
+position=Vector2(0,-55)
+scale=Vector2(0.6962025316,0.6962025316)
+texture=ExtResource("fish")
+[node name="Pulse" type="Node" parent="Layout/Corner/Fish/Visual"]
+script=ExtResource("pulse")
+strength=0.11
+stiffness=200.0
+damping=12.0
+[node name="Squirrel" type="Node2D" parent="Layout/Corner"]
+position=Vector2(420,155)
+script=ExtResource("bounce")
+[node name="Visual" type="Node2D" parent="Layout/Corner/Squirrel"]
+[node name="Sprite" type="Sprite2D" parent="Layout/Corner/Squirrel/Visual"]
+position=Vector2(0,-55)
+scale=Vector2(0.6918238994,0.6918238994)
+texture=ExtResource("squirrel")
+[node name="Pulse" type="Node" parent="Layout/Corner/Squirrel/Visual"]
+script=ExtResource("pulse")
+strength=0.11
+stiffness=200.0
+damping=12.0
+[node name="Bird" type="Node2D" parent="Layout/Corner"]
+position=Vector2(540,155)
+script=ExtResource("bounce")
+[node name="Visual" type="Node2D" parent="Layout/Corner/Bird"]
+[node name="Sprite" type="Sprite2D" parent="Layout/Corner/Bird/Visual"]
+position=Vector2(0,-55)
+scale=Vector2(0.7236842105,0.7236842105)
+texture=ExtResource("bird")
+[node name="Pulse" type="Node" parent="Layout/Corner/Bird/Visual"]
+script=ExtResource("pulse")
+strength=0.11
+stiffness=200.0
+damping=12.0

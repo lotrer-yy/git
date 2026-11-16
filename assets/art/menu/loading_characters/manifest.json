@@ -1,0 +1,51 @@
+{
+  "source_name": "游戏主页-加载5个豆子单体.png",
+  "sha256": "a4cbecf2498455e9e5e2747c0207f64241c7ea2786c45c2c854f058c7522cdd9",
+  "characters": [
+    {
+      "name": "ghost",
+      "source_box": [
+        1068,
+        2809,
+        1221,
+        2963
+      ]
+    },
+    {
+      "name": "demon",
+      "source_box": [
+        1247,
+        2805,
+        1412,
+        2967
+      ]
+    },
+    {
+      "name": "fish",
+      "source_box": [
+        1432,
+        2809,
+        1591,
+        2967
+      ]
+    },
+    {
+      "name": "squirrel",
+      "source_box": [
+        1613,
+        2806,
+        1754,
+        2965
+      ]
+    },
+    {
+      "name": "bird",
+      "source_box": [
+        1763,
+        2809,
+        1927,
+        2961
+      ]
+    }
+  ]
+}

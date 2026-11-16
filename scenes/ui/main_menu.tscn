@@ -1,5 +1,6 @@
 [gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/ui/main_menu.gd" id="menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/loading_character_overlay.tscn" id="loading_overlay"]
 [ext_resource type="Script" path="res://modules/camera/menu_descent_transition.gd" id="descent"]
 [ext_resource type="Script" path="res://modules/camera/loading_arrival_motion.gd" id="arrival"]
 [ext_resource type="Script" path="res://modules/visual/menu_exit_motion.gd" id="exit"]
@@ -159,3 +160,5 @@ script=ExtResource("descent")
 
 [node name="ArrivalMotion" type="Node" parent="."]
 script=ExtResource("arrival")
+
+[node name="LoadingOverlay" parent="." instance=ExtResource("loading_overlay")]

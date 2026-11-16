@@ -6,6 +6,8 @@ func _ready() -> void:
 	$Start.mouse_entered.connect($Start/Pulse.pulse)
 	$Settings.mouse_entered.connect($Settings/Pulse.pulse)
 	$DescentTransition.descent_started.connect($ExitMotion.play)
+	$DescentTransition.descent_started.connect($LoadingOverlay.begin_loading)
+	$ArrivalMotion.arrived.connect($LoadingOverlay.finish_loading)
 func _settings_pressed() -> void:
 	$Settings/Pulse.pulse()
 func _start_game() -> void:

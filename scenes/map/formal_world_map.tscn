@@ -1,0 +1,637 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/map/finite_parallax.gd" id="parallax"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/00_preview.png" id="tile1"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/01_preview.png" id="tile2"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/02_preview.png" id="tile3"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/03_preview.png" id="tile4"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/04_preview.png" id="tile5"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/05_preview.png" id="tile6"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/06_preview.png" id="tile7"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/07_preview.png" id="tile8"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/08_preview.png" id="tile9"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/09_preview.png" id="tile10"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/10_preview.png" id="tile11"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/11_preview.png" id="tile12"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/12_preview.png" id="tile13"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/13_preview.png" id="tile14"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/14_preview.png" id="tile15"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/15_preview.png" id="tile16"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/16_preview.png" id="tile17"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/17_preview.png" id="tile18"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/18_preview.png" id="tile19"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/19_preview.png" id="tile20"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/20_preview.png" id="tile21"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/21_preview.png" id="tile22"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/22_preview.png" id="tile23"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/23_preview.png" id="tile24"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/24_preview.png" id="tile25"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/base/25_preview.png" id="tile26"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/sky/00_preview.png" id="tile27"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/sky/01_preview.png" id="tile28"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/sky/02_preview.png" id="tile29"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/sky/03_preview.png" id="tile30"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/sky/04_preview.png" id="tile31"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/sky/05_preview.png" id="tile32"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/sky/06_preview.png" id="tile33"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/jungle/00_preview.png" id="tile34"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/jungle/01_preview.png" id="tile35"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/jungle/02_preview.png" id="tile36"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/jungle/03_preview.png" id="tile37"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/jungle/04_preview.png" id="tile38"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/jungle/05_preview.png" id="tile39"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/ocean/00_preview.png" id="tile40"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/ocean/01_preview.png" id="tile41"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/ocean/02_preview.png" id="tile42"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/ocean/03_preview.png" id="tile43"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/ocean/04_preview.png" id="tile44"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/hell/00_preview.png" id="tile45"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/hell/01_preview.png" id="tile46"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/hell/02_preview.png" id="tile47"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/hell/03_preview.png" id="tile48"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/hell/04_preview.png" id="tile49"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/hell/05_preview.png" id="tile50"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/00_preview.png" id="tile51"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/01_preview.png" id="tile52"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/02_preview.png" id="tile53"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/03_preview.png" id="tile54"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/04_preview.png" id="tile55"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/05_preview.png" id="tile56"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/06_preview.png" id="tile57"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/07_preview.png" id="tile58"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/08_preview.png" id="tile59"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/09_preview.png" id="tile60"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/10_preview.png" id="tile61"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/11_preview.png" id="tile62"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/12_preview.png" id="tile63"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/13_preview.png" id="tile64"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/14_preview.png" id="tile65"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/15_preview.png" id="tile66"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/16_preview.png" id="tile67"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/17_preview.png" id="tile68"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/18_preview.png" id="tile69"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/19_preview.png" id="tile70"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/20_preview.png" id="tile71"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/21_preview.png" id="tile72"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/22_preview.png" id="tile73"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/23_preview.png" id="tile74"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/24_preview.png" id="tile75"]
+[ext_resource type="Texture2D" path="res://assets/formal_map/foreground/25_preview.png" id="tile76"]
+[node name="WorldMap" type="Node2D"]
+[node name="Base" type="Node2D" parent="."]
+z_index=-30
+[node name="Backgrounds" type="Node2D" parent="."]
+z_index=-20
+[node name="Chunk00" type="Sprite2D" parent="Base"]
+position=Vector2(0,0)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile1")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/00.png"
+metadata/pixel_height=2048
+[node name="Chunk01" type="Sprite2D" parent="Base"]
+position=Vector2(0,2048)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile2")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/01.png"
+metadata/pixel_height=2048
+[node name="Chunk02" type="Sprite2D" parent="Base"]
+position=Vector2(0,4096)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile3")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/02.png"
+metadata/pixel_height=2048
+[node name="Chunk03" type="Sprite2D" parent="Base"]
+position=Vector2(0,6144)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile4")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/03.png"
+metadata/pixel_height=2048
+[node name="Chunk04" type="Sprite2D" parent="Base"]
+position=Vector2(0,8192)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile5")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/04.png"
+metadata/pixel_height=2048
+[node name="Chunk05" type="Sprite2D" parent="Base"]
+position=Vector2(0,10240)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile6")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/05.png"
+metadata/pixel_height=2048
+[node name="Chunk06" type="Sprite2D" parent="Base"]
+position=Vector2(0,12288)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile7")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/06.png"
+metadata/pixel_height=2048
+[node name="Chunk07" type="Sprite2D" parent="Base"]
+position=Vector2(0,14336)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile8")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/07.png"
+metadata/pixel_height=2048
+[node name="Chunk08" type="Sprite2D" parent="Base"]
+position=Vector2(0,16384)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile9")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/08.png"
+metadata/pixel_height=2048
+[node name="Chunk09" type="Sprite2D" parent="Base"]
+position=Vector2(0,18432)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile10")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/09.png"
+metadata/pixel_height=2048
+[node name="Chunk10" type="Sprite2D" parent="Base"]
+position=Vector2(0,20480)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile11")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/10.png"
+metadata/pixel_height=2048
+[node name="Chunk11" type="Sprite2D" parent="Base"]
+position=Vector2(0,22528)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile12")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/11.png"
+metadata/pixel_height=2048
+[node name="Chunk12" type="Sprite2D" parent="Base"]
+position=Vector2(0,24576)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile13")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/12.png"
+metadata/pixel_height=2048
+[node name="Chunk13" type="Sprite2D" parent="Base"]
+position=Vector2(0,26624)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile14")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/13.png"
+metadata/pixel_height=2048
+[node name="Chunk14" type="Sprite2D" parent="Base"]
+position=Vector2(0,28672)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile15")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/14.png"
+metadata/pixel_height=2048
+[node name="Chunk15" type="Sprite2D" parent="Base"]
+position=Vector2(0,30720)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile16")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/15.png"
+metadata/pixel_height=2048
+[node name="Chunk16" type="Sprite2D" parent="Base"]
+position=Vector2(0,32768)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile17")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/16.png"
+metadata/pixel_height=2048
+[node name="Chunk17" type="Sprite2D" parent="Base"]
+position=Vector2(0,34816)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile18")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/17.png"
+metadata/pixel_height=2048
+[node name="Chunk18" type="Sprite2D" parent="Base"]
+position=Vector2(0,36864)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile19")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/18.png"
+metadata/pixel_height=2048
+[node name="Chunk19" type="Sprite2D" parent="Base"]
+position=Vector2(0,38912)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile20")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/19.png"
+metadata/pixel_height=2048
+[node name="Chunk20" type="Sprite2D" parent="Base"]
+position=Vector2(0,40960)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile21")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/20.png"
+metadata/pixel_height=2048
+[node name="Chunk21" type="Sprite2D" parent="Base"]
+position=Vector2(0,43008)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile22")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/21.png"
+metadata/pixel_height=2048
+[node name="Chunk22" type="Sprite2D" parent="Base"]
+position=Vector2(0,45056)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile23")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/22.png"
+metadata/pixel_height=2048
+[node name="Chunk23" type="Sprite2D" parent="Base"]
+position=Vector2(0,47104)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile24")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/23.png"
+metadata/pixel_height=2048
+[node name="Chunk24" type="Sprite2D" parent="Base"]
+position=Vector2(0,49152)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile25")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/24.png"
+metadata/pixel_height=2048
+[node name="Chunk25" type="Sprite2D" parent="Base"]
+position=Vector2(0,51200)
+scale=Vector2(10,10.0000000000)
+texture=ExtResource("tile26")
+centered=false
+metadata/full_texture="res://assets/formal_map/base/25.png"
+metadata/pixel_height=800
+[node name="Sky" type="Node2D" parent="Backgrounds"]
+script=ExtResource("parallax")
+camera_path=NodePath("../../../Camera")
+region_top=4942.0
+region_bottom=18712.0
+[node name="Chunk00" type="Sprite2D" parent="Backgrounds/Sky"]
+position=Vector2(0,4942)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile27")
+centered=false
+metadata/full_texture="res://assets/formal_map/sky/00.png"
+metadata/pixel_height=2048
+[node name="Chunk01" type="Sprite2D" parent="Backgrounds/Sky"]
+position=Vector2(0,6990)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile28")
+centered=false
+metadata/full_texture="res://assets/formal_map/sky/01.png"
+metadata/pixel_height=2048
+[node name="Chunk02" type="Sprite2D" parent="Backgrounds/Sky"]
+position=Vector2(0,9038)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile29")
+centered=false
+metadata/full_texture="res://assets/formal_map/sky/02.png"
+metadata/pixel_height=2048
+[node name="Chunk03" type="Sprite2D" parent="Backgrounds/Sky"]
+position=Vector2(0,11086)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile30")
+centered=false
+metadata/full_texture="res://assets/formal_map/sky/03.png"
+metadata/pixel_height=2048
+[node name="Chunk04" type="Sprite2D" parent="Backgrounds/Sky"]
+position=Vector2(0,13134)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile31")
+centered=false
+metadata/full_texture="res://assets/formal_map/sky/04.png"
+metadata/pixel_height=2048
+[node name="Chunk05" type="Sprite2D" parent="Backgrounds/Sky"]
+position=Vector2(0,15182)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile32")
+centered=false
+metadata/full_texture="res://assets/formal_map/sky/05.png"
+metadata/pixel_height=2048
+[node name="Chunk06" type="Sprite2D" parent="Backgrounds/Sky"]
+position=Vector2(0,17230)
+scale=Vector2(10,9.9463087248)
+texture=ExtResource("tile33")
+centered=false
+metadata/full_texture="res://assets/formal_map/sky/06.png"
+metadata/pixel_height=1482
+[node name="Jungle" type="Node2D" parent="Backgrounds"]
+script=ExtResource("parallax")
+camera_path=NodePath("../../../Camera")
+region_top=17637.0
+region_bottom=29662.0
+[node name="Chunk00" type="Sprite2D" parent="Backgrounds/Jungle"]
+position=Vector2(0,17637)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile34")
+centered=false
+metadata/full_texture="res://assets/formal_map/jungle/00.png"
+metadata/pixel_height=2048
+[node name="Chunk01" type="Sprite2D" parent="Backgrounds/Jungle"]
+position=Vector2(0,19685)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile35")
+centered=false
+metadata/full_texture="res://assets/formal_map/jungle/01.png"
+metadata/pixel_height=2048
+[node name="Chunk02" type="Sprite2D" parent="Backgrounds/Jungle"]
+position=Vector2(0,21733)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile36")
+centered=false
+metadata/full_texture="res://assets/formal_map/jungle/02.png"
+metadata/pixel_height=2048
+[node name="Chunk03" type="Sprite2D" parent="Backgrounds/Jungle"]
+position=Vector2(0,23781)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile37")
+centered=false
+metadata/full_texture="res://assets/formal_map/jungle/03.png"
+metadata/pixel_height=2048
+[node name="Chunk04" type="Sprite2D" parent="Backgrounds/Jungle"]
+position=Vector2(0,25829)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile38")
+centered=false
+metadata/full_texture="res://assets/formal_map/jungle/04.png"
+metadata/pixel_height=2048
+[node name="Chunk05" type="Sprite2D" parent="Backgrounds/Jungle"]
+position=Vector2(0,27877)
+scale=Vector2(10,9.9720670391)
+texture=ExtResource("tile39")
+centered=false
+metadata/full_texture="res://assets/formal_map/jungle/05.png"
+metadata/pixel_height=1785
+[node name="Ocean" type="Node2D" parent="Backgrounds"]
+script=ExtResource("parallax")
+camera_path=NodePath("../../../Camera")
+region_top=29978.0
+region_bottom=39138.0
+[node name="Chunk00" type="Sprite2D" parent="Backgrounds/Ocean"]
+position=Vector2(0,29978)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile40")
+centered=false
+metadata/full_texture="res://assets/formal_map/ocean/00.png"
+metadata/pixel_height=2048
+[node name="Chunk01" type="Sprite2D" parent="Backgrounds/Ocean"]
+position=Vector2(0,32026)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile41")
+centered=false
+metadata/full_texture="res://assets/formal_map/ocean/01.png"
+metadata/pixel_height=2048
+[node name="Chunk02" type="Sprite2D" parent="Backgrounds/Ocean"]
+position=Vector2(0,34074)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile42")
+centered=false
+metadata/full_texture="res://assets/formal_map/ocean/02.png"
+metadata/pixel_height=2048
+[node name="Chunk03" type="Sprite2D" parent="Backgrounds/Ocean"]
+position=Vector2(0,36122)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile43")
+centered=false
+metadata/full_texture="res://assets/formal_map/ocean/03.png"
+metadata/pixel_height=2048
+[node name="Chunk04" type="Sprite2D" parent="Backgrounds/Ocean"]
+position=Vector2(0,38170)
+scale=Vector2(10,9.9793814433)
+texture=ExtResource("tile44")
+centered=false
+metadata/full_texture="res://assets/formal_map/ocean/04.png"
+metadata/pixel_height=968
+[node name="Hell" type="Node2D" parent="Backgrounds"]
+script=ExtResource("parallax")
+camera_path=NodePath("../../../Camera")
+region_top=41398.0
+region_bottom=52000.0
+[node name="Chunk00" type="Sprite2D" parent="Backgrounds/Hell"]
+position=Vector2(0,41398)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile45")
+centered=false
+metadata/full_texture="res://assets/formal_map/hell/00.png"
+metadata/pixel_height=2048
+[node name="Chunk01" type="Sprite2D" parent="Backgrounds/Hell"]
+position=Vector2(0,43446)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile46")
+centered=false
+metadata/full_texture="res://assets/formal_map/hell/01.png"
+metadata/pixel_height=2048
+[node name="Chunk02" type="Sprite2D" parent="Backgrounds/Hell"]
+position=Vector2(0,45494)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile47")
+centered=false
+metadata/full_texture="res://assets/formal_map/hell/02.png"
+metadata/pixel_height=2048
+[node name="Chunk03" type="Sprite2D" parent="Backgrounds/Hell"]
+position=Vector2(0,47542)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile48")
+centered=false
+metadata/full_texture="res://assets/formal_map/hell/03.png"
+metadata/pixel_height=2048
+[node name="Chunk04" type="Sprite2D" parent="Backgrounds/Hell"]
+position=Vector2(0,49590)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile49")
+centered=false
+metadata/full_texture="res://assets/formal_map/hell/04.png"
+metadata/pixel_height=2048
+[node name="Chunk05" type="Sprite2D" parent="Backgrounds/Hell"]
+position=Vector2(0,51638)
+scale=Vector2(10,9.7837837838)
+texture=ExtResource("tile50")
+centered=false
+metadata/full_texture="res://assets/formal_map/hell/05.png"
+metadata/pixel_height=362
+[node name="Foreground" type="Node2D" parent="."]
+z_index=10
+[node name="Chunk00" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,0)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile51")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/00.png"
+metadata/pixel_height=2048
+[node name="Chunk01" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,2048)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile52")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/01.png"
+metadata/pixel_height=2048
+[node name="Chunk02" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,4096)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile53")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/02.png"
+metadata/pixel_height=2048
+[node name="Chunk03" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,6144)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile54")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/03.png"
+metadata/pixel_height=2048
+[node name="Chunk04" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,8192)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile55")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/04.png"
+metadata/pixel_height=2048
+[node name="Chunk05" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,10240)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile56")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/05.png"
+metadata/pixel_height=2048
+[node name="Chunk06" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,12288)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile57")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/06.png"
+metadata/pixel_height=2048
+[node name="Chunk07" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,14336)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile58")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/07.png"
+metadata/pixel_height=2048
+[node name="Chunk08" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,16384)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile59")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/08.png"
+metadata/pixel_height=2048
+[node name="Chunk09" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,18432)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile60")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/09.png"
+metadata/pixel_height=2048
+[node name="Chunk10" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,20480)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile61")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/10.png"
+metadata/pixel_height=2048
+[node name="Chunk11" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,22528)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile62")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/11.png"
+metadata/pixel_height=2048
+[node name="Chunk12" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,24576)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile63")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/12.png"
+metadata/pixel_height=2048
+[node name="Chunk13" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,26624)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile64")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/13.png"
+metadata/pixel_height=2048
+[node name="Chunk14" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,28672)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile65")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/14.png"
+metadata/pixel_height=2048
+[node name="Chunk15" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,30720)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile66")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/15.png"
+metadata/pixel_height=2048
+[node name="Chunk16" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,32768)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile67")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/16.png"
+metadata/pixel_height=2048
+[node name="Chunk17" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,34816)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile68")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/17.png"
+metadata/pixel_height=2048
+[node name="Chunk18" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,36864)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile69")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/18.png"
+metadata/pixel_height=2048
+[node name="Chunk19" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,38912)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile70")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/19.png"
+metadata/pixel_height=2048
+[node name="Chunk20" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,40960)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile71")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/20.png"
+metadata/pixel_height=2048
+[node name="Chunk21" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,43008)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile72")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/21.png"
+metadata/pixel_height=2048
+[node name="Chunk22" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,45056)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile73")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/22.png"
+metadata/pixel_height=2048
+[node name="Chunk23" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,47104)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile74")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/23.png"
+metadata/pixel_height=2048
+[node name="Chunk24" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,49152)
+scale=Vector2(10,9.9902439024)
+texture=ExtResource("tile75")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/24.png"
+metadata/pixel_height=2048
+[node name="Chunk25" type="Sprite2D" parent="Foreground"]
+position=Vector2(0,51200)
+scale=Vector2(10,10.0000000000)
+texture=ExtResource("tile76")
+centered=false
+metadata/full_texture="res://assets/formal_map/foreground/25.png"
+metadata/pixel_height=800

@@ -25,6 +25,7 @@
 [ext_resource type="Script" path="res://modules/camera/cinematic_chase_camera.gd" id="chase_camera"]
 [ext_resource type="Script" path="res://modules/cinematic/opening_chase_director.gd" id="chase_director"]
 [ext_resource type="Script" path="res://modules/camera/cinematic_prezoom.gd" id="prezoom"]
+[ext_resource type="PackedScene" path="res://scenes/cinematics/pillar_game_handoff.tscn" id="handoff"]
 [sub_resource type="AtlasTexture" id="LogoArt"]
 atlas=ExtResource("logo")
 region=Rect2(72, 40, 872, 633)
@@ -173,3 +174,5 @@ script=ExtResource("chase_director")
 
 [node name="PreChaseZoom" type="Node" parent="."]
 script=ExtResource("prezoom")
+
+[node name="GameHandoff" parent="." instance=ExtResource("handoff")]

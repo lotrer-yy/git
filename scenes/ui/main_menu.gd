@@ -9,6 +9,8 @@ func _ready() -> void:
 	$DescentTransition.descent_started.connect($LoadingOverlay.begin_loading)
 	$ArrivalMotion.arrived.connect($LoadingOverlay.finish_loading)
 	$LoadingOverlay.finished.connect($OpeningChase.start)
+	$LoadingOverlay.finished.connect($GameHandoff.prepare)
+	$OpeningChase.finished.connect($GameHandoff.play)
 func _settings_pressed() -> void:
 	$Settings/Pulse.pulse()
 func _start_game() -> void:

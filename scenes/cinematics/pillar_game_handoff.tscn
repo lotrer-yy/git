@@ -1,0 +1,12 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/cinematic/pillar_game_handoff.gd" id="handoff"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/final_wall_wipe.png" id="wall"]
+[ext_resource type="PackedScene" path="res://scenes/levels/formal_hell_entry.tscn" id="gameplay"]
+[node name="GameHandoff" type="CanvasLayer"]
+layer=50
+script=ExtResource("handoff")
+gameplay_scene=ExtResource("gameplay")
+[node name="Wall" type="Sprite2D" parent="."]
+texture=ExtResource("wall")
+centered=false
+scale=Vector2(2,2)

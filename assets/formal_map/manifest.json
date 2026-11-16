@@ -1,0 +1,432 @@
+{
+  "canvas": [
+    1920,
+    52000
+  ],
+  "sources": {
+    "游戏总地图-天空背景.png": "ea2368ca15902512304109bd1d4bb1f4aefae564fc3c375dcfbd57e71b220887",
+    "游戏总地图-丛林背景.png": "10ccc45b32d34c5dba85025e746b424468f1afb6bf6b3222ca5c8a5ad9a27fad",
+    "游戏总地图-海底背景.png": "c14395cefefca1e68f745f2361de3dd69bad69fc2c19effddf8c83727522fab1",
+    "游戏总地图-地狱背景.png": "d380a7dafbb4e96bae8b075124abd75aa9aba158c6f7b379bce0eddc84705601",
+    "游戏总地图.png": "fc6d01e38848bfdf005f0a959b0415d5a1a01fb178755b70b6e2d8ffe5cc01b1",
+    "游戏总地图-前景.png": "8958744089cb05d1f5f7f35020345765a70a513c56e16b4ecce28093d63e7167"
+  },
+  "layers": {
+    "Sky": {
+      "top": 4942,
+      "bottom": 18712,
+      "title": "天空"
+    },
+    "Jungle": {
+      "top": 17637,
+      "bottom": 29662,
+      "title": "丛林"
+    },
+    "Ocean": {
+      "top": 29978,
+      "bottom": 39138,
+      "title": "海底"
+    },
+    "Hell": {
+      "top": 41398,
+      "bottom": 52000,
+      "title": "地狱"
+    }
+  },
+  "chunks": {
+    "Base": [
+      {
+        "path": "assets/map/base/00.png",
+        "top": 0,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/01.png",
+        "top": 2048,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/02.png",
+        "top": 4096,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/03.png",
+        "top": 6144,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/04.png",
+        "top": 8192,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/05.png",
+        "top": 10240,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/06.png",
+        "top": 12288,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/07.png",
+        "top": 14336,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/08.png",
+        "top": 16384,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/09.png",
+        "top": 18432,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/10.png",
+        "top": 20480,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/11.png",
+        "top": 22528,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/12.png",
+        "top": 24576,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/13.png",
+        "top": 26624,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/14.png",
+        "top": 28672,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/15.png",
+        "top": 30720,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/16.png",
+        "top": 32768,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/17.png",
+        "top": 34816,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/18.png",
+        "top": 36864,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/19.png",
+        "top": 38912,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/20.png",
+        "top": 40960,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/21.png",
+        "top": 43008,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/22.png",
+        "top": 45056,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/23.png",
+        "top": 47104,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/24.png",
+        "top": 49152,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/base/25.png",
+        "top": 51200,
+        "height": 800
+      }
+    ],
+    "Sky": [
+      {
+        "path": "assets/map/sky/00.png",
+        "top": 4942,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/sky/01.png",
+        "top": 6990,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/sky/02.png",
+        "top": 9038,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/sky/03.png",
+        "top": 11086,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/sky/04.png",
+        "top": 13134,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/sky/05.png",
+        "top": 15182,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/sky/06.png",
+        "top": 17230,
+        "height": 1482
+      }
+    ],
+    "Jungle": [
+      {
+        "path": "assets/map/jungle/00.png",
+        "top": 17637,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/jungle/01.png",
+        "top": 19685,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/jungle/02.png",
+        "top": 21733,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/jungle/03.png",
+        "top": 23781,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/jungle/04.png",
+        "top": 25829,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/jungle/05.png",
+        "top": 27877,
+        "height": 1785
+      }
+    ],
+    "Ocean": [
+      {
+        "path": "assets/map/ocean/00.png",
+        "top": 29978,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/ocean/01.png",
+        "top": 32026,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/ocean/02.png",
+        "top": 34074,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/ocean/03.png",
+        "top": 36122,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/ocean/04.png",
+        "top": 38170,
+        "height": 968
+      }
+    ],
+    "Hell": [
+      {
+        "path": "assets/map/hell/00.png",
+        "top": 41398,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/hell/01.png",
+        "top": 43446,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/hell/02.png",
+        "top": 45494,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/hell/03.png",
+        "top": 47542,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/hell/04.png",
+        "top": 49590,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/hell/05.png",
+        "top": 51638,
+        "height": 362
+      }
+    ],
+    "Foreground": [
+      {
+        "path": "assets/map/foreground/00.png",
+        "top": 0,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/01.png",
+        "top": 2048,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/02.png",
+        "top": 4096,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/03.png",
+        "top": 6144,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/04.png",
+        "top": 8192,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/05.png",
+        "top": 10240,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/06.png",
+        "top": 12288,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/07.png",
+        "top": 14336,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/08.png",
+        "top": 16384,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/09.png",
+        "top": 18432,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/10.png",
+        "top": 20480,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/11.png",
+        "top": 22528,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/12.png",
+        "top": 24576,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/13.png",
+        "top": 26624,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/14.png",
+        "top": 28672,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/15.png",
+        "top": 30720,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/16.png",
+        "top": 32768,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/17.png",
+        "top": 34816,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/18.png",
+        "top": 36864,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/19.png",
+        "top": 38912,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/20.png",
+        "top": 40960,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/21.png",
+        "top": 43008,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/22.png",
+        "top": 45056,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/23.png",
+        "top": 47104,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/24.png",
+        "top": 49152,
+        "height": 2048
+      },
+      {
+        "path": "assets/map/foreground/25.png",
+        "top": 51200,
+        "height": 800
+      }
+    ]
+  },
+  "foreground_method": "作者独立前景；仅恢复白底透明度、去除导出参考线；不再从总图推算轮廓",
+  "background_wall_cleanup": "地狱背景两侧各 280 像素延展相邻背景纹理，去除导出中自带的旧侧墙；显示侧墙仅来自新版前景"
+}

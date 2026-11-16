@@ -11,6 +11,8 @@
 [ext_resource type="Shader" path="res://shaders/foreground_soft_blur.gdshader" id="blur"]
 [ext_resource type="Texture2D" path="res://assets/art/cinematic/final_side_wall.png" id="side_wall"]
 [ext_resource type="PackedScene" path="res://scenes/cinematics/near_miss_volley.tscn" id="near_miss_arrows"]
+[ext_resource type="Script" path="res://modules/cinematic/surface_arrow_volley.gd" id="surface_volley"]
+[ext_resource type="PackedScene" path="res://scenes/cinematics/near_miss_arrow.tscn" id="surface_arrow"]
 [sub_resource type="ShaderMaterial" id="PillarBlur"]
 shader=ExtResource("blur")
 shader_parameter/blur_radius=8.0
@@ -110,3 +112,55 @@ centered=false
 scale=Vector2(0.96969697,0.96969697)
 
 [node name="NearMissArrows" parent="." instance=ExtResource("near_miss_arrows")]
+
+[node name="ArrowImpact1" type="Marker2D" parent="NearPillars/Pillar3"]
+position=Vector2(-95,825)
+[node name="ArrowImpact2" type="Marker2D" parent="NearPillars/Pillar3"]
+position=Vector2(-72,900)
+[node name="PillarArrows" type="Node2D" parent="."]
+z_index=21
+script=ExtResource("surface_volley")
+first_delay=0.04
+shot_interval=0.12
+flight_duration=0.26
+arrow_scene=ExtResource("surface_arrow")
+target_paths=Array[NodePath]([NodePath("../NearPillars/Pillar3/ArrowImpact1"),NodePath("../NearPillars/Pillar3/ArrowImpact2")])
+
+[node name="ExitArrows" type="Node2D" parent="."]
+z_index=6
+script=ExtResource("surface_volley")
+arrow_scene=ExtResource("surface_arrow")
+first_delay=0.04
+shot_interval=0.055
+flight_duration=0.44
+arc_height=50.0
+launch_height=220.0
+attached_z_index=6
+target_paths=Array[NodePath]([NodePath("../ExitImpact1"),NodePath("../ExitImpact2"),NodePath("../ExitImpact3"),NodePath("../ExitImpact4"),NodePath("../ExitImpact5"),NodePath("../ExitImpact6"),NodePath("../ExitImpact7"),NodePath("../ExitImpact8"),NodePath("../ExitImpact9")])
+
+[node name="ExitImpact1" type="Marker2D" parent="."]
+position=Vector2(5030,1042)
+
+[node name="ExitImpact2" type="Marker2D" parent="."]
+position=Vector2(5097,1048)
+
+[node name="ExitImpact3" type="Marker2D" parent="."]
+position=Vector2(5164,1054)
+
+[node name="ExitImpact4" type="Marker2D" parent="."]
+position=Vector2(5231,1042)
+
+[node name="ExitImpact5" type="Marker2D" parent="."]
+position=Vector2(5073,1048)
+
+[node name="ExitImpact6" type="Marker2D" parent="."]
+position=Vector2(5140,1054)
+
+[node name="ExitImpact7" type="Marker2D" parent="."]
+position=Vector2(5207,1042)
+
+[node name="ExitImpact8" type="Marker2D" parent="."]
+position=Vector2(5049,1048)
+
+[node name="ExitImpact9" type="Marker2D" parent="."]
+position=Vector2(5116,1054)

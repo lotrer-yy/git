@@ -12,6 +12,14 @@ var rest_time: float = 0.0
 var start_point: Vector2
 var end_point: Vector2
 var _rest_angle: float = 0.0
+var surface_target: Node2D
+var attached_z_index: int = 1
+
+func aim_at_surface(target: Node2D, landing_z_index: int) -> void:
+	surface_target = target
+	attached_z_index = landing_z_index
+	# 柱子在视差更新后才确定本帧位置，箭在它之后更新。
+	process_priority = 230
 
 func _ready() -> void:
 	process_priority = 6
@@ -31,6 +39,11 @@ func _process(delta: float) -> void:
 		if u >= 1.0:
 			flying = false
 			impact = true
+			if is_instance_valid(surface_target):
+				# 钉住后归属落点，随柱子一起运动，不能漂在屏幕上。
+				reparent(surface_target, true)
+				position = Vector2.ZERO
+				z_index = attached_z_index
 			_rest_angle = rotation
 			landed.emit()
 	elif impact:
@@ -42,6 +55,8 @@ func _process(delta: float) -> void:
 			queue_free()
 
 func _apply_flight(u: float) -> void:
+	if is_instance_valid(surface_target):
+		end_point = surface_target.global_position
 	global_position = start_point.lerp(end_point,u) - Vector2(0,4.0 * arc_height * u * (1.0-u))
 	var tangent: Vector2 = end_point - start_point - Vector2(0,4.0 * arc_height * (1.0-2.0*u))
 	rotation = tangent.angle() - deg_to_rad(artwork_angle_degrees)

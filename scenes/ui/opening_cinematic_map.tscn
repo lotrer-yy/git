@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/cinematic/front_pillar.png" id="pillar"]
 [ext_resource type="Shader" path="res://shaders/foreground_soft_blur.gdshader" id="blur"]
 [ext_resource type="Texture2D" path="res://assets/art/cinematic/final_side_wall.png" id="side_wall"]
+[ext_resource type="PackedScene" path="res://scenes/cinematics/near_miss_volley.tscn" id="near_miss_arrows"]
 [sub_resource type="ShaderMaterial" id="PillarBlur"]
 shader=ExtResource("blur")
 shader_parameter/blur_radius=8.0
@@ -107,3 +108,5 @@ position=Vector2(5275.151515,0)
 texture=ExtResource("side_wall")
 centered=false
 scale=Vector2(0.96969697,0.96969697)
+
+[node name="NearMissArrows" parent="." instance=ExtResource("near_miss_arrows")]

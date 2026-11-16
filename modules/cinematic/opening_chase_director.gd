@@ -1,6 +1,7 @@
 extends Node
 ## 只负责分镜节奏；角色弹跑、镜头运动各自由独立模块处理。
 signal finished
+signal ghost_returned
 @export var actors_path: NodePath = ^"../DescentWorld/ArrivalMap/ChaseActors"
 @export var camera_motion_path: NodePath = ^"../ChaseCamera"
 @export var prezoom_path: NodePath = ^"../PreChaseZoom"
@@ -42,6 +43,7 @@ func _process(delta: float) -> void:
 	elif stage == 1 and elapsed >= follow_time + mob_reveal_time:
 		stage = 2
 		motion.track(actors.get_node("Ghost/Focus"), 96.0, 0.36)
+		ghost_returned.emit()
 	elif stage == 2 and elapsed >= follow_time + mob_reveal_time + return_follow_time:
 		stage = 3
 		motion.lock_frame()

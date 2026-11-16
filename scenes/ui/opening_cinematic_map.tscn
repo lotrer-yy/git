@@ -1,13 +1,22 @@
 [gd_scene format=3]
-[ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_0.png" id="art0"]
-[ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_1.png" id="art1"]
-[ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_2.png" id="art2"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/backdrop_0.png" id="art0"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/backdrop_1.png" id="art1"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/backdrop_2.png" id="art2"]
 [ext_resource type="PackedScene" path="res://scenes/cinematics/opening_chase_actors.tscn" id="actors"]
 [ext_resource type="Texture2D" path="res://assets/art/cinematic/foreground_0.png" id="foreground0"]
 [ext_resource type="Texture2D" path="res://assets/art/cinematic/foreground_1.png" id="foreground1"]
 [ext_resource type="Texture2D" path="res://assets/art/cinematic/foreground_2.png" id="foreground2"]
+[ext_resource type="Script" path="res://modules/environment/cinematic_parallax_layer.gd" id="parallax"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/front_pillar.png" id="pillar"]
+[ext_resource type="Shader" path="res://shaders/foreground_soft_blur.gdshader" id="blur"]
+[sub_resource type="ShaderMaterial" id="PillarBlur"]
+shader=ExtResource("blur")
+shader_parameter/blur_radius=8.0
 [node name="OpeningMap" type="Node2D"]
-[node name="Art0" type="Sprite2D" parent="."]
+[node name="FarBackground" type="Node2D" parent="."]
+script=ExtResource("parallax")
+motion_scale=0.65
+[node name="Art0" type="Sprite2D" parent="FarBackground"]
 texture=ExtResource("art0")
 centered=false
 position=Vector2(0.0000000000,0)
@@ -15,7 +24,7 @@ scale=Vector2(0.9696969697,0.9696969697)
 region_enabled=true
 region_rect=Rect2(1,0,2000,1300)
 region_filter_clip_enabled=true
-[node name="Art1" type="Sprite2D" parent="."]
+[node name="Art1" type="Sprite2D" parent="FarBackground"]
 texture=ExtResource("art1")
 centered=false
 position=Vector2(1939.3939393939,0)
@@ -23,7 +32,7 @@ scale=Vector2(0.9696969697,0.9696969697)
 region_enabled=true
 region_rect=Rect2(1,0,2000,1300)
 region_filter_clip_enabled=true
-[node name="Art2" type="Sprite2D" parent="."]
+[node name="Art2" type="Sprite2D" parent="FarBackground"]
 texture=ExtResource("art2")
 centered=false
 position=Vector2(3878.7878787879,0)
@@ -62,3 +71,40 @@ scale=Vector2(0.9696969697,0.9696969697)
 region_enabled=true
 region_rect=Rect2(1,0,2000,1300)
 region_filter_clip_enabled=true
+
+[node name="NearPillars" type="Node2D" parent="."]
+z_index=20
+script=ExtResource("parallax")
+motion_scale=1.3
+[node name="Pillar1" type="Sprite2D" parent="NearPillars"]
+position=Vector2(1257.7,-46.54545)
+texture=ExtResource("pillar")
+material=SubResource("PillarBlur")
+centered=false
+offset=Vector2(-211,0)
+scale=Vector2(0.96969697,0.96969697)
+texture_filter=2
+[node name="Pillar2" type="Sprite2D" parent="NearPillars"]
+position=Vector2(2650,-46.54545)
+texture=ExtResource("pillar")
+material=SubResource("PillarBlur")
+centered=false
+offset=Vector2(-211,0)
+scale=Vector2(0.96969697,0.96969697)
+texture_filter=2
+[node name="Pillar3" type="Sprite2D" parent="NearPillars"]
+position=Vector2(4050,-46.54545)
+texture=ExtResource("pillar")
+material=SubResource("PillarBlur")
+centered=false
+offset=Vector2(-211,0)
+scale=Vector2(0.96969697,0.96969697)
+texture_filter=2
+[node name="Pillar4" type="Sprite2D" parent="NearPillars"]
+position=Vector2(5450,-46.54545)
+texture=ExtResource("pillar")
+material=SubResource("PillarBlur")
+centered=false
+offset=Vector2(-211,0)
+scale=Vector2(0.96969697,0.96969697)
+texture_filter=2

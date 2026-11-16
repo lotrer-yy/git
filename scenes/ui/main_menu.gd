@@ -8,6 +8,7 @@ func _ready() -> void:
 	$DescentTransition.descent_started.connect($ExitMotion.play)
 	$DescentTransition.descent_started.connect($LoadingOverlay.begin_loading)
 	$ArrivalMotion.arrived.connect($LoadingOverlay.finish_loading)
+	$LoadingOverlay.finished.connect($OpeningChase.start)
 func _settings_pressed() -> void:
 	$Settings/Pulse.pulse()
 func _start_game() -> void:
@@ -23,5 +24,7 @@ func _start_game() -> void:
 	$DescentTransition.start()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _starting and event is InputEventKey and event.pressed and event.physical_keycode == KEY_ESCAPE:
-		get_tree().reload_current_scene()
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_R or (_starting and event.physical_keycode == KEY_ESCAPE):
+			get_viewport().set_input_as_handled()
+			get_tree().reload_current_scene()

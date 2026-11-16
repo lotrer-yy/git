@@ -1,0 +1,30 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/visual/cinematic_runner.gd" id="runner"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/ghost.png" id="ghost"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/mob.png" id="mob"]
+[node name="ChaseActors" type="Node2D"]
+visible=false
+z_index=2
+[node name="Ghost" type="Node2D" parent="."]
+position=Vector2(-130,979.4)
+script=ExtResource("runner")
+[node name="Visual" type="Node2D" parent="Ghost"]
+[node name="Sprite" type="Sprite2D" parent="Ghost/Visual"]
+texture=ExtResource("ghost")
+centered=false
+position=Vector2(-74.67,-135.76)
+scale=Vector2(0.969697,0.969697)
+[node name="Mob" type="Node2D" parent="."]
+position=Vector2(-980,1014.3)
+script=ExtResource("runner")
+cadence=2.7
+hop_height=23.0
+squash=0.045
+[node name="Visual" type="Node2D" parent="Mob"]
+[node name="Sprite" type="Sprite2D" parent="Mob/Visual"]
+texture=ExtResource("mob")
+centered=false
+position=Vector2(-1207.27,-688.48)
+scale=Vector2(0.969697,0.969697)
+[node name="Focus" type="Marker2D" parent="Mob"]
+position=Vector2(-400,-250)

@@ -22,6 +22,8 @@
 [ext_resource type="Texture2D" path="res://assets/art/menu/eyes.png" id="eyes"]
 [ext_resource type="Texture2D" path="res://assets/art/menu/brows.png" id="brows"]
 [ext_resource type="Texture2D" path="res://assets/art/menu/god.png" id="god"]
+[ext_resource type="Script" path="res://modules/camera/cinematic_chase_camera.gd" id="chase_camera"]
+[ext_resource type="Script" path="res://modules/cinematic/opening_chase_director.gd" id="chase_director"]
 [sub_resource type="AtlasTexture" id="LogoArt"]
 atlas=ExtResource("logo")
 region=Rect2(72, 40, 872, 633)
@@ -162,3 +164,8 @@ script=ExtResource("descent")
 script=ExtResource("arrival")
 
 [node name="LoadingOverlay" parent="." instance=ExtResource("loading_overlay")]
+
+[node name="ChaseCamera" type="Node" parent="."]
+script=ExtResource("chase_camera")
+[node name="OpeningChase" type="Node" parent="."]
+script=ExtResource("chase_director")

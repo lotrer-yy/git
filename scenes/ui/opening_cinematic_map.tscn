@@ -2,6 +2,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_0.png" id="art0"]
 [ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_1.png" id="art1"]
 [ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_2.png" id="art2"]
+[ext_resource type="PackedScene" path="res://scenes/cinematics/opening_chase_actors.tscn" id="actors"]
 [node name="OpeningMap" type="Node2D"]
 [node name="Art0" type="Sprite2D" parent="."]
 texture=ExtResource("art0")
@@ -29,3 +30,5 @@ region_rect=Rect2(1,0,2000,1300)
 region_filter_clip_enabled=true
 [node name="StopFrame" type="Marker2D" parent="."]
 position=Vector2(960,630.303030)
+
+[node name="ChaseActors" parent="." instance=ExtResource("actors")]

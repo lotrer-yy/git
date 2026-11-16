@@ -1,0 +1,31 @@
+[gd_scene format=3]
+[ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_0.png" id="art0"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_1.png" id="art1"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_2.png" id="art2"]
+[node name="OpeningMap" type="Node2D"]
+[node name="Art0" type="Sprite2D" parent="."]
+texture=ExtResource("art0")
+centered=false
+position=Vector2(0.0000000000,0)
+scale=Vector2(0.9696969697,0.9696969697)
+region_enabled=true
+region_rect=Rect2(1,0,2000,1300)
+region_filter_clip_enabled=true
+[node name="Art1" type="Sprite2D" parent="."]
+texture=ExtResource("art1")
+centered=false
+position=Vector2(1939.3939393939,0)
+scale=Vector2(0.9696969697,0.9696969697)
+region_enabled=true
+region_rect=Rect2(1,0,2000,1300)
+region_filter_clip_enabled=true
+[node name="Art2" type="Sprite2D" parent="."]
+texture=ExtResource("art2")
+centered=false
+position=Vector2(3878.7878787879,0)
+scale=Vector2(0.9696969697,0.9696969697)
+region_enabled=true
+region_rect=Rect2(1,0,2000,1300)
+region_filter_clip_enabled=true
+[node name="StopFrame" type="Marker2D" parent="."]
+position=Vector2(960,630.303030)

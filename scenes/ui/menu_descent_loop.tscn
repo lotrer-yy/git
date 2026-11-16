@@ -2,6 +2,7 @@
 [ext_resource type="Script" path="res://modules/environment/looping_loading_strata.gd" id="loop"]
 [ext_resource type="Texture2D" path="res://assets/art/menu/descent/connector.png" id="connector"]
 [ext_resource type="PackedScene" path="res://scenes/ui/loading_stratum_page.tscn" id="page"]
+[ext_resource type="PackedScene" path="res://scenes/ui/opening_cinematic_map.tscn" id="opening"]
 [sub_resource type="AtlasTexture" id="ConnectorArt"]
 atlas=ExtResource("connector")
 region=Rect2(0,0,1980,3000)
@@ -20,3 +21,7 @@ position=Vector2(0,2909.090909000)
 position=Vector2(0,4654.545454000)
 [node name="Page2" parent="Pages" instance=ExtResource("page")]
 position=Vector2(0,6399.999999000)
+
+[node name="ArrivalMap" parent="." instance=ExtResource("opening")]
+z_index=1
+position=Vector2(0,4654.545454)

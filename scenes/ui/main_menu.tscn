@@ -1,6 +1,7 @@
 [gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/ui/main_menu.gd" id="menu"]
 [ext_resource type="Script" path="res://modules/camera/menu_descent_transition.gd" id="descent"]
+[ext_resource type="Script" path="res://modules/camera/loading_arrival_motion.gd" id="arrival"]
 [ext_resource type="Script" path="res://modules/visual/menu_exit_motion.gd" id="exit"]
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_descent_loop.tscn" id="strata"]
 [ext_resource type="Script" path="res://modules/visual/elastic_pulse.gd" id="pulse"]
@@ -155,3 +156,6 @@ position=Vector2(960,540)
 script=ExtResource("exit")
 [node name="DescentTransition" type="Node" parent="."]
 script=ExtResource("descent")
+
+[node name="ArrivalMotion" type="Node" parent="."]
+script=ExtResource("arrival")

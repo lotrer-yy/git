@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dc64kcjsp1lb5"
-path="res://.godot/imported/final_wall_wipe.png-33e568cd9d68b8121d56805aca45b0f0.ctex"
+uid="uid://ceaf7g4qxodgv"
+path="res://.godot/imported/final_side_wall.png-0a5705bc06dfa0b3db52b9d987644234.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/cinematic/final_wall_wipe.png"
-dest_files=["res://.godot/imported/final_wall_wipe.png-33e568cd9d68b8121d56805aca45b0f0.ctex"]
+source_file="res://assets/art/cinematic/final_side_wall.png"
+dest_files=["res://.godot/imported/final_side_wall.png-0a5705bc06dfa0b3db52b9d987644234.ctex"]
 
 [params]
 

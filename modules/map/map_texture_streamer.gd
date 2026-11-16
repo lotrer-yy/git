@@ -56,3 +56,11 @@ func _process(_delta: float) -> void:
 		elif status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 			push_error("地图高清切片载入失败：" + path)
 			_pending.erase(chunk)
+
+
+func is_view_ready() -> bool:
+	## 只有镜头附近高清切片都已驻留，才允许过场揭示地图。
+	for chunk in _chunks:
+		if _near(chunk) and not _resident.has(chunk):
+			return false
+	return true

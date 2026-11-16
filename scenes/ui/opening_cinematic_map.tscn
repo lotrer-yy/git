@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://modules/environment/cinematic_parallax_layer.gd" id="parallax"]
 [ext_resource type="Texture2D" path="res://assets/art/cinematic/front_pillar.png" id="pillar"]
 [ext_resource type="Shader" path="res://shaders/foreground_soft_blur.gdshader" id="blur"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/final_side_wall.png" id="side_wall"]
 [sub_resource type="ShaderMaterial" id="PillarBlur"]
 shader=ExtResource("blur")
 shader_parameter/blur_radius=8.0
@@ -100,11 +101,9 @@ centered=false
 offset=Vector2(-211,0)
 scale=Vector2(0.96969697,0.96969697)
 texture_filter=2
-[node name="Pillar4" type="Sprite2D" parent="NearPillars"]
-position=Vector2(5450,-46.54545)
-texture=ExtResource("pillar")
-material=SubResource("PillarBlur")
+[node name="FinalSideWall" type="Sprite2D" parent="."]
+z_index=60
+position=Vector2(4480.969697,0)
+texture=ExtResource("side_wall")
 centered=false
-offset=Vector2(-211,0)
 scale=Vector2(0.96969697,0.96969697)
-texture_filter=2

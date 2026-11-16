@@ -32,10 +32,6 @@ func _begin_running() -> void:
 
 func _process(delta: float) -> void:
 	if completed:
-		var mob: Node2D = actors.get_node("Mob")
-		if mob.global_position.x > motion.camera.position.x + 2300.0:
-			mob.running = false
-			mob.visible = false
 		return
 	if not active or stage == -1:
 		return
@@ -49,10 +45,13 @@ func _process(delta: float) -> void:
 	elif stage == 2 and elapsed >= follow_time + mob_reveal_time + return_follow_time:
 		stage = 3
 		motion.lock_frame()
+		# 回到幽灵后，追兵已经在左侧画外；不让它们追进最后的停顿镜头。
+		actors.get_node("Mob").running = false
+		actors.get_node("Mob").visible = false
 	elif stage == 3:
 		var ghost: Node2D = actors.get_node("Ghost")
-		var camera: Camera2D = motion.camera
-		if ghost.global_position.x > camera.position.x + get_viewport().get_visible_rect().size.x / (2.0 * camera.zoom.x) + 100.0:
+		var wall: Node2D = actors.get_parent().get_node("FinalSideWall")
+		if ghost.global_position.x > wall.global_position.x + 90.0:
 			active = false
 			completed = true
 			ghost.running = false

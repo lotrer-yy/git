@@ -23,7 +23,7 @@ var _pan_elapsed: float = 0.0
 @onready var chase_motion: Node = get_node(chase_camera_path)
 
 func _ready() -> void:
-	process_priority = 300
+	process_priority = 110
 
 func prepare() -> void:
 	if is_instance_valid(gameplay):
@@ -44,6 +44,9 @@ func prepare() -> void:
 	# 隐藏时仍让流式加载器预载附近高清切片，但禁止隐藏相机移动。
 	game_camera.set_process(false)
 	gameplay.get_node("CameraOutput").output_camera = camera
+	# 地图预载、横移和实际游玩全程使用同一视差参考，交接不再跳一下。
+	for layer in gameplay.get_node("Map/Backgrounds").get_children():
+		layer.set_camera(camera)
 	gameplay.get_node("WallEntry").control_ready.connect(_enable_follow)
 
 func play() -> void:

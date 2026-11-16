@@ -1,0 +1,10 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/cinematic/near_miss_arrow.gd" id="flight"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/chase_arrow.png" id="art"]
+[node name="NearMissArrow" type="Node2D"]
+script=ExtResource("flight")
+[node name="Sprite" type="Sprite2D" parent="."]
+texture=ExtResource("art")
+centered=false
+position=Vector2(-131.879,-41.697)
+scale=Vector2(0.969697,0.969697)

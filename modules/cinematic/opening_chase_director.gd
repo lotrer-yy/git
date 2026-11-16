@@ -1,6 +1,9 @@
 extends Node
 ## 只负责分镜节奏；角色弹跑、镜头运动各自由独立模块处理。
+signal chase_started
 signal finished
+signal ghost_exiting
+signal ghost_returned
 @export var actors_path: NodePath = ^"../DescentWorld/ArrivalMap/ChaseActors"
 @export var camera_motion_path: NodePath = ^"../ChaseCamera"
 @export var prezoom_path: NodePath = ^"../PreChaseZoom"
@@ -28,6 +31,7 @@ func _begin_running() -> void:
 	actors.visible = true
 	actors.get_node("Ghost").start()
 	actors.get_node("Mob").start()
+	chase_started.emit()
 	motion.track(actors.get_node("Ghost/Focus"), 96.0, 0.65)
 
 func _process(delta: float) -> void:
@@ -42,9 +46,11 @@ func _process(delta: float) -> void:
 	elif stage == 1 and elapsed >= follow_time + mob_reveal_time:
 		stage = 2
 		motion.track(actors.get_node("Ghost/Focus"), 96.0, 0.36)
+		ghost_returned.emit()
 	elif stage == 2 and elapsed >= follow_time + mob_reveal_time + return_follow_time:
 		stage = 3
 		motion.lock_frame()
+		ghost_exiting.emit()
 		# 回到幽灵后，追兵已经在左侧画外；不让它们追进最后的停顿镜头。
 		actors.get_node("Mob").running = false
 		actors.get_node("Mob").visible = false

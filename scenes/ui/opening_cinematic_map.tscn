@@ -10,6 +10,9 @@
 [ext_resource type="Texture2D" path="res://assets/art/cinematic/front_pillar.png" id="pillar"]
 [ext_resource type="Shader" path="res://shaders/foreground_soft_blur.gdshader" id="blur"]
 [ext_resource type="Texture2D" path="res://assets/art/cinematic/final_side_wall.png" id="side_wall"]
+[ext_resource type="PackedScene" path="res://scenes/cinematics/near_miss_volley.tscn" id="near_miss_arrows"]
+[ext_resource type="Script" path="res://modules/cinematic/surface_arrow_volley.gd" id="surface_volley"]
+[ext_resource type="PackedScene" path="res://scenes/cinematics/near_miss_arrow.tscn" id="surface_arrow"]
 [sub_resource type="ShaderMaterial" id="PillarBlur"]
 shader=ExtResource("blur")
 shader_parameter/blur_radius=8.0
@@ -107,3 +110,105 @@ position=Vector2(5275.151515,0)
 texture=ExtResource("side_wall")
 centered=false
 scale=Vector2(0.96969697,0.96969697)
+
+[node name="NearMissArrows" parent="." instance=ExtResource("near_miss_arrows")]
+
+[node name="ArrowImpact1" type="Marker2D" parent="NearPillars/Pillar3"]
+position=Vector2(-95,825)
+[node name="ArrowImpact2" type="Marker2D" parent="NearPillars/Pillar3"]
+position=Vector2(-72,900)
+[node name="PillarArrows" type="Node2D" parent="."]
+z_index=21
+script=ExtResource("surface_volley")
+first_delay=0.04
+shot_interval=0.12
+flight_duration=0.26
+arrow_scene=ExtResource("surface_arrow")
+target_paths=Array[NodePath]([NodePath("../NearPillars/Pillar3/ArrowImpact1"),NodePath("../NearPillars/Pillar3/ArrowImpact2")])
+
+[node name="ExitArrows" type="Node2D" parent="."]
+z_index=61
+script=ExtResource("surface_volley")
+arrow_scene=ExtResource("surface_arrow")
+first_delay=0.0
+random_interval_range=Vector2(0.012,0.035)
+flight_duration=0.36
+flight_variation=0.055
+arc_height=22.0
+launch_height=100.0
+launch_variation=140.0
+attached_z_index=1
+rest_duration=5.0
+target_paths=Array[NodePath]([NodePath("../FinalSideWall/WallImpact1"),NodePath("../FinalSideWall/WallImpact2"),NodePath("../FinalSideWall/WallImpact3"),NodePath("../FinalSideWall/WallImpact4"),NodePath("../FinalSideWall/WallImpact5"),NodePath("../FinalSideWall/WallImpact6"),NodePath("../FinalSideWall/WallImpact7"),NodePath("../FinalSideWall/WallImpact8"),NodePath("../FinalSideWall/WallImpact9"),NodePath("../FinalSideWall/WallImpact10"),NodePath("../FinalSideWall/WallImpact11"),NodePath("../FinalSideWall/WallImpact12"),NodePath("../FinalSideWall/WallImpact13"),NodePath("../FinalSideWall/WallImpact14"),NodePath("../FinalSideWall/WallImpact15"),NodePath("../FinalSideWall/WallImpact16"),NodePath("../FinalSideWall/WallImpact17"),NodePath("../FinalSideWall/WallImpact18"),NodePath("../FinalSideWall/WallImpact19"),NodePath("../FinalSideWall/WallImpact20"),NodePath("../FinalSideWall/WallImpact21"),NodePath("../FinalSideWall/WallImpact22"),NodePath("../FinalSideWall/WallImpact23"),NodePath("../FinalSideWall/WallImpact24")])
+
+[node name="WallImpact1" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(40,743)
+
+[node name="WallImpact2" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(91,654)
+
+[node name="WallImpact3" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(57,893)
+
+[node name="WallImpact4" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(104,1106)
+
+[node name="WallImpact5" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(63,675)
+
+[node name="WallImpact6" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(68,565)
+
+[node name="WallImpact7" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(57,944)
+
+[node name="WallImpact8" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(33,1058)
+
+[node name="WallImpact9" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(87,621)
+
+[node name="WallImpact10" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(47,806)
+
+[node name="WallImpact11" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(45,1119)
+
+[node name="WallImpact12" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(32,863)
+
+[node name="WallImpact13" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(25,835)
+
+[node name="WallImpact14" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(75,993)
+
+[node name="WallImpact15" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(63,1011)
+
+[node name="WallImpact16" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(48,905)
+
+[node name="WallImpact17" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(46,1041)
+
+[node name="WallImpact18" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(95,852)
+
+[node name="WallImpact19" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(26,858)
+
+[node name="WallImpact20" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(35,842)
+
+[node name="WallImpact21" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(65,566)
+
+[node name="WallImpact22" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(102,819)
+
+[node name="WallImpact23" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(82,606)
+
+[node name="WallImpact24" type="Marker2D" parent="FinalSideWall"]
+position=Vector2(29,1096)

@@ -16,6 +16,8 @@ texture=ExtResource("ghost")
 centered=false
 position=Vector2(-74.67,-135.76)
 scale=Vector2(0.969697,0.969697)
+[node name="Focus" type="Marker2D" parent="Ghost"]
+position=Vector2(0,-68)
 [node name="Mob" type="Node2D" parent="."]
 position=Vector2(-980,1014.3)
 script=ExtResource("runner")
@@ -30,4 +32,4 @@ centered=false
 position=Vector2(-1207.27,-688.48)
 scale=Vector2(0.969697,0.969697)
 [node name="Focus" type="Marker2D" parent="Mob"]
-position=Vector2(-400,-250)
+position=Vector2(-604,-344)

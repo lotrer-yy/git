@@ -28,7 +28,7 @@ func _begin_running() -> void:
 	actors.visible = true
 	actors.get_node("Ghost").start()
 	actors.get_node("Mob").start()
-	motion.track(actors.get_node("Ghost"), 160.0, 0.65)
+	motion.track(actors.get_node("Ghost/Focus"), 96.0, 0.65)
 
 func _process(delta: float) -> void:
 	if completed:
@@ -42,10 +42,10 @@ func _process(delta: float) -> void:
 	elapsed += delta
 	if stage == 0 and elapsed >= follow_time:
 		stage = 1
-		motion.track(actors.get_node("Mob/Focus"), 40.0, 0.32)
+		motion.track(actors.get_node("Mob/Focus"), 96.0, 0.32)
 	elif stage == 1 and elapsed >= follow_time + mob_reveal_time:
 		stage = 2
-		motion.track(actors.get_node("Ghost"), 180.0, 0.36)
+		motion.track(actors.get_node("Ghost/Focus"), 96.0, 0.36)
 	elif stage == 2 and elapsed >= follow_time + mob_reveal_time + return_follow_time:
 		stage = 3
 		motion.lock_frame()

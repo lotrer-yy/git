@@ -3,6 +3,8 @@ extends Node
 signal finished
 @export var camera_path: NodePath = ^"../DescentCamera"
 @export_range(1.0, 1.6) var close_zoom: float = 1.35
+@export var map_path: NodePath = ^"../DescentWorld/ArrivalMap"
+@export var focus_height: float = 860.0
 @export var duration: float = 0.8
 var playing: bool = false
 var _tween: Tween
@@ -18,6 +20,8 @@ func play() -> void:
 	_tween.tween_property(camera, "zoom", Vector2.ONE * close_zoom, duration)
 	# 以地图左侧为入场框，推近时不裁掉幽灵入场的左边缘。
 	_tween.tween_property(camera, "position:x", half_width, duration)
+	var map: Node2D = get_node(map_path)
+	_tween.tween_property(camera, "position:y", map.global_position.y + focus_height, duration)
 	_tween.chain().tween_callback(_complete)
 
 func _complete() -> void:

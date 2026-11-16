@@ -5,6 +5,8 @@ extends Node
 @export var minimum_x: float = 960.0
 @export var maximum_x: float = 4858.18
 @export var map_height: float = 1260.60606
+## 取景点上移，角色在屏幕中略微降低；不改变实际奔跑路线路径。
+@export var vertical_framing_offset: float = -110.0
 var active: bool = false
 var target: Node2D
 var lead: float = 0.0
@@ -52,7 +54,7 @@ func _process(delta: float) -> void:
 	_blend = minf(_blend + delta, _duration)
 	var u: float = _blend / _duration
 	var weight: float = u * u * (3.0 - 2.0 * u)
-	var destination: Vector2 = _clamp_view(target.global_position + Vector2(lead, 0.0))
+	var destination: Vector2 = _clamp_view(target.global_position + Vector2(lead, vertical_framing_offset))
 	var desired: Vector2 = _from.lerp(destination, weight)
 	var remaining: float = delta
 	while remaining > 0.0:

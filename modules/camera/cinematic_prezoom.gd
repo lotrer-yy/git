@@ -4,7 +4,7 @@ signal finished
 @export var camera_path: NodePath = ^"../DescentCamera"
 @export_range(1.0, 1.6) var close_zoom: float = 1.35
 @export var map_path: NodePath = ^"../DescentWorld/ArrivalMap"
-@export var focus_height: float = 860.0
+@export var focus_height: float = 800.0
 @export var duration: float = 0.8
 var playing: bool = false
 var _tween: Tween

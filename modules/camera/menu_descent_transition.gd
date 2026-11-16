@@ -8,6 +8,9 @@ enum State { IDLE, CHARGE, DESCENDING, LOOPING }
 @export var charge_duration: float = 0.28
 @export var acceleration_duration: float = 1.05
 @export var descent_speed: float = 930.0
+@export var ongoing_acceleration: float = 240.0
+@export var maximum_speed: float = 3200.0
+var current_speed: float = 0.0
 var state: State = State.IDLE
 var elapsed: float = 0.0
 var _launch_time: float = 0.0
@@ -23,9 +26,6 @@ func start() -> void:
 func _process(delta: float) -> void:
 	if state == State.IDLE:
 		return
-	if state == State.LOOPING:
-		strata.advance(descent_speed * delta)
-		return
 	if state == State.CHARGE:
 		var used := minf(delta, charge_duration - elapsed)
 		elapsed += used
@@ -37,12 +37,13 @@ func _process(delta: float) -> void:
 		state = State.DESCENDING
 		descent_started.emit()
 		delta -= used
+	var previous_distance := _distance_at(_launch_time)
 	_launch_time += delta
-	var u := minf(_launch_time / acceleration_duration, 1.0)
-	# smoothstep 速度曲线的解析积分，避免按帧累加造成顿挫或速度差。
-	var distance := descent_speed * acceleration_duration * (u * u * u - 0.5 * u * u * u * u)
-	if _launch_time > acceleration_duration:
-		distance += descent_speed * (_launch_time - acceleration_duration)
+	var distance := _distance_at(_launch_time)
+	current_speed = _speed_at(_launch_time)
+	if state == State.LOOPING:
+		strata.advance(distance - previous_distance)
+		return
 	var y := 530.0 + distance
 	camera.zoom = Vector2.ONE * lerpf(1.035, 1.0, smoothstep(0.0, 0.65, _launch_time))
 	var handoff: float = strata.loop_origin + 540.0
@@ -53,3 +54,23 @@ func _process(delta: float) -> void:
 		loop_started.emit()
 	else:
 		camera.position.y = y
+
+func _speed_at(time: float) -> float:
+	var duration := maxf(acceleration_duration, 0.001)
+	if time < duration:
+		return descent_speed * smoothstep(0.0, duration, time)
+	return minf(maxf(maximum_speed, descent_speed),
+		descent_speed + maxf(ongoing_acceleration, 0.0) * (time - duration))
+
+func _distance_at(time: float) -> float:
+	# 统一用解析积分计算全程距离，进入循环和达到最高速度时都不重置运动。
+	var duration := maxf(acceleration_duration, 0.001)
+	var u := clampf(time / duration, 0.0, 1.0)
+	var distance := descent_speed * duration * (u * u * u - 0.5 * u * u * u * u)
+	var tail := maxf(time - duration, 0.0)
+	var acceleration := maxf(ongoing_acceleration, 0.0)
+	if acceleration <= 0.0:
+		return distance + descent_speed * tail
+	var cap := maxf(maximum_speed, descent_speed)
+	var accelerating := minf(tail, (cap - descent_speed) / acceleration)
+	return distance + descent_speed * accelerating + 0.5 * acceleration * accelerating * accelerating + cap * (tail - accelerating)

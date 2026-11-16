@@ -11,7 +11,7 @@ extends Node2D
 var camera: Camera2D
 
 func _ready() -> void:
-	process_priority = 20
+	process_priority = 220
 	camera = get_node_or_null(camera_path) as Camera2D
 
 func offset_at(camera_y: float) -> float:
@@ -26,3 +26,9 @@ func offset_at(camera_y: float) -> float:
 func _process(_delta: float) -> void:
 	if is_instance_valid(camera):
 		position.y = offset_at(camera.global_position.y - get_parent().get_parent().global_position.y)
+
+
+func set_camera(display_camera: Camera2D) -> void:
+	## 视差始终使用真正显示画面的相机，不跟随隐藏的构图计算相机。
+	camera = display_camera
+	position.y = offset_at(camera.global_position.y - get_parent().get_parent().global_position.y)

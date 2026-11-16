@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="借身登天"
+config/name="oh my god"
 config/description="地狱、海底、森林、天空到天堂的连续附身平台跳跃原型。"
 config/version="1.0.0-prototype"
 run/main_scene="res://scenes/ui/main_menu.tscn"

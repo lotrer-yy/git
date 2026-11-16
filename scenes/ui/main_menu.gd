@@ -11,9 +11,10 @@ func _ready() -> void:
 	$LoadingOverlay.finished.connect($OpeningChase.start)
 	$LoadingOverlay.finished.connect($GameHandoff.prepare)
 	$OpeningChase.finished.connect($GameHandoff.play)
-	$OpeningChase.ghost_returned.connect($DescentWorld/ArrivalMap/NearMissArrows.start)
+	$OpeningChase.chase_started.connect($DescentWorld/ArrivalMap/NearMissArrows.start)
 	$OpeningChase.ghost_returned.connect($DescentWorld/ArrivalMap/PillarArrows.start)
-	$OpeningChase.ghost_exiting.connect($DescentWorld/ArrivalMap/ExitArrows.start)
+	$OpeningChase.finished.connect($DescentWorld/ArrivalMap/NearMissArrows.stop)
+	$OpeningChase.finished.connect($DescentWorld/ArrivalMap/ExitArrows.start)
 func _settings_pressed() -> void:
 	$Settings/Pulse.pulse()
 func _start_game() -> void:

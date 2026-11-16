@@ -1,5 +1,6 @@
 extends Node
 ## 只负责分镜节奏；角色弹跑、镜头运动各自由独立模块处理。
+signal chase_started
 signal finished
 signal ghost_exiting
 signal ghost_returned
@@ -30,6 +31,7 @@ func _begin_running() -> void:
 	actors.visible = true
 	actors.get_node("Ghost").start()
 	actors.get_node("Mob").start()
+	chase_started.emit()
 	motion.track(actors.get_node("Ghost/Focus"), 96.0, 0.65)
 
 func _process(delta: float) -> void:

@@ -1,5 +1,5 @@
 extends Node
-## 追逐时预加载；幽灵进墙后停顿，再用同一台相机向右平移揭示正式地图。
+## 追逐时预加载；幽灵进墙后停顿，同镜头完成最后一次右移后，才显示正式地图。
 signal pan_started
 signal finished
 @export var gameplay_scene: PackedScene
@@ -8,7 +8,7 @@ signal finished
 @export var chase_camera_path: NodePath = ^"../ChaseCamera"
 @export var hold_time: float = 0.65
 @export var pan_duration: float = 1.35
-@export var gameplay_origin_x: float = 4876.0
+@export var gameplay_origin_x: float = 5628.181818
 @export var connected_floor_y: float = 1100.0
 var gameplay: Node2D
 var playing: bool = false
@@ -62,26 +62,24 @@ func _process(delta: float) -> void:
 		_pan_from = camera.global_position
 		var half_width: float = get_viewport().get_visible_rect().size.x / (2.0 * camera.zoom.x)
 		_pan_to = Vector2(gameplay.position.x + half_width, _pan_from.y)
-		gameplay.visible = true
 		pan_started.emit()
 	_pan_elapsed = minf(_pan_elapsed + delta, pan_duration)
 	var u: float = _pan_elapsed / pan_duration
 	var eased: float = u * u * (3.0 - 2.0 * u)
 	camera.global_position = _pan_from.lerp(_pan_to,eased)
-	if not revealed and u >= 0.52:
-		revealed = true
-		gameplay.get_node("WallEntry").play()
 	if u >= 1.0:
 		playing = false
 		switched = true
+		# 严格时序：最后一帧平移结束之前，正式地图与小幽灵都保持隐藏。
+		gameplay.visible = true
+		revealed = true
 		var game_camera: Camera2D = gameplay.get_node("Camera")
 		game_camera.adopt_view(camera.global_position,camera.zoom)
 		camera.enabled = false
 		game_camera.enabled = true
 		game_camera.make_current()
 		# 交接只是相机所有权变化，位置和缩放完全相同。
-		if gameplay.get_node("WallEntry").completed:
-			_enable_follow()
+		gameplay.get_node("WallEntry").play()
 		finished.emit()
 
 func _enable_follow() -> void:

@@ -103,7 +103,7 @@ scale=Vector2(0.96969697,0.96969697)
 texture_filter=2
 [node name="FinalSideWall" type="Sprite2D" parent="."]
 z_index=60
-position=Vector2(4480.969697,0)
+position=Vector2(5275.151515,0)
 texture=ExtResource("side_wall")
 centered=false
 scale=Vector2(0.96969697,0.96969697)

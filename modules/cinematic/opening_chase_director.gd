@@ -6,7 +6,7 @@ signal finished
 @export var prezoom_path: NodePath = ^"../PreChaseZoom"
 @export var follow_time: float = 3.4
 @export var mob_reveal_time: float = 1.35
-@export var return_follow_time: float = 1.55
+@export var return_follow_time: float = 2.65
 var active: bool = false
 var completed: bool = false
 var elapsed: float = 0.0

@@ -8,6 +8,8 @@ z_index=2
 [node name="Ghost" type="Node2D" parent="."]
 position=Vector2(-130,979.4)
 script=ExtResource("runner")
+speed=720.0
+cadence=4.2
 [node name="Visual" type="Node2D" parent="Ghost"]
 [node name="Sprite" type="Sprite2D" parent="Ghost/Visual"]
 texture=ExtResource("ghost")
@@ -17,7 +19,8 @@ scale=Vector2(0.969697,0.969697)
 [node name="Mob" type="Node2D" parent="."]
 position=Vector2(-980,1014.3)
 script=ExtResource("runner")
-cadence=2.7
+speed=720.0
+cadence=3.5
 hop_height=23.0
 squash=0.045
 [node name="Visual" type="Node2D" parent="Mob"]

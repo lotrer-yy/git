@@ -1,5 +1,5 @@
 extends Node
-## 追逐时预加载；幽灵进墙后停顿，同镜头完成最后一次右移后，才显示正式地图。
+## 动画通道与正式地图贴边组成同一个世界；唯一显示相机直接平移进入关卡。
 signal pan_started
 signal finished
 @export var gameplay_scene: PackedScene
@@ -8,7 +8,7 @@ signal finished
 @export var chase_camera_path: NodePath = ^"../ChaseCamera"
 @export var hold_time: float = 0.65
 @export var pan_duration: float = 1.35
-@export var gameplay_origin_x: float = 5628.181818
+var join_x: float = 0.0
 @export var connected_floor_y: float = 1100.0
 var gameplay: Node2D
 var playing: bool = false
@@ -32,7 +32,10 @@ func prepare() -> void:
 	gameplay = gameplay_scene.instantiate()
 	gameplay.name = "Gameplay"
 	gameplay.z_index = -60
-	gameplay.position = Vector2(gameplay_origin_x, map.global_position.y + connected_floor_y - 51870.0)
+	var wall: Sprite2D = map.get_node("FinalSideWall")
+	# 作者柱子右沿与正式地图左沿颜色一致，直接贴边，不重叠、不再额外叠墙。
+	join_x = wall.to_global(Vector2(wall.texture.get_width(),0)).x
+	gameplay.position = Vector2(join_x, map.global_position.y + connected_floor_y - 51870.0)
 	gameplay.visible = false
 	var game_camera: Camera2D = gameplay.get_node("Camera")
 	game_camera.world_bounds = Rect2(gameplay.position,Vector2(1920,52000))
@@ -40,6 +43,7 @@ func prepare() -> void:
 	get_parent().add_child(gameplay)
 	# 隐藏时仍让流式加载器预载附近高清切片，但禁止隐藏相机移动。
 	game_camera.set_process(false)
+	gameplay.get_node("CameraOutput").output_camera = camera
 	gameplay.get_node("WallEntry").control_ready.connect(_enable_follow)
 
 func play() -> void:
@@ -50,11 +54,14 @@ func play() -> void:
 	chase_motion.lock_frame()
 
 func _process(delta: float) -> void:
+	# 后台加载好就成为右侧世界的一部分；相机尚未走到那里，前面自然看不到。
+	if is_instance_valid(gameplay) and not gameplay.visible and gameplay.get_node("TextureStreamer").is_view_ready():
+		gameplay.visible = true
 	if not playing:
 		return
 	elapsed += delta
 	if not panning:
-		# 停在原来的动画镜头；高清尚未准备好就继续等，不露出正式地图。
+		# 停在动画一侧；正式地图在画面右边界以外，等待高清，不切显示开关。
 		if elapsed < hold_time or not gameplay.get_node("TextureStreamer").is_view_ready():
 			return
 		panning = true
@@ -70,15 +77,11 @@ func _process(delta: float) -> void:
 	if u >= 1.0:
 		playing = false
 		switched = true
-		# 严格时序：最后一帧平移结束之前，正式地图与小幽灵都保持隐藏。
-		gameplay.visible = true
 		revealed = true
 		var game_camera: Camera2D = gameplay.get_node("Camera")
 		game_camera.adopt_view(camera.global_position,camera.zoom)
-		camera.enabled = false
-		game_camera.enabled = true
-		game_camera.make_current()
-		# 交接只是相机所有权变化，位置和缩放完全相同。
+		# 不换显示相机；游戏跟随模块接收当前视野，再继续驱动这一台相机。
+		gameplay.get_node("CameraOutput").enabled = true
 		gameplay.get_node("WallEntry").play()
 		finished.emit()
 

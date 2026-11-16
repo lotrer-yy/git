@@ -1,0 +1,42 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/visual/loading_fossil_layout.gd" id="layout"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/descent/loop.png" id="loop"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/descent/fossils.png" id="fossils"]
+[ext_resource type="Shader" path="res://shaders/loading_strata_clean.gdshader" id="clean"]
+[sub_resource type="AtlasTexture" id="LoopArt"]
+atlas=ExtResource("loop")
+region=Rect2(0,1200,1980,1800)
+filter_clip=true
+[sub_resource type="AtlasTexture" id="Fossil0"]
+atlas=ExtResource("fossils")
+region=Rect2(314,1639,293,207)
+filter_clip=true
+[sub_resource type="AtlasTexture" id="Fossil1"]
+atlas=ExtResource("fossils")
+region=Rect2(1245,2009,564,286)
+filter_clip=true
+[sub_resource type="AtlasTexture" id="Fossil2"]
+atlas=ExtResource("fossils")
+region=Rect2(656,2435,292,208)
+filter_clip=true
+[sub_resource type="ShaderMaterial" id="CleanStrata"]
+shader=ExtResource("clean")
+shader_parameter/fossils_art=ExtResource("fossils")
+[node name="StratumPage" type="Node2D"]
+script=ExtResource("layout")
+variants=Array[Texture2D]([SubResource("Fossil0"),SubResource("Fossil1"),SubResource("Fossil2")])
+[node name="Backdrop" type="Sprite2D" parent="."]
+texture=SubResource("LoopArt")
+material=SubResource("CleanStrata")
+centered=false
+scale=Vector2(0.9696969697,0.9696969697)
+[node name="Fossils" type="Node2D" parent="."]
+[node name="Fossil0" type="Sprite2D" parent="Fossils"]
+texture=SubResource("Fossil0")
+position=Vector2(400,300)
+[node name="Fossil1" type="Sprite2D" parent="Fossils"]
+texture=SubResource("Fossil1")
+position=Vector2(850,850)
+[node name="Fossil2" type="Sprite2D" parent="Fossils"]
+texture=SubResource("Fossil2")
+position=Vector2(1300,1400)

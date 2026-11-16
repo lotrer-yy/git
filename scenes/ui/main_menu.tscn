@@ -1,5 +1,8 @@
 [gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/ui/main_menu.gd" id="menu"]
+[ext_resource type="Script" path="res://modules/camera/menu_descent_transition.gd" id="descent"]
+[ext_resource type="Script" path="res://modules/visual/menu_exit_motion.gd" id="exit"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_descent_loop.tscn" id="strata"]
 [ext_resource type="Script" path="res://modules/visual/elastic_pulse.gd" id="pulse"]
 [ext_resource type="Script" path="res://modules/visual/mouse_gaze.gd" id="gaze"]
 [ext_resource type="Script" path="res://modules/input/flap_input.gd" id="input"]
@@ -144,3 +147,11 @@ texture_normal=SubResource("SettingsArt")
 [node name="Pulse" type="Node" parent="Settings"]
 script=ExtResource("pulse")
 strength=0.12
+
+[node name="DescentCamera" type="Camera2D" parent="."]
+position=Vector2(960,540)
+[node name="DescentWorld" parent="." instance=ExtResource("strata")]
+[node name="ExitMotion" type="Node" parent="."]
+script=ExtResource("exit")
+[node name="DescentTransition" type="Node" parent="."]
+script=ExtResource("descent")

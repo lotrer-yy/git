@@ -1,0 +1,22 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/environment/looping_loading_strata.gd" id="loop"]
+[ext_resource type="Texture2D" path="res://assets/art/menu/descent/connector.png" id="connector"]
+[ext_resource type="PackedScene" path="res://scenes/ui/loading_stratum_page.tscn" id="page"]
+[sub_resource type="AtlasTexture" id="ConnectorArt"]
+atlas=ExtResource("connector")
+region=Rect2(0,0,1980,3000)
+filter_clip=true
+[node name="DescentWorld" type="Node2D"]
+script=ExtResource("loop")
+z_index=-100
+[node name="Connector" type="Sprite2D" parent="."]
+texture=SubResource("ConnectorArt")
+centered=false
+scale=Vector2(0.9696969697,0.9696969697)
+[node name="Pages" type="Node2D" parent="."]
+[node name="Page0" parent="Pages" instance=ExtResource("page")]
+position=Vector2(0,2909.090909000)
+[node name="Page1" parent="Pages" instance=ExtResource("page")]
+position=Vector2(0,4654.545454000)
+[node name="Page2" parent="Pages" instance=ExtResource("page")]
+position=Vector2(0,6399.999999000)

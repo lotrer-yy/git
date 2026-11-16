@@ -5,6 +5,7 @@ func _ready() -> void:
 	$Settings.pressed.connect(_settings_pressed)
 	$Start.mouse_entered.connect($Start/Pulse.pulse)
 	$Settings.mouse_entered.connect($Settings/Pulse.pulse)
+	$DescentTransition.descent_started.connect($ExitMotion.play)
 func _settings_pressed() -> void:
 	$Settings/Pulse.pulse()
 func _start_game() -> void:
@@ -13,5 +14,12 @@ func _start_game() -> void:
 	_starting = true
 	$Start/Pulse.pulse()
 	$Start.disabled = true
-	await get_tree().create_timer(0.32).timeout
-	get_tree().change_scene_to_file("res://scenes/game_flow.tscn")
+	$Settings.disabled = true
+	if $Bird/MouseDrag.dragging:
+		$Bird/MouseDrag.end_drag()
+	$Bird/MouseDrag.set_process_input(false)
+	$DescentTransition.start()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _starting and event is InputEventKey and event.pressed and event.physical_keycode == KEY_ESCAPE:
+		get_tree().reload_current_scene()

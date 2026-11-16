@@ -2,7 +2,8 @@ shader_type canvas_item;
 #include "res://shaders/menu_cloud_shape.gdshaderinc"
 uniform sampler2D god_art;
 void fragment() {
- vec4 c=clean_menu_background(TEXTURE,god_art,UV);
+ vec4 c=clean_menu_background(texture(TEXTURE,UV),texture(god_art,UV).a,
+  texture(TEXTURE,vec2(1250.0/1920.0,UV.y)),UV*vec2(1920.0,1080.0));
  vec2 p=UV*vec2(1920.0,1080.0);
  float cloud=smoothstep(cloud_edge(p.x)-0.7,cloud_edge(p.x)+0.7,p.y);
  float white=smoothstep(0.84,0.92,min(c.r,min(c.g,c.b)));

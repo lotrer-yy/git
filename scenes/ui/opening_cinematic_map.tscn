@@ -3,6 +3,9 @@
 [ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_1.png" id="art1"]
 [ext_resource type="Texture2D" path="res://assets/art/menu/descent/opening_map_2.png" id="art2"]
 [ext_resource type="PackedScene" path="res://scenes/cinematics/opening_chase_actors.tscn" id="actors"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/foreground_0.png" id="foreground0"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/foreground_1.png" id="foreground1"]
+[ext_resource type="Texture2D" path="res://assets/art/cinematic/foreground_2.png" id="foreground2"]
 [node name="OpeningMap" type="Node2D"]
 [node name="Art0" type="Sprite2D" parent="."]
 texture=ExtResource("art0")
@@ -32,3 +35,30 @@ region_filter_clip_enabled=true
 position=Vector2(960,630.303030)
 
 [node name="ChaseActors" parent="." instance=ExtResource("actors")]
+
+[node name="Foreground" type="Node2D" parent="."]
+z_index=10
+[node name="Art0" type="Sprite2D" parent="Foreground"]
+texture=ExtResource("foreground0")
+centered=false
+position=Vector2(0.0000000000,0)
+scale=Vector2(0.9696969697,0.9696969697)
+region_enabled=true
+region_rect=Rect2(1,0,2000,1300)
+region_filter_clip_enabled=true
+[node name="Art1" type="Sprite2D" parent="Foreground"]
+texture=ExtResource("foreground1")
+centered=false
+position=Vector2(1939.3939393939,0)
+scale=Vector2(0.9696969697,0.9696969697)
+region_enabled=true
+region_rect=Rect2(1,0,2000,1300)
+region_filter_clip_enabled=true
+[node name="Art2" type="Sprite2D" parent="Foreground"]
+texture=ExtResource("foreground2")
+centered=false
+position=Vector2(3878.7878787879,0)
+scale=Vector2(0.9696969697,0.9696969697)
+region_enabled=true
+region_rect=Rect2(1,0,2000,1300)
+region_filter_clip_enabled=true

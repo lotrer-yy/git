@@ -16,6 +16,10 @@ config/version="1.0.0-prototype"
 run/main_scene="res://scenes/ui/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[autoload]
+
+Bgm="*res://modules/audio/bgm.gd"
+
 [display]
 
 window/size/viewport_width=1920

@@ -5,11 +5,14 @@
 [ext_resource type="Script" path="res://modules/map/map_texture_streamer.gd" id="streamer"]
 [ext_resource type="Script" path="res://modules/cinematic/soul_wall_entry.gd" id="entry"]
 [ext_resource type="Script" path="res://modules/camera/follow_camera_output.gd" id="camera_output"]
+[ext_resource type="Script" path="res://modules/audio/map_bgm.gd" id="music"]
 [sub_resource type="RectangleShape2D" id="ground"]
 size=Vector2(1920,200)
 [sub_resource type="RectangleShape2D" id="wall"]
 size=Vector2(190,10602)
 [node name="FormalHellEntry" type="Node2D"]
+[node name="MusicRegions" type="Node" parent="."]
+script=ExtResource("music")
 [node name="Map" parent="." instance=ExtResource("map")]
 [node name="Soul" parent="." instance=ExtResource("soul")]
 position=Vector2(140,51620)

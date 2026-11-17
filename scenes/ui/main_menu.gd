@@ -1,6 +1,8 @@
 extends Node2D
 var _starting := false
 func _ready() -> void:
+	Bgm.play_track(Bgm.Track.MENU)
+	$ArrivalMotion.arrived.connect(func(): Bgm.play_track(Bgm.Track.HELL))
 	$Start.pressed.connect(_start_game)
 	$Settings.pressed.connect(_settings_pressed)
 	$Start.mouse_entered.connect($Start/Pulse.pulse)

@@ -49,6 +49,10 @@ func start_hell() -> void:
 	add_child(ocean)
 	ocean.launch.erupted.connect(impact.kick_up)
 	ocean.round_restarted.connect(impact.reset)
+	ocean.round_restarted.connect(func(): Bgm.play_track(Bgm.Track.OCEAN))
+	ocean.shore.landed_on_shore.connect(func(): Bgm.play_track(Bgm.Track.JUNGLE))
+	ocean.jungle.sky_exit.arrived.connect(func(): Bgm.play_track(Bgm.Track.SKY))
+	ocean.jungle.sky_exit.sky.heaven_exit.arrived.connect(func(_ghost): Bgm.play_track(Bgm.Track.HEAVEN))
 	ocean.camera.enabled = false
 	if not is_instance_valid(camera):
 		camera = CAMERA.new()
@@ -65,6 +69,7 @@ func start_hell() -> void:
 	_reset_parallax(hell)
 	_reset_parallax(ocean)
 	stage = Stage.HELL
+	Bgm.play_track(Bgm.Track.HELL)
 
 func _wire_camera(level: Node2D) -> void:
 	level.camera = camera
@@ -110,6 +115,7 @@ func _begin_transition() -> void:
 
 func _finish_transition() -> void:
 	stage = Stage.OCEAN
+	Bgm.play_track(Bgm.Track.OCEAN)
 	_use_map_camera_settings(ocean, ocean_origin)
 	camera.resume_follow_from_current_position(ocean.demon)
 	camera.set_process(true)

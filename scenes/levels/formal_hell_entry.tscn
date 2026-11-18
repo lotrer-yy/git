@@ -234,9 +234,9 @@ shape = SubResource("target_range")
 position = Vector2(-55, -10)
 
 [node name="Target02" type="Node2D" parent="Fork/Targets" unique_id=753706135]
-position = Vector2(1344.18944, 50352.736)
+position = Vector2(1344.18944, 50368.796859238)
 script = ExtResource("target_script")
-scale = Vector2(0.755919855, 0.614414414)
+scale = Vector2(0.755919855, 0.755919855)
 platform_art_path = NodePath("../../../Hazards/Hazard09/RockArt09")
 
 [node name="Art" type="Sprite2D" parent="Fork/Targets/Target02" unique_id=1794686701]
@@ -254,7 +254,7 @@ collision_mask = 0
 shape = SubResource("target_range")
 
 [node name="SwapPoint" type="Marker2D" parent="Fork/Targets/Target02" unique_id=1211476639]
-position = Vector2(-90, -10)
+position = Vector2(-90, -29.374811670)
 
 [node name="Target03" type="Node2D" parent="Fork/Targets" unique_id=1663235126]
 position = Vector2(1087, 47416.5)
@@ -375,6 +375,7 @@ collision_mask = 0
 script = ExtResource("52_rs4er")
 
 [node name="Art" type="Sprite2D" parent="Platforms/Static05" unique_id=1070816939]
+z_index = -5
 visible = false
 position = Vector2(32, 31.5)
 texture = ExtResource("group_flat")
@@ -1057,7 +1058,7 @@ collision_mask = 6
 
 [node name="_CollisionShape2D_153" type="CollisionPolygon2D" parent="Hazards/Hazard09" unique_id=1820721329]
 position = Vector2(0, 0)
-polygon = PackedVector2Array(-95.2732242, 57.8324324, -58.9890712, 72.5783784, -104.344262, 87.3243243)
+polygon = PackedVector2Array(-95.273224200, 93.491803522, -58.989071200, 111.633880121, -104.344262000, 129.775956597)
 scale = Vector2(1, 1)
 
 [node name="Hazard11" type="Area2D" parent="Hazards" unique_id=751686503]
@@ -1402,9 +1403,9 @@ region_rect = Rect2(0, 0, 549, 555)
 material = SubResource("attach_right")
 
 [node name="RockArt09" type="Sprite2D" parent="Hazards/Hazard09"]
-z_index = 9
-position = Vector2(-25.3506376, 73.5)
-scale = Vector2(0.755919855, 0.614414414)
+z_index = 6
+position = Vector2(-25.3506376, 112.767759877)
+scale = Vector2(0.755919855, 0.755919855)
 texture = ExtResource("group_cliff")
 flip_h = false
 region_enabled = true

@@ -65,6 +65,8 @@
 
 [ext_resource type="Script" path="res://modules/environment/hell_death_flow.gd" id="death_flow"]
 
+[ext_resource type="Script" path="res://modules/camera/hell_camera_attention.gd" id="camera_attention"]
+
 [sub_resource type="ShaderMaterial" id="attach_left"]
 shader = ExtResource("attach_shader")
 shader_parameter/fill_left = true
@@ -1474,3 +1476,6 @@ polygon = PackedVector2Array(-211.684882, -86.5549548, -216.976321, -79.1819819,
 
 [node name="DeathFlow" type="Node" parent="."]
 script = ExtResource("death_flow")
+
+[node name="CameraAttention" type="Node" parent="."]
+script = ExtResource("camera_attention")

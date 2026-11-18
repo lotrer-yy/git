@@ -1,7 +1,10 @@
 extends Node2D
 ## 锁定来自 Nodes Plus；动作按投叉、插中、交换和弹射顺序执行。
 const SURFACE = preload("res://modules/environment/hell_surface.gd")
+signal exchanged(body: Node2D)
+signal interaction_reset
 @export var lock_distance: float = 610.0
+@export var fork_tip_angle_degrees: float = -25.0
 @export var throw_seconds: float = 0.28
 @export var launch_seconds: float = 0.9
 var demon: CharacterBody2D
@@ -73,7 +76,9 @@ func _throw() -> void:
     lodged = selected
     selected = null
     fork.global_position = demon.global_position + Vector2(50*demon.get_node("Movement").facing,-70)
-    fork.global_rotation = (lodged.global_position-fork.global_position).angle()+PI*0.5
+    var incoming := (lodged.global_position-fork.global_position).angle()
+    fork.global_rotation = incoming - deg_to_rad(fork_tip_angle_degrees)
+    lodged.hit_angle = incoming
     fork.show()
     _visual.get_node("Sprite").texture = load("res://assets/art/hell/new/throw.png")
     var start := fork.global_position
@@ -129,10 +134,8 @@ func _exchange() -> void:
     demon.global_position = lodged.get_node("SwapPoint").global_position
     fork.global_position = previous + Vector2(0,-60)
     fork.show()
-    var camera = get_parent().get_node("Camera")
-    camera.clear_impulse()
-    camera.set_follow_target(demon,true)
-    camera.reset_physics_interpolation()
+    demon.reset_physics_interpolation()
+    exchanged.emit(demon)
 
 func _release_ball() -> void:
     var ball := lodged
@@ -166,6 +169,7 @@ func _end_launch() -> void:
     demon.get_node("Movement").landed.emit(650.0)
 
 func reset() -> void:
+    interaction_reset.emit()
     if motion != null:
         motion.kill()
     if _ball_feedback != null:
@@ -182,3 +186,10 @@ func reset() -> void:
     detector.clear_target()
     for target in targets:
         target.set_state(0)
+
+func camera_interest() -> Node2D:
+    if launching and is_instance_valid(_destination):
+        return _destination
+    if is_instance_valid(lodged):
+        return lodged
+    return selected if is_instance_valid(selected) else null

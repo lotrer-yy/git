@@ -17,6 +17,11 @@ extends Camera2D
 ## Cinematic modules can temporarily drive these without touching the follow center.
 var use_unscaled_time: bool = false
 var cinematic_offset: Vector2 = Vector2.ZERO
+## 构图模块提供世界单位偏移；仍由本相机统一平滑和限制地图边界。
+var framing_bias: Vector2 = Vector2.ZERO
+var _retarget_from := Vector2.ZERO
+var _retarget_seconds: float = 0.0
+var _retarget_elapsed: float = 0.0
 
 var target: Node2D
 var _center := Vector2.ZERO
@@ -42,11 +47,16 @@ func _process(delta: float) -> void:
 		return
 	if use_unscaled_time:
 		delta /= maxf(Engine.time_scale, 0.001)
-	var desired := target.global_position + framing_offset
+	var desired := target.global_position + framing_offset + framing_bias
 	if target is CharacterBody2D:
 		var velocity: Vector2 = (target as CharacterBody2D).velocity
 		desired.x += clampf(velocity.x / 520.0, -1.0, 1.0) * horizontal_look_ahead
 		desired.y -= clampf(-velocity.y / 1200.0, 0.0, 1.0) * upward_look_ahead
+	if _retarget_elapsed < _retarget_seconds:
+		_retarget_elapsed = minf(_retarget_elapsed + delta, _retarget_seconds)
+		var u := _retarget_elapsed / _retarget_seconds
+		var eased := u * u * u * (u * (u * 6.0 - 15.0) + 10.0)
+		desired = _retarget_from.lerp(desired, eased)
 	var difference := desired - _center
 	var outside := Vector2(_outside_dead_zone(difference.x, dead_zone.x), _outside_dead_zone(difference.y, dead_zone.y))
 	_center = _clamp_center(_center + outside * (1.0 - exp(-follow_speed * delta)))
@@ -60,7 +70,8 @@ func _process(delta: float) -> void:
 
 
 func snap_to_target() -> void:
-	_center = _clamp_center(target.global_position + framing_offset)
+	_retarget_elapsed = _retarget_seconds
+	_center = _clamp_center(target.global_position + framing_offset + framing_bias)
 	global_position = _center
 	_trauma = 0.0
 	clear_impulse()
@@ -91,6 +102,7 @@ func set_follow_target(new_target: Node2D, snap: bool = false) -> void:
 func resume_follow_from_current_position(new_target: Node2D) -> void:
 	# A scripted move owns global_position; adopt it before normal following resumes.
 	target = new_target
+	_retarget_elapsed = _retarget_seconds
 	_center = _clamp_center(global_position)
 	global_position = _center
 	clear_impulse()
@@ -112,7 +124,16 @@ func _clamp_center(point: Vector2) -> Vector2:
 func adopt_view(center: Vector2, view_zoom: Vector2) -> void:
 	## 连续镜头交接时接收已有视野，避免重新对准角色造成跳帧。
 	zoom = view_zoom
+	_retarget_elapsed = _retarget_seconds
 	_center = _clamp_center(center)
 	global_position = _center
 	offset = Vector2.ZERO
 	_trauma = 0.0
+
+func blend_to_target(new_target: Node2D, seconds: float = 0.28) -> void:
+	## 传送改变角色位置，不立即改变画面位置；保留同一台显示相机。
+	target = new_target
+	_retarget_from = _center
+	_retarget_seconds = maxf(seconds, 0.01)
+	_retarget_elapsed = 0.0
+	clear_impulse()

@@ -1,0 +1,271 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/00.png" id="4_230d4"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/01.png" id="5_n7vfx"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/02.png" id="6_6m2w3"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/03.png" id="7_ksef2"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/04.png" id="8_hy0ga"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/05.png" id="9_0j3cm"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/06.png" id="10_a1dva"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/07.png" id="11_uuago"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/08.png" id="12_03wqt"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/09.png" id="13_3hl8o"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/10.png" id="14_gjhhw"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/11.png" id="15_g7fvj"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/12.png" id="16_m5s01"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/13.png" id="17_gtntp"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/14.png" id="18_1pj8p"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/15.png" id="19_ts8t3"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/16.png" id="20_xs41f"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/17.png" id="21_g17wg"]
+[ext_resource type="Texture2D" path="res://assets/art/reference_map/18.png" id="22_4xqnc"]
+[ext_resource type="Texture2D" path="res://assets/art/hell/layers/background/19.png" id="23_vkouu"]
+[ext_resource type="Texture2D" path="res://assets/art/hell/layers/background/20.png" id="24_i5f7g"]
+[ext_resource type="Texture2D" path="res://assets/art/hell/layers/background/21.png" id="25_73d3y"]
+[ext_resource type="Texture2D" path="res://assets/art/hell/layers/background/22.png" id="26_oy1mk"]
+[ext_resource type="Texture2D" path="res://assets/art/hell/layers/background/23.png" id="27_1q825"]
+[ext_resource type="Texture2D" path="res://assets/art/hell/layers/background/24.png" id="28_hu155"]
+[ext_resource type="Texture2D" path="res://assets/art/hell/layers/background/25.png" id="29_kbh2a"]
+
+[node name="Background" type="Node2D"]
+metadata/temporary_composite = false
+
+[node name="Tile00" type="Sprite2D" parent="." unique_id=1781421946]
+texture = ExtResource("4_230d4")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/00.png"
+metadata/pixel_height = 2048
+
+[node name="Tile01" type="Sprite2D" parent="." unique_id=1417669595]
+position = Vector2(0, 2048)
+texture = ExtResource("5_n7vfx")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/01.png"
+metadata/pixel_height = 2048
+
+[node name="Tile02" type="Sprite2D" parent="." unique_id=686787073]
+position = Vector2(0, 4096)
+texture = ExtResource("6_6m2w3")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/02.png"
+metadata/pixel_height = 2048
+
+[node name="Tile03" type="Sprite2D" parent="." unique_id=1753076387]
+position = Vector2(0, 6144)
+texture = ExtResource("7_ksef2")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/03.png"
+metadata/pixel_height = 2048
+
+[node name="Tile04" type="Sprite2D" parent="." unique_id=314967737]
+position = Vector2(0, 8192)
+texture = ExtResource("8_hy0ga")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/04.png"
+metadata/pixel_height = 2048
+
+[node name="Tile05" type="Sprite2D" parent="." unique_id=1331291281]
+position = Vector2(0, 10240)
+texture = ExtResource("9_0j3cm")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/05.png"
+metadata/pixel_height = 2048
+
+[node name="Tile06" type="Sprite2D" parent="." unique_id=1217387838]
+position = Vector2(0, 12288)
+texture = ExtResource("10_a1dva")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/06.png"
+metadata/pixel_height = 2048
+
+[node name="Tile07" type="Sprite2D" parent="." unique_id=1430052674]
+position = Vector2(0, 14336)
+texture = ExtResource("11_uuago")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/07.png"
+metadata/pixel_height = 2048
+
+[node name="Tile08" type="Sprite2D" parent="." unique_id=1130315661]
+position = Vector2(0, 16384)
+texture = ExtResource("12_03wqt")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/08.png"
+metadata/pixel_height = 2048
+
+[node name="Tile09" type="Sprite2D" parent="." unique_id=1401340267]
+position = Vector2(0, 18432)
+texture = ExtResource("13_3hl8o")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/09.png"
+metadata/pixel_height = 2048
+
+[node name="Tile10" type="Sprite2D" parent="." unique_id=297383637]
+position = Vector2(0, 20480)
+texture = ExtResource("14_gjhhw")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/10.png"
+metadata/pixel_height = 2048
+
+[node name="Tile11" type="Sprite2D" parent="." unique_id=1729644853]
+position = Vector2(0, 22528)
+texture = ExtResource("15_g7fvj")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/11.png"
+metadata/pixel_height = 2048
+
+[node name="Tile12" type="Sprite2D" parent="." unique_id=669065640]
+position = Vector2(0, 24576)
+texture = ExtResource("16_m5s01")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/12.png"
+metadata/pixel_height = 2048
+
+[node name="Tile13" type="Sprite2D" parent="." unique_id=467915024]
+position = Vector2(0, 26624)
+texture = ExtResource("17_gtntp")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/13.png"
+metadata/pixel_height = 2048
+
+[node name="Tile14" type="Sprite2D" parent="." unique_id=825568820]
+position = Vector2(0, 28672)
+texture = ExtResource("18_1pj8p")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/14.png"
+metadata/pixel_height = 2048
+
+[node name="Tile15" type="Sprite2D" parent="." unique_id=962343560]
+position = Vector2(0, 30720)
+texture = ExtResource("19_ts8t3")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/15.png"
+metadata/pixel_height = 2048
+
+[node name="Tile16" type="Sprite2D" parent="." unique_id=883474625]
+position = Vector2(0, 32768)
+texture = ExtResource("20_xs41f")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/16.png"
+metadata/pixel_height = 2048
+
+[node name="Tile17" type="Sprite2D" parent="." unique_id=252953922]
+position = Vector2(0, 34816)
+texture = ExtResource("21_g17wg")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/17.png"
+metadata/pixel_height = 2048
+
+[node name="Tile18" type="Sprite2D" parent="." unique_id=481211260]
+position = Vector2(0, 36864)
+texture = ExtResource("22_4xqnc")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/reference_map/18.png"
+metadata/pixel_height = 2048
+
+[node name="Tile19" type="Sprite2D" parent="." unique_id=1822052363]
+position = Vector2(0, 38912)
+texture = ExtResource("23_vkouu")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/hell/layers/background/19.png"
+metadata/runtime_texture = "res://assets/art/hell/layers/background/19.png"
+metadata/pixel_height = 2048
+
+[node name="Tile20" type="Sprite2D" parent="." unique_id=1412939178]
+position = Vector2(0, 40960)
+texture = ExtResource("24_i5f7g")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/hell/layers/background/20.png"
+metadata/pixel_height = 2048
+metadata/runtime_texture = "res://assets/art/hell/layers/background/20.png"
+
+[node name="Tile21" type="Sprite2D" parent="." unique_id=878992670]
+position = Vector2(0, 43008)
+texture = ExtResource("25_73d3y")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/hell/layers/background/21.png"
+metadata/pixel_height = 2048
+metadata/runtime_texture = "res://assets/art/hell/layers/background/21.png"
+
+[node name="Tile22" type="Sprite2D" parent="." unique_id=1055152007]
+position = Vector2(0, 45056)
+texture = ExtResource("26_oy1mk")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/hell/layers/background/22.png"
+metadata/pixel_height = 2048
+metadata/runtime_texture = "res://assets/art/hell/layers/background/22.png"
+
+[node name="Tile23" type="Sprite2D" parent="." unique_id=1551971134]
+position = Vector2(0, 47104)
+texture = ExtResource("27_1q825")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/hell/layers/background/23.png"
+metadata/pixel_height = 2048
+metadata/runtime_texture = "res://assets/art/hell/layers/background/23.png"
+
+[node name="Tile24" type="Sprite2D" parent="." unique_id=1367413149]
+position = Vector2(0, 49152)
+texture = ExtResource("28_hu155")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 2048)
+metadata/full_texture = "res://assets/art/hell/layers/background/24.png"
+metadata/pixel_height = 2048
+metadata/runtime_texture = "res://assets/art/hell/layers/background/24.png"
+
+[node name="Tile25" type="Sprite2D" parent="." unique_id=1509169261]
+position = Vector2(0, 51200)
+texture = ExtResource("29_kbh2a")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 1, 1920, 800)
+metadata/full_texture = "res://assets/art/hell/layers/background/25.png"
+metadata/pixel_height = 800
+metadata/runtime_texture = "res://assets/art/hell/layers/background/25.png"

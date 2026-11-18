@@ -1,0 +1,184 @@
+extends Node2D
+## 锁定来自 Nodes Plus；动作按投叉、插中、交换和弹射顺序执行。
+const SURFACE = preload("res://modules/environment/hell_surface.gd")
+@export var lock_distance: float = 610.0
+@export var throw_seconds: float = 0.28
+@export var launch_seconds: float = 0.9
+var demon: CharacterBody2D
+var targets: Array[Node2D] = []
+var selected: Node2D
+var lodged: Node2D
+var flying: bool = false
+var launching: bool = false
+var swapping: bool = false
+var fork: Sprite2D
+var motion: Tween
+var _ball_feedback: Tween
+var detector: Area2D
+var _visual: Node2D
+var _destination: Node2D
+var _launch_start: Vector2
+
+func _ready() -> void:
+    demon = get_parent().get_node("Demon")
+    _visual = demon.get_node("Visual")
+    fork = $ForkSprite
+    targets.assign($Targets.get_children())
+    detector = load("res://addons/nodes_plus/nodes/target2D.gd").new()
+    detector.name = "TargetSensor"
+    detector.auto_acquire = false
+    detector.valid_groups.assign(["fork_targets"])
+    detector.collision_layer = 0
+    detector.collision_mask = 64
+    var shape := CircleShape2D.new()
+    shape.radius = lock_distance
+    var collision := CollisionShape2D.new()
+    collision.shape = shape
+    detector.add_child(collision)
+    add_child(detector)
+
+func _physics_process(_delta: float) -> void:
+    detector.global_position = demon.global_position + Vector2(0,-60)
+    if not demon.get_node("Host").claimed or flying or launching or swapping or is_instance_valid(lodged):
+        return
+    detector.acquire_nearest()
+    var nearest: Node2D = detector.get_target()
+    if nearest == selected:
+        return
+    if is_instance_valid(selected):
+        selected.set_state(0)
+    selected = nearest
+    if is_instance_valid(selected):
+        selected.set_state(1)
+
+func _unhandled_input(event: InputEvent) -> void:
+    if not event.is_action_pressed(&"possess") or event.is_echo() or not demon.get_node("Host").claimed:
+        return
+    if event is InputEventKey and event.location == KEY_LOCATION_RIGHT:
+        return
+    if flying or launching or swapping:
+        return
+    if is_instance_valid(lodged):
+        _swap_and_bounce()
+    elif is_instance_valid(selected):
+        _throw()
+    else:
+        return
+    get_viewport().set_input_as_handled()
+
+func _throw() -> void:
+    if flying or swapping or launching or not is_instance_valid(selected):
+        return
+    flying = true
+    lodged = selected
+    selected = null
+    fork.global_position = demon.global_position + Vector2(50*demon.get_node("Movement").facing,-70)
+    fork.global_rotation = (lodged.global_position-fork.global_position).angle()+PI*0.5
+    fork.show()
+    _visual.get_node("Sprite").texture = load("res://assets/art/hell/new/throw.png")
+    var start := fork.global_position
+    motion = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+    motion.tween_method(func(u: float): fork.global_position = start.lerp(lodged.global_position,u),0.0,1.0,throw_seconds)
+    motion.tween_callback(func():
+        flying = false
+        lodged.set_state(2)
+        fork.hide()
+        lodged.art.scale = Vector2(1.15,0.78)
+        _visual.get_node("Sprite").texture = load("res://assets/art/hell/new/right.png"))
+    motion.tween_property(lodged.art,"scale",Vector2(1.08,0.84),0.22).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
+func _swap_and_bounce() -> void:
+    if flying or swapping or launching or not is_instance_valid(lodged):
+        return
+    _destination = null
+    var distance := INF
+    var candidates: Array = get_tree().get_nodes_in_group("hell_platforms")
+    candidates.append_array(get_parent().get_node("Terrain").get_children())
+    for body in candidates:
+        if body is AnimatableBody2D and body.broken:
+            continue
+        var point: Vector2 = SURFACE.landing_on(body)
+        if not is_finite(point.y) or point.y >= lodged.global_position.y-40:
+            continue
+        var gap := point.distance_to(lodged.global_position)
+        if gap < distance:
+            distance = gap
+            _destination = body
+    if _destination == null:
+        return
+    if motion != null:
+        motion.kill()
+    swapping = true
+    _lock_control()
+    _visual.set_process(false)
+    _visual.position = Vector2.ZERO
+    motion = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+    motion.tween_property(_visual,"scale",Vector2(0.08,0.12),0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+    motion.tween_callback(_exchange)
+    motion.tween_property(_visual,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+    motion.tween_callback(_release_ball)
+
+func _lock_control() -> void:
+    demon.get_node("Movement").enabled = false
+    demon.get_node("Input").enabled = false
+    demon.get_node("Input").clear()
+    demon.velocity = Vector2.ZERO
+
+func _exchange() -> void:
+    var previous := demon.global_position
+    demon.global_position = lodged.get_node("SwapPoint").global_position
+    fork.global_position = previous + Vector2(0,-60)
+    fork.show()
+    var camera = get_parent().get_node("Camera")
+    camera.clear_impulse()
+    camera.set_follow_target(demon,true)
+    camera.reset_physics_interpolation()
+
+func _release_ball() -> void:
+    var ball := lodged
+    lodged = null
+    ball.set_state(0)
+    _ball_feedback = GlobalTweens.elastic_pop(ball.art,1.15,0.22)
+    swapping = false
+    launching = true
+    fork.hide()
+    _launch_start = demon.global_position
+    motion = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+    motion.tween_method(_sample_launch,0.0,1.0,launch_seconds)
+    motion.tween_callback(_end_launch)
+
+func _sample_launch(u: float) -> void:
+    var finish: Vector2 = SURFACE.landing_on(_destination)
+    var height := maxf(180.0,(_launch_start.y-finish.y)*0.4)
+    var point := _launch_start.lerp(finish,u)-Vector2(0,4.0*height*u*(1.0-u))
+    var collision := demon.move_and_collide(point-demon.global_position)
+    if collision != null:
+        motion.kill()
+        _end_launch()
+
+func _end_launch() -> void:
+    launching = false
+    _visual.scale = Vector2.ONE
+    _visual.position = Vector2.ZERO
+    _visual.set_process(true)
+    demon.get_node("Movement").enabled = true
+    demon.get_node("Input").enabled = true
+    demon.get_node("Movement").landed.emit(650.0)
+
+func reset() -> void:
+    if motion != null:
+        motion.kill()
+    if _ball_feedback != null:
+        _ball_feedback.kill()
+    fork.hide()
+    selected = null
+    lodged = null
+    flying = false
+    swapping = false
+    launching = false
+    _visual.scale = Vector2.ONE
+    _visual.position = Vector2.ZERO
+    _visual.set_process(true)
+    detector.clear_target()
+    for target in targets:
+        target.set_state(0)

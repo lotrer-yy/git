@@ -1,9 +1,12 @@
 [gd_scene format=3]
+[ext_resource type="Script" path="res://modules/audio/map_bgm.gd" id="music"]
 [ext_resource type="Script" path="res://modules/input/map_browser_input.gd" id="input"]
 [ext_resource type="Script" path="res://modules/camera/map_browser_camera.gd" id="camera"]
 [ext_resource type="Script" path="res://modules/map/map_texture_streamer.gd" id="streamer"]
 [ext_resource type="PackedScene" path="res://scenes/map/world_map.tscn" id="map"]
 [node name="MapBrowser" type="Node2D"]
+[node name="MusicRegions" type="Node" parent="."]
+script=ExtResource("music")
 [node name="Input" type="Node" parent="."]
 script=ExtResource("input")
 [node name="Camera" type="Camera2D" parent="."]

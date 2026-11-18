@@ -86,6 +86,7 @@ func _process(delta: float) -> void:
 		# 不换显示相机；游戏跟随模块接收当前视野，再继续驱动这一台相机。
 		gameplay.get_node("CameraOutput").enabled = true
 		gameplay.get_node("WallEntry").play()
+		gameplay.get_node("MusicRegions").enabled = true
 		finished.emit()
 
 func _enable_follow() -> void:

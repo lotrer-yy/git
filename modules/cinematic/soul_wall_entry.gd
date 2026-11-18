@@ -70,3 +70,20 @@ func _process(delta: float) -> void:
 		soul.get_node("Movement").enabled = true
 		soul.get_node("Input").enabled = true
 		control_ready.emit()
+
+func reset_for_replay() -> void:
+	## 重来只复用洞口入场，不重新播放追逐过场。
+	playing = false
+	completed = false
+	elapsed = 0.0
+	var sprite: Sprite2D = soul.get_node("Visual/Sprite")
+	if _exit_material != null and sprite.material == _exit_material:
+		sprite.material = _original_material
+	_exit_material = null
+	soul.position = start_point.position
+	soul.velocity = Vector2.ZERO
+	soul.hide()
+	soul.get_node("Input").clear()
+	soul.get_node("Input").enabled = false
+	soul.get_node("Movement").enabled = false
+	soul.get_node("Collision").set_deferred("disabled", true)

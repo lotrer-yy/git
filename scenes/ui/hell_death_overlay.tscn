@@ -1,0 +1,72 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://modules/ui/hell_death_overlay.gd" id="script"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/death/hell_end.png" id="card"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/death/retry_home.png" id="buttons"]
+
+[sub_resource type="AtlasTexture" id="card_region"]
+atlas = ExtResource("card")
+region = Rect2(627, 184, 674, 627)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="retry_region"]
+atlas = ExtResource("buttons")
+region = Rect2(0, 0, 196, 146)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="home_region"]
+atlas = ExtResource("buttons")
+region = Rect2(431, 0, 196, 146)
+filter_clip = true
+
+[node name="HellDeathOverlay" type="CanvasLayer"]
+process_mode = 3
+layer = 100
+script = ExtResource("script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+
+[node name="Stage" type="Node2D" parent="Root"]
+
+[node name="Card" type="TextureRect" parent="Root/Stage"]
+offset_left = 627.0
+offset_top = 184.0
+offset_right = 1301.0
+offset_bottom = 811.0
+pivot_offset = Vector2(337, 313.5)
+mouse_filter = 2
+texture = SubResource("card_region")
+
+[node name="Retry" type="TextureButton" parent="Root/Stage"]
+offset_left = 621.0
+offset_top = 653.0
+offset_right = 817.0
+offset_bottom = 799.0
+pivot_offset = Vector2(98, 73)
+focus_mode = 0
+texture_normal = SubResource("retry_region")
+
+[node name="Home" type="TextureButton" parent="Root/Stage"]
+offset_left = 1052.0
+offset_top = 653.0
+offset_right = 1248.0
+offset_bottom = 799.0
+pivot_offset = Vector2(98, 73)
+focus_mode = 0
+texture_normal = SubResource("home_region")

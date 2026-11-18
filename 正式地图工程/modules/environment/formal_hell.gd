@@ -1,6 +1,8 @@
 extends Node2D
 ## 正式地狱组装；沿用原角色、附身控制器及附身运镜。
 const SURFACE = preload("res://modules/environment/hell_surface.gd")
+signal died
+var dead: bool = false
 var _demon_spawn: Vector2
 var _ghost_spawn: Vector2
 var _zzz_origin: Vector2
@@ -50,7 +52,7 @@ func _ready() -> void:
 	for area in $Hazards.get_children():
 		area.body_entered.connect(func(body):
 			if body == player:
-				restart.call_deferred())
+				die.call_deferred())
 	$WallEntry.control_ready.connect(func():
 		camera.set_follow_target(soul)
 		if get_parent() == get_tree().root:
@@ -61,6 +63,8 @@ func _ready() -> void:
 		$WallEntry.play()
 
 func _physics_process(delta: float) -> void:
+	if dead:
+		return
 	elapsed += delta
 	zzz.position = _zzz_origin - Vector2(0,fmod(elapsed*12,22))
 	zzz.modulate.a = 1.0 - fmod(elapsed, 2.0) * 0.35
@@ -73,9 +77,16 @@ func _physics_process(delta: float) -> void:
 	if demon.get_node("Host").claimed and not $Fork.flying:
 		demon.get_node("Visual/Sprite").texture = load("res://assets/art/hell/new/right.png")
 	if player.position.y > 52120:
-		restart()
+		die()
+
+func die() -> void:
+	if dead or not visible or not $WallEntry.completed:
+		return
+	dead = true
+	died.emit()
 
 func restart() -> void:
+	dead = false
 	$Fork.reset()
 	possession.reset()
 	demon.get_node("Host").reset()

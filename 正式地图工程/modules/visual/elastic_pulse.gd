@@ -5,7 +5,6 @@ extends Node
 @export var strength: float = 0.12
 @export var stiffness: float = 190.0
 @export var damping: float = 11.0
-signal pulsed
 var pulse_count := 0
 var _shape := Vector2.ONE
 var _velocity := Vector2.ZERO
@@ -19,7 +18,6 @@ func pulse() -> void:
 	_shape = Vector2(1.0 + strength, 1.0 - strength)
 	_velocity = Vector2(-1.2, 1.2)
 	pulse_count += 1
-	pulsed.emit()
 func _process(delta: float) -> void:
 	_clock += delta
 	if interval > 0.0 and _clock >= _next:

@@ -1,6 +1,4 @@
 extends Node2D
-signal stepped
-var _last_step: int = 0
 ## 路径移动与脚底弹跳分离；美术通过 Visual 子节点保持脚底轴心。
 @export var speed: float = 460.0
 @export var animate_visual: bool = true
@@ -21,10 +19,6 @@ func _process(delta: float) -> void:
 	if not running:
 		return
 	elapsed += delta
-	var step_number := int(elapsed * cadence)
-	if step_number > _last_step:
-		_last_step = step_number
-		stepped.emit()
 	position.x += speed * delta
 	if not animate_visual:
 		return

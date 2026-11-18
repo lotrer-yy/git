@@ -1,6 +1,4 @@
 extends Node
-signal grabbed
-signal released
 ## 首页鼠标拖拽；放开后恢复原有扇翅 AI，不影响关卡中的小鸟。
 @export var screen_bounds := Rect2(75, 80, 1770, 920)
 var dragging := false
@@ -23,7 +21,6 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 func begin_drag(mouse: Vector2) -> void:
 	dragging = true
-	grabbed.emit()
 	_offset = _bird.global_position - mouse
 	_patrol.stop()
 	_motor.enabled = false
@@ -36,7 +33,6 @@ func end_drag() -> void:
 	if not dragging:
 		return
 	dragging = false
-	released.emit()
 	# 给巡游和扇翅留出边缘空间，当前位置连续接回 AI，不瞬移。
 	var margin: Vector2 = _patrol.patrol_radius + Vector2(20, 110)
 	_patrol.center = _bird.position.clamp(screen_bounds.position + margin, screen_bounds.end - margin)

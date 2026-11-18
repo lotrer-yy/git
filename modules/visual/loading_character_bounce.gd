@@ -1,6 +1,5 @@
 extends Node2D
 ## 单个角色只管理弹入、波浪位移和弹出；身体形变复用 ElasticPulse。
-signal leaving
 signal entered
 signal exited
 enum Pose { HIDDEN, ENTERING, READY, EXITING }
@@ -55,9 +54,7 @@ func leave(delay: float) -> void:
 	pose = Pose.EXITING
 	_tween = create_tween()
 	_tween.tween_interval(delay)
-	_tween.tween_callback(func():
-		$Visual/Pulse.pulse()
-		leaving.emit())
+	_tween.tween_callback($Visual/Pulse.pulse)
 	_tween.tween_property(self, "position:y", _rest.y - 16.0, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(self, "position:y", _rest.y + hidden_distance, exit_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	_tween.tween_callback(_exited)

@@ -1,6 +1,5 @@
 class_name PossessableHost
 extends Node
-signal selected
 ## A host exposes its selection artwork, capture point and control handoff.
 
 @export_node_path("CharacterBody2D") var body_path: NodePath = ^".."
@@ -49,7 +48,6 @@ func set_highlight(value: bool) -> void:
 	_selected.flip_h = false
 	if just_selected:
 		visual.play_selection_pulse()
-		selected.emit()
 
 
 func freeze_for_transfer() -> void:

@@ -19,6 +19,8 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 [autoload]
 
 Bgm="*res://modules/audio/bgm.gd"
+PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
+GlobalTweens="*res://addons/global_tweens/GlobalTweens.gd"
 
 [display]
 
@@ -45,3 +47,7 @@ common/physics_ticks_per_second=120
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.19, 0.065, 0.07, 1)
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/nodes_plus/plugin.cfg", "res://addons/phantom_camera/plugin.cfg")

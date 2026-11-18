@@ -31,7 +31,7 @@ func _process(_delta: float) -> void:
 	for chunk in _chunks:
 		if _near(chunk):
 			if not _resident.has(chunk) and not _pending.has(chunk):
-				var path: String = chunk.get_meta("full_texture")
+				var path: String = chunk.get_meta("runtime_texture", chunk.get_meta("full_texture"))
 				var error := ResourceLoader.load_threaded_request(path, "Texture2D")
 				if error == OK:
 					_pending[chunk] = path

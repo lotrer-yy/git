@@ -1,4 +1,5 @@
 extends Node
+const SURFACE = preload("res://modules/environment/hell_surface.gd")
 ## 动画通道与正式地图贴边组成同一个世界；唯一显示相机直接平移进入关卡。
 signal pan_started
 signal finished
@@ -10,6 +11,7 @@ signal finished
 @export var pan_duration: float = 1.35
 var join_x: float = 0.0
 @export var connected_floor_y: float = 1100.0
+@export var gameplay_entry_path: NodePath = ^"LandingPoint"
 var gameplay: Node2D
 var playing: bool = false
 var elapsed: float = 0.0
@@ -35,10 +37,15 @@ func prepare() -> void:
 	var wall: Sprite2D = map.get_node("FinalSideWall")
 	# 作者柱子右沿与正式地图左沿颜色一致，直接贴边，不重叠、不再额外叠墙。
 	join_x = wall.to_global(Vector2(wall.texture.get_width(),0)).x
-	gameplay.position = Vector2(join_x, map.global_position.y + connected_floor_y - 51870.0)
+	var entry: Marker2D = gameplay.get_node(gameplay_entry_path)
+	var surface: Vector2 = SURFACE.local_top_at(gameplay.get_node("Ground/Collision"),gameplay,entry.position.x)
+	if is_finite(surface.y):
+		gameplay.get_node("WallSpawn").position.y += surface.y - entry.position.y
+		entry.position.y = surface.y
+	gameplay.position = Vector2(join_x, map.global_position.y + connected_floor_y - entry.position.y)
 	gameplay.visible = false
 	var game_camera: Camera2D = gameplay.get_node("Camera")
-	game_camera.world_bounds = Rect2(gameplay.position,Vector2(1920,52000))
+	game_camera.world_bounds.position += gameplay.position
 	game_camera.zoom = Vector2.ONE * 1.35
 	get_parent().add_child(gameplay)
 	# 隐藏时仍让流式加载器预载附近高清切片，但禁止隐藏相机移动。

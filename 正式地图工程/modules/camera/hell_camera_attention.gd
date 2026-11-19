@@ -3,11 +3,11 @@ extends Node
 @export var enabled: bool = true
 @export var maximum_peek_pixels: Vector2 = Vector2(160, 250)
 @export_range(0.0, 0.5) var interest_weight: float = 0.34
-@export var interest_radius: float = 650.0
+@export var interest_radius: float = 1000.0
 @export var bias_response: float = 4.5
 @export var exchange_blend_seconds: float = 0.28
 const SURFACE = preload("res://modules/environment/hell_surface.gd")
-@export var screen_margin_pixels: float = 150.0
+@export var screen_margin_pixels: float = 90.0
 var _platform_interest: Node2D
 @onready var level: Node2D = get_parent()
 @onready var camera: FollowCamera = get_node("../Camera")
@@ -22,10 +22,16 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var desired := Vector2.ZERO
+	camera.precise_framing = false
 	if enabled and not level.dead and demon.get_node("Host").claimed and camera.target == demon:
 		var interest: Node2D = fork.camera_interest()
+		# 已经在脚下的锁定球不是下一步；投出、插中和弹射中的主动目标仍优先。
+		var active_action: bool = fork.flying or fork.swapping or fork.launching or is_instance_valid(fork.lodged)
+		if not active_action and is_instance_valid(interest) and interest.global_position.y > demon.global_position.y - 80.0:
+			interest = null
 		if not is_instance_valid(interest): interest = _nearby_platform()
 		if is_instance_valid(interest):
+			camera.precise_framing = true
 			var point := interest.global_position
 			if interest.is_in_group("hell_platforms"):
 				var landing: Vector2 = SURFACE.landing_on(interest)
@@ -35,40 +41,46 @@ func _process(delta: float) -> void:
 			var half_view := camera.get_viewport_rect().size * 0.5 / camera.zoom
 			var margin := Vector2.ONE * screen_margin_pixels / camera.zoom
 			# 把上方机关从屏幕边缘带入安全区，同时保留主角下方的空间。
-			# 补偿跟随死区，否则静止时机关仍会被留在画面外。
+			# 关注时由跟随模块平滑对准精确构图，不额外遗留一段死区。
 			if point.y < demon.global_position.y:
-				center.y = minf(center.y, point.y + half_view.y - margin.y - camera.dead_zone.y)
+				center.y = minf(center.y, point.y + half_view.y - margin.y)
 				center.y = maxf(center.y, demon.global_position.y - half_view.y + margin.y)
 			var pixels := (center - base) * camera.zoom
 			pixels = pixels.clamp(-maximum_peek_pixels, maximum_peek_pixels)
 			desired = pixels / camera.zoom
 	camera.framing_bias = camera.framing_bias.lerp(desired, 1.0 - exp(-bias_response * delta))
 
+func _platform_point(platform: Node2D) -> Vector2:
+	return SURFACE.landing_on(platform)
+
+func _fits_preview(point: Vector2) -> bool:
+	var half := camera.get_viewport_rect().size * 0.5 / camera.zoom
+	var margin := Vector2.ONE * screen_margin_pixels / camera.zoom
+	var distance := demon.global_position - point
+	return is_finite(point.y) and distance.y > 70.0 and distance.y < minf(interest_radius, 2.0 * (half.y - margin.y)) and absf(distance.x) < minf(interest_radius, 2.0 * (half.x - margin.x))
+
 func _nearby_platform() -> Node2D:
-	var nearest: Node2D
-	var best := interest_radius * interest_radius
+	var next: Node2D
+	var highest := INF
+	# 预览能够同屏展示的下一段路线，也包含静态落脚平台。
+	# 不能只按最近距离选，否则低处的移动平台会一直挡住更上方的机关指引。
 	for platform in get_tree().get_nodes_in_group("hell_platforms"):
-		if platform.kind not in ["moving", "floating", "breakable"] or platform.broken:
-			continue
-		var delta_position: Vector2 = platform.global_position - demon.global_position
-		if delta_position.y > -50.0 or delta_position.y < -interest_radius or absf(delta_position.x) > interest_radius:
-			continue
-		var distance := delta_position.length_squared()
-		if distance < best:
-			nearest = platform
-			best = distance
-	# 接近两个机关时保持原关注点，只有明显更近才切换，避免左右来回摆。
+		if platform.broken: continue
+		var point := _platform_point(platform)
+		if _fits_preview(point) and point.y < highest:
+			next = platform
+			highest = point.y
 	if is_instance_valid(_platform_interest) and not _platform_interest.broken:
-		var old_delta: Vector2 = _platform_interest.global_position - demon.global_position
-		var old_distance := old_delta.length_squared()
-		if old_delta.y < -25.0 and old_distance < pow(interest_radius * 1.15, 2.0) and (nearest == null or best > old_distance * 0.65):
+		var old_point := _platform_point(_platform_interest)
+		if _fits_preview(old_point) and (next == null or old_point.y - highest < 60.0):
 			return _platform_interest
-	_platform_interest = nearest
-	return nearest
+	_platform_interest = next
+	return next
 
 func _on_exchanged(body: Node2D) -> void:
 	camera.blend_to_target(body, exchange_blend_seconds)
 
 func clear() -> void:
 	_platform_interest = null
+	camera.precise_framing = false
 	camera.framing_bias = Vector2.ZERO

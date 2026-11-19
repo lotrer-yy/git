@@ -19,6 +19,8 @@ var use_unscaled_time: bool = false
 var cinematic_offset: Vector2 = Vector2.ZERO
 ## 构图模块提供世界单位偏移；仍由本相机统一平滑和限制地图边界。
 var framing_bias: Vector2 = Vector2.ZERO
+## 机关构图有明确安全区时，不让跟随死区抵消已经计算好的偏移。
+var precise_framing: bool = false
 var _retarget_from := Vector2.ZERO
 var _retarget_seconds: float = 0.0
 var _retarget_elapsed: float = 0.0
@@ -58,7 +60,8 @@ func _process(delta: float) -> void:
 		var eased := u * u * u * (u * (u * 6.0 - 15.0) + 10.0)
 		desired = _retarget_from.lerp(desired, eased)
 	var difference := desired - _center
-	var outside := Vector2(_outside_dead_zone(difference.x, dead_zone.x), _outside_dead_zone(difference.y, dead_zone.y))
+	var zone := Vector2.ZERO if precise_framing else dead_zone
+	var outside := Vector2(_outside_dead_zone(difference.x, zone.x), _outside_dead_zone(difference.y, zone.y))
 	_center = _clamp_center(_center + outside * (1.0 - exp(-follow_speed * delta)))
 	_trauma = maxf(0.0, _trauma - impulse_decay * delta)
 	_impulse_time += delta

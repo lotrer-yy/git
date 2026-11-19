@@ -62,6 +62,7 @@ func run():
     check(not game.demon.get_node("Input").enabled and not game.demon.get_node("Movement").enabled,"Abandoned demon no longer receives player input")
     await create_timer(1.0,true,false,true).timeout
     check(game.player==fish and stage.host.claimed,"Transfer hands player control to the fish")
+    check(fish.get_node("Teleport").enabled and is_zero_approx(fish.get_node("Teleport").cooldown_remaining),"Possession Shift enables blink without casting it on the same press")
     check(not selected.visible and fish.get_node("Visual/Sprite").visible,"Possessed fish returns to its normal image")
     check(not fish.get_node("Patrol").enabled,"Player control stops automatic patrol")
     check(not game.soul.visible and not game.dead,"Soul hides inside the fish without ending the round")

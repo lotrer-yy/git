@@ -33,15 +33,20 @@ func _on_transfer_started(_chosen_host: PossessableHost) -> void:
 
 func _on_transfer_finished(chosen_host: PossessableHost) -> void:
     level.player = chosen_host.body
+    fish.get_node("Teleport").enabled = true
 
 func _on_player_died() -> void:
     if not active: return
+    fish.get_node("Teleport").enabled = false
+    fish.get_node("Teleport").reset()
     if possession.state == PossessionController.State.TRANSFERRING:
         possession.reset()
     possession.enabled = false
     possession.clear_selection()
 
 func reset() -> void:
+    fish.get_node("Teleport").enabled = false
+    fish.get_node("Teleport").reset()
     if active: possession.reset()
     possession.enabled = false
     fish.position = _spawn

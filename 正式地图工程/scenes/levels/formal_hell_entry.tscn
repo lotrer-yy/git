@@ -1346,8 +1346,8 @@ material = SubResource("attach_right")
 
 [node name="RockArt03" type="Sprite2D" parent="Terrain/Rock06"]
 z_index = 9
-position = Vector2(-1181.5, -182)
-scale = Vector2(0.66848816, 0.472072072)
+position = Vector2(-1181.5, -127.49403558)
+scale = Vector2(0.66848816, 0.66848816)
 texture = ExtResource("layer_rock2")
 flip_h = true
 region_enabled = true

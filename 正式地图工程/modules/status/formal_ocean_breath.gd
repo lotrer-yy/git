@@ -13,6 +13,7 @@ var corpse: Sprite2D
 var _rest_texture: Texture2D
 var _rest_position: Vector2
 var _motion: Tween
+var _release: Tween
 @onready var level: Node2D = get_parent().get_parent()
 @onready var body: CharacterBody2D = level.get_node("Demon")
 @onready var visual: Node2D = body.get_node("Visual")
@@ -48,9 +49,21 @@ func _process(delta: float) -> void:
         sprite.texture = _region(DEAD_ART)
         level.die(&"drown")
 
+func release_soul() -> void:
+    # 复用旧海洋的交接规则：幽灵离开后，原身体死亡不再判玩家失败。
+    active = false
+    body.get_node("Input").enabled = false
+    body.get_node("Input").clear()
+    body.get_node("Movement").enabled = false
+    body.velocity = Vector2.ZERO
+    _release = create_tween().set_ignore_time_scale(true)
+    _release.tween_interval(0.12)
+    _release.tween_callback(play_death)
+
 func play_death() -> void:
     # 先展示原画叉眼死亡表情，再缓缓沉出屏幕；只移动视觉替身。
     active = false
+    sprite.texture = _region(DEAD_ART)
     corpse = Sprite2D.new()
     corpse.texture = _region(DEAD_ART)
     corpse.flip_h = sprite.flip_h
@@ -71,6 +84,7 @@ func reset() -> void:
     active = false
     elapsed = 0.0
     if _motion != null: _motion.kill()
+    if _release != null: _release.kill()
     if is_instance_valid(corpse):
         corpse.queue_free()
         corpse = null

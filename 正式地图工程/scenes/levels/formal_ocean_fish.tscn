@@ -1,0 +1,28 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/environment/formal_ocean_fish.gd" id="assembly"]
+[ext_resource type="PackedScene" path="res://scenes/actors/fish.tscn" id="fish"]
+[ext_resource type="Script" path="res://modules/possession/possession_controller.gd" id="possession"]
+[ext_resource type="Script" path="res://modules/camera/possession_camera.gd" id="shot"]
+
+[node name="FishStage" type="Node2D"]
+process_mode = 4
+visible = false
+script = ExtResource("assembly")
+
+[node name="Fish" parent="." instance=ExtResource("fish")]
+position = Vector2(1288,38848)
+z_index = 15
+
+[node name="Possession" type="Node" parent="."]
+script = ExtResource("possession")
+soul_path = NodePath("../../../Soul")
+camera_path = NodePath("../../../Camera")
+source_body_path = NodePath("../../../Demon")
+source_focus_offset = Vector2(0,-67)
+center_soul_artwork = true
+enabled = false
+host_group = &"formal_ocean_fish_hosts"
+
+[node name="PossessionCamera" type="Node" parent="."]
+script = ExtResource("shot")
+camera_path = NodePath("../../../Camera")

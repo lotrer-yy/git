@@ -15,7 +15,8 @@ func run():
     check(Geometry2D.is_point_in_polygon(foreground.to_local(link.vortex.get_node("Mouth").global_position+Vector2(0,-57.5)),foreground.polygon),"Crater foreground covers the character at the hidden destination")
     var display_id=root.get_camera_2d().get_instance_id()
     check(link.get_node_or_null("Ocean")==null,"No duplicate ocean prototype is loaded")
-    check(link.find_children("*","Sprite2D",true,false).is_empty(),"Passage adds no replacement map artwork")
+    for art in link.find_children("*","Sprite2D",true,false):
+        check(link.get_node("FishStage/Fish").is_ancestor_of(art),"Only the confirmed fish artwork is added, with no replacement map artwork")
     var original_tiles=game.get_node("Map/ImageTiles").get_child_count()
     var platform_positions:Array[Vector2]=[]
     for platform in game.get_node("Platforms").get_children():platform_positions.append(platform.position)

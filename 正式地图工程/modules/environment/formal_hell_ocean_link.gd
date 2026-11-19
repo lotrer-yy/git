@@ -104,9 +104,11 @@ func _finish_eruption() -> void:
     body.get_node("Input").enabled = true
     camera.resume_follow_from_current_position(body)
     camera.set_process(true)
+    $FishStage.activate()
     eruption_finished.emit()
 
 func reset() -> void:
+    $FishStage.reset()
     $Breath.reset()
     if stage == Stage.HELL: return
     if _eruption != null: _eruption.kill()

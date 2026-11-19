@@ -10,6 +10,9 @@ func run():
     current_scene=game
     await create_timer(.85).timeout
     var link=game.get_node("OceanLink")
+    var foreground=link.get_node("MouthForeground")
+    check(foreground.z_index>game.demon.z_index,"Original crater lip draws in front of the demon")
+    check(Geometry2D.is_point_in_polygon(foreground.to_local(link.vortex.get_node("Mouth").global_position+Vector2(0,-57.5)),foreground.polygon),"Crater foreground covers the character at the hidden destination")
     var display_id=root.get_camera_2d().get_instance_id()
     check(link.get_node_or_null("Ocean")==null,"No duplicate ocean prototype is loaded")
     check(link.find_children("*","Sprite2D",true,false).is_empty(),"Passage adds no replacement map artwork")
@@ -40,12 +43,15 @@ func run():
     var previous:Vector2=game.camera.global_position
     var largest:=0.0
     var uniform:=true
+    var solid_entry:=true
     var travelled:=false
     for i in 800:
         await process_frame
         var visual=game.demon.get_node("Visual")
         if link.stage in [link.Stage.CAPTURING,link.Stage.ERUPTING]:
             uniform=uniform and absf(visual.scale.x-visual.scale.y)<.001
+        if link.stage==link.Stage.CAPTURING:
+            solid_entry=solid_entry and visual.scale.is_equal_approx(Vector2.ONE) and is_equal_approx(visual.modulate.a,1.0)
         if link.stage==link.Stage.TRAVELLING:
             travelled=true
             largest=maxf(largest,game.camera.global_position.distance_to(previous))
@@ -53,6 +59,7 @@ func run():
         if link.stage==link.Stage.OCEAN:break
     check(travelled and link.stage==link.Stage.OCEAN,"Entry travels through the original strata and erupts into the original ocean")
     check(uniform,"Entry and emergence preserve character proportions")
+    check(solid_entry,"Entry uses the foreground layer for occlusion instead of shrinking or fading out")
     check(largest<100,"Camera travels continuously through the original map")
     check(root.get_camera_2d().get_instance_id()==display_id,"The original display camera remains active")
     check(game.demon.global_position.y<link.ocean_mouth.global_position.y-150,"Same demon emerges above the original seabed crater")

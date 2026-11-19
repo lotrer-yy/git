@@ -2,8 +2,12 @@
 [ext_resource type="Script" path="res://modules/environment/formal_hell_ocean_link.gd" id="link"]
 [ext_resource type="Script" path="res://modules/environment/original_volcano_capture.gd" id="capture"]
 [ext_resource type="Script" path="res://modules/camera/vertical_scene_transition.gd" id="transition"]
+[ext_resource type="Script" path="res://modules/environment/volcano_mouth_foreground.gd" id="mouth_foreground"]
 [node name="OceanLink" type="Node2D"]
 script = ExtResource("link")
+[node name="MouthForeground" type="Polygon2D" parent="."]
+z_index = 16
+script = ExtResource("mouth_foreground")
 [node name="Exit" type="Area2D" parent="."]
 position = Vector2(940,41780)
 collision_layer = 0

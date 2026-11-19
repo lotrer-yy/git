@@ -17,7 +17,7 @@ var launching: bool = false
 var swapping: bool = false
 var fork: Sprite2D
 var motion: Tween
-var _ball_feedback: Tween
+var _arrival_feedback: Tween
 var detector: Area2D
 var _visual: Node2D
 var _held_material: ShaderMaterial
@@ -93,9 +93,7 @@ func _throw() -> void:
     motion.tween_callback(func():
         flying = false
         lodged.set_state(2)
-        fork.hide()
-        lodged.art.scale = Vector2(1.15,0.78))
-    motion.tween_property(lodged.art,"scale",Vector2(1.08,0.84),0.22).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+        fork.hide())
 
 func _swap_and_bounce() -> void:
     if flying or swapping or launching or not is_instance_valid(lodged):
@@ -125,7 +123,7 @@ func _swap_and_bounce() -> void:
     motion = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
     motion.tween_property(_visual,"scale",Vector2(0.08,0.12),0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
     motion.tween_callback(_exchange)
-    motion.tween_property(_visual,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+    motion.tween_property(_visual,"scale",Vector2(1.24,0.78),0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
     motion.tween_callback(_release_ball)
 
 func _lock_control() -> void:
@@ -137,16 +135,16 @@ func _lock_control() -> void:
 func _exchange() -> void:
     demon.global_position = lodged.get_node("SwapPoint").global_position
     fork.hide()
-    lodged.set_state(0)
+    lodged.bounce_on_teleport()
     _set_held(true)
     demon.reset_physics_interpolation()
     exchanged.emit(demon)
 
 func _release_ball() -> void:
-    var ball := lodged
     lodged = null
-    ball.set_state(0)
-    _ball_feedback = GlobalTweens.elastic_pop(ball.art,1.15,0.22)
+    if _arrival_feedback != null: _arrival_feedback.kill()
+    _arrival_feedback = create_tween()
+    _arrival_feedback.tween_property(_visual,"scale",Vector2.ONE,0.26).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
     swapping = false
     launching = true
     fork.hide()
@@ -166,6 +164,7 @@ func _sample_launch(u: float) -> void:
 
 func _end_launch() -> void:
     launching = false
+    if _arrival_feedback != null: _arrival_feedback.kill()
     _visual.scale = Vector2.ONE
     _visual.position = Vector2.ZERO
     _visual.set_process(true)
@@ -177,8 +176,8 @@ func reset() -> void:
     interaction_reset.emit()
     if motion != null:
         motion.kill()
-    if _ball_feedback != null:
-        _ball_feedback.kill()
+    if _arrival_feedback != null:
+        _arrival_feedback.kill()
     fork.hide()
     _set_held(true)
     selected = null

@@ -140,13 +140,21 @@ func _swap_and_bounce() -> void:
         motion.kill()
     swapping = true
     _lock_control()
+    if _arrival_feedback != null: _arrival_feedback.kill()
+    _visual.reset()
     _visual.set_process(false)
-    _visual.position = Vector2.ZERO
+    _sample_swap_scale(1.0)
     motion = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
-    motion.tween_property(_visual,"scale",Vector2(0.08,0.12),0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+    motion.tween_method(_sample_swap_scale,1.0,0.08,0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
     motion.tween_callback(_exchange)
-    motion.tween_property(_visual,"scale",Vector2(1.24,0.78),0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+    motion.tween_method(_sample_swap_scale,0.08,1.18,0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
     motion.tween_callback(_release_ball)
+
+func _sample_swap_scale(amount: float) -> void:
+    # Visual 原点在脚底：补偿位移，让等比例收缩和回弹始终围绕角色中心。
+    var center: Vector2 = _visual.get_node("Sprite").position
+    _visual.scale = Vector2.ONE * amount
+    _visual.position = center * (1.0-amount)
 
 func _lock_control() -> void:
     demon.get_node("Movement").enabled = false
@@ -165,8 +173,8 @@ func _exchange() -> void:
 func _release_ball() -> void:
     lodged = null
     if _arrival_feedback != null: _arrival_feedback.kill()
-    _arrival_feedback = create_tween()
-    _arrival_feedback.tween_property(_visual,"scale",Vector2.ONE,0.26).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+    _arrival_feedback = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+    _arrival_feedback.tween_method(_sample_swap_scale,1.18,1.0,0.26).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
     swapping = false
     launching = true
     fork.hide()

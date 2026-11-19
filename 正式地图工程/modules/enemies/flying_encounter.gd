@@ -37,7 +37,7 @@ func _physics_process(delta: float) -> void:
         return
     if not is_active():return
     for enemy in enemies():
-        if enemy.mode!=enemy.Mode.ENTERING and enemy.global_position.distance_to(level.player.global_position)>1900:enemy.queue_free()
+        if not enemy.is_defeated() and enemy.mode!=enemy.Mode.ENTERING and enemy.global_position.distance_to(level.player.global_position)>1900:enemy.queue_free()
     elapsed+=delta
     if elapsed>=spawn_interval:
         elapsed-=spawn_interval

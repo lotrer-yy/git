@@ -10,6 +10,7 @@ const FLAP=preload("res://assets/art/enemies/flying_demon/flap.png")
 @export var death_spin_seconds: float = .65
 @export var death_jump_speed: float = 320.0
 @export var death_gravity: float = 1200.0
+@export var death_screen_margin_pixels: float = 48.0
 var _death_origin: Vector2
 var _death_rotation: float
 var _death_drift: float
@@ -57,7 +58,9 @@ func _physics_process(delta: float) -> void:
     if mode==Mode.DYING:
         global_position=_death_origin+Vector2(_death_drift*_state_time,-death_jump_speed*_state_time+.5*death_gravity*_state_time*_state_time)
         $Visual.rotation=_death_rotation+TAU*minf(_state_time/death_spin_seconds,1.0)
-        if _state_time>death_spin_seconds+.13:queue_free()
+        # 转完一圈后继续下落，整张死亡图离开实际显示视口才清理。
+        if _state_time >= death_spin_seconds and death_gravity*_state_time > death_jump_speed and _death_art_is_outside_view():
+            queue_free()
         return
     if not is_instance_valid(encounter) or not encounter.is_active():return
     if mode==Mode.ENTERING:
@@ -110,6 +113,14 @@ func _pose(delta: float = 1.0/60.0) -> void:
     art.material.set_shader_parameter("has_fork",mode!=Mode.RECOVERING)
     if is_instance_valid(encounter):art.flip_h=encounter.level.player.global_position.x>global_position.x
     $Visual.rotation=lerp_angle($Visual.rotation,clampf(velocity.x/flight.max_speed,-1,1)*.10,1.0-exp(-7.0*delta))
+
+func _death_art_is_outside_view() -> bool:
+    var rect := art.get_rect()
+    var canvas := art.get_global_transform_with_canvas()
+    var bounds := Rect2(canvas*rect.position,Vector2.ZERO)
+    for corner in [Vector2(rect.end.x,rect.position.y),rect.end,Vector2(rect.position.x,rect.end.y)]:
+        bounds = bounds.expand(canvas*corner)
+    return not bounds.intersects(get_viewport_rect().grow(death_screen_margin_pixels))
 
 func take_hit() -> void:
     if is_defeated():return

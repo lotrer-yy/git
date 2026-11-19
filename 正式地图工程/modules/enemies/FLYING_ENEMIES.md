@@ -8,13 +8,13 @@
 - `enemy_fork.gd`：带轻微重力的飞行轨迹，逐帧扫射检测玩家及地形；碰到地形短暂插住后释放。命中调用已有死亡流程。
 - `hell_fork.gd`：在 850 世界单位内优先锁定已经入场、当前镜头内且视线可见的飞行敌人，瞄准图标在距屏幕边缘 24 世界单位处即可出现；敌人攻击仍保留原先的屏幕安全边距。仍使用同一个 Shift 投叉操作。默认 80% 命中、20% 落空，均自动回到主角手里，回收时主角弹一下；不会把玩家瞬移到敌人身上。团团仍使用 610 单位锁定范围，原投叉与瞬移逻辑保留。
 - `visual/aim_indicator.gd`：复用独立透明 `lock.png`，图标从中心等比例缩到 8%，0.09 秒弹到 116%，再用 0.16 秒回稳。只在新锁定时播放，取消或死亡立即清理，不缩放敌人本体。
-- 命中后换作者死亡图，压扁回弹，在空中完整旋转 360°，再下落消失。锁定图标隐藏、停止攻击，并立即从可锁定目标中移除。
+- 命中后换作者死亡图，压扁回弹，在空中完整旋转 360°，继续下落；整张死亡图离开实际视口并越过 48 屏幕像素的余量后才清理，不按固定时间在画面里消失。判断包含贴图偏移、旋转、缩放与当前镜头，死亡替身不受普通敌人的距离清理影响。锁定图标隐藏、停止攻击，并立即从可锁定目标中移除。
 - 敌人出现发送方向提示，镜头轻偏向来向；投叉及已有团团动作不因敌人出现而改变物理位置。
 
 ## 可调参数
 
 - 场景 `FlyingEnemies`：`spawn_interval`、`max_alive`、`enabled`。
-- 敌人场景 `FlyingDemon`：`attack_interval`、`windup_seconds`、`sight_radius`、`death_spin_seconds`、`death_jump_speed`、`death_gravity`。
+- 敌人场景 `FlyingDemon`：`attack_interval`、`windup_seconds`、`sight_radius`、`death_spin_seconds`、`death_jump_speed`、`death_gravity`、`death_screen_margin_pixels`。
 - `Flight`：`max_speed`、`acceleration`、`orbit_radius`、`sweep_frequency`、`entry_speed`、`entry_acceleration`。
 - 主角 `Fork`：`enemy_hit_chance`、`enemy_lock_distance`、`enemy_lock_screen_inset`。
 - 敌人 `Lock`：`initial_scale`、`overshoot_scale`、`grow_seconds`、`settle_seconds`。

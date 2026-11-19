@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://modules/enemies/flying_motion.gd" id="flight"]
 [ext_resource type="Texture2D" path="res://assets/art/enemies/flying_demon/windup.png" id="windup"]
 [ext_resource type="Texture2D" path="res://assets/art/enemies/flying_demon/lock.png" id="lock"]
+[ext_resource type="Script" path="res://modules/visual/aim_indicator.gd" id="aim_indicator"]
 [sub_resource type="CircleShape2D" id="body"]
 radius=44.0
 [sub_resource type="CircleShape2D" id="detection"]
@@ -23,6 +24,7 @@ shape=SubResource("body")
 [node name="Art" type="Sprite2D" parent="Visual"]
 texture=SubResource("pose")
 [node name="Lock" type="Sprite2D" parent="."]
+script=ExtResource("aim_indicator")
 visible=false
 z_index=1
 position=Vector2(0,-5)

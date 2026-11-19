@@ -46,13 +46,10 @@ func is_defeated() -> bool:
     return mode==Mode.DYING
 
 func set_state(value: int) -> void:
-    if is_defeated():lock.hide();return
-    lock.visible=value==1
-    if value==1:
-        if _pop!=null:_pop.kill()
-        $Visual.scale=Vector2(1.15,.88)
-        _pop=create_tween()
-        _pop.tween_property($Visual,"scale",Vector2.ONE,.25).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+    if is_defeated() or value!=1:
+        lock.conceal()
+    else:
+        lock.reveal()
 
 func _physics_process(delta: float) -> void:
     _time+=delta
@@ -118,7 +115,7 @@ func take_hit() -> void:
     if is_defeated():return
     mode=Mode.DYING
     _state_time=0
-    lock.hide()
+    lock.conceal()
     remove_from_group("fork_targets")
     collision_layer=0
     $Detection.set_deferred("monitorable",false)

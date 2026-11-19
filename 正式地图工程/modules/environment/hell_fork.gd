@@ -7,6 +7,8 @@ signal interaction_reset
 var _enemy_attack_target: Node2D
 var _combat_rng := RandomNumberGenerator.new()
 @export var lock_distance: float = 610.0
+@export var enemy_lock_distance: float = 850.0
+@export var enemy_lock_screen_inset: Vector2 = Vector2(24,24)
 @export var fork_tip_angle_degrees: float = -25.0
 @export var throw_seconds: float = 0.28
 @export var launch_seconds: float = 0.9
@@ -63,10 +65,10 @@ func _physics_process(_delta: float) -> void:
             if is_instance_valid(candidate) and not candidate.is_in_group("hell_flying_enemies"):
                 var gap:float=detector.global_position.distance_squared_to(candidate.global_position)
                 if gap<best_ball:best_ball=gap;nearest=candidate
-    var best_enemy := lock_distance*lock_distance
+    var best_enemy := enemy_lock_distance*enemy_lock_distance
     # 动态入场的敌人不能只依赖 Area 首次进入事件：入场时它尚不可选。
     for candidate in get_tree().get_nodes_in_group("hell_flying_enemies"):
-        if not is_instance_valid(candidate) or not candidate.is_in_group("fork_targets") or candidate.is_defeated() or not candidate.encounter.is_on_screen(candidate.global_position):continue
+        if not is_instance_valid(candidate) or not candidate.is_in_group("fork_targets") or candidate.is_defeated() or not candidate.encounter.is_on_screen(candidate.global_position,enemy_lock_screen_inset):continue
         var distance:float=detector.global_position.distance_squared_to(candidate.global_position)
         if distance<best_enemy and get_world_2d().direct_space_state.intersect_ray(PhysicsRayQueryParameters2D.create(detector.global_position,candidate.global_position,9)).is_empty():
             best_enemy=distance

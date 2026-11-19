@@ -19,10 +19,9 @@ func _ready() -> void:
 func is_active() -> bool:
     return enabled and level.visible and not level.dead and not level.exit_in_progress and level.player==level.demon and level.demon.get_node("Host").claimed
 
-func is_on_screen(point: Vector2) -> bool:
+func is_on_screen(point: Vector2, inset: Vector2 = Vector2(100,90)) -> bool:
     var camera:Camera2D=level.camera
     var half:=camera.get_viewport_rect().size*.5/camera.zoom
-    var inset:=Vector2(100,90)
     return Rect2(camera.global_position-half+inset,(half-inset)*2.0).has_point(point)
 
 func enemies() -> Array:

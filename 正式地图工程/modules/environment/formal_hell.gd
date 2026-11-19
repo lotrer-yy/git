@@ -44,8 +44,6 @@ func _ready() -> void:
 		body.get_node("Movement").landed.connect(camera.add_landing_impulse)
 	demon.get_node("Visual/Sprite").texture = load("res://assets/art/hell/new/right.png")
 	demon.get_node("Visual/Sprite").position = Vector2(0, -57.5)
-	demon.get_node("Visual/SelectedSprite").texture = load("res://assets/art/hell/new/right.png")
-	demon.get_node("Visual/SelectedSprite").position = Vector2(0, -57.5)
 	sleeping = $Demon/Sleeping
 	zzz = $Demon/SleepLetters
 	_zzz_origin = zzz.position

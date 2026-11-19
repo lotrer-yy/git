@@ -253,7 +253,6 @@ func _set_held(value: bool) -> void:
     _held_material.set_shader_parameter("has_fork", held)
     var texture = load("res://assets/art/hell/new/right.png")
     _visual.get_node("Sprite").texture = texture
-    _visual.get_node("SelectedSprite").texture = texture
 
 func _throw_at_enemy() -> void:
     var victim:Node2D=selected

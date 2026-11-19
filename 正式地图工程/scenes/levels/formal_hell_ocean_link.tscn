@@ -3,8 +3,11 @@
 [ext_resource type="Script" path="res://modules/environment/original_volcano_capture.gd" id="capture"]
 [ext_resource type="Script" path="res://modules/camera/vertical_scene_transition.gd" id="transition"]
 [ext_resource type="Script" path="res://modules/environment/volcano_mouth_foreground.gd" id="mouth_foreground"]
+[ext_resource type="Script" path="res://modules/status/formal_ocean_breath.gd" id="breath"]
 [node name="OceanLink" type="Node2D"]
 script = ExtResource("link")
+[node name="Breath" type="Node" parent="."]
+script = ExtResource("breath")
 [node name="MouthForeground" type="Polygon2D" parent="."]
 z_index = 16
 script = ExtResource("mouth_foreground")

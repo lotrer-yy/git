@@ -51,7 +51,9 @@ func _freeze() -> void:
 	output.process_mode = Node.PROCESS_MODE_ALWAYS
 	streamer.process_mode = Node.PROCESS_MODE_ALWAYS
 	impact_shake.play(camera, level.death_reason == &"fall")
-	if level.player == level.demon:
+	if level.death_reason == &"drown":
+		await level.get_node("OceanLink/Breath").play_death()
+	elif level.player == level.demon:
 		await death_animation.play(level.demon, camera, level.get_node("Fork").held)
 	overlay.show_death()
 

@@ -66,6 +66,7 @@ func _arrive() -> void:
     var visual = level.demon.get_node("Visual")
     visual.rotation = 0.0
     visual.modulate = Color.WHITE
+    $Breath.start()
     visual.show()
     _sample_eruption(0.0)
     _eruption = create_tween()
@@ -106,6 +107,7 @@ func _finish_eruption() -> void:
     eruption_finished.emit()
 
 func reset() -> void:
+    $Breath.reset()
     if stage == Stage.HELL: return
     if _eruption != null: _eruption.kill()
     transition.cancel()

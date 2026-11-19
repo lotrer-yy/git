@@ -87,6 +87,7 @@ func die(reason: StringName = &"impact") -> void:
 	died.emit()
 
 func restart() -> void:
+	$OceanLink.reset()
 	dead = false
 	death_reason = &"impact"
 	$Fork.reset()

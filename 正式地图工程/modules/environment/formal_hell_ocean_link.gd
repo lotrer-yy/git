@@ -1,62 +1,30 @@
 extends Node2D
-## 正式地狱只负责触发；复用旧版吸入、地层运镜与海底火山喷出。
+## 只连接原地图两个火山口，不加载旧海洋场景、平台或覆盖美术。
 signal ocean_entered
 signal eruption_finished
-enum Stage { HELL, CAPTURING, TRAVELLING, OCEAN }
-const OCEAN_PATH = "res://scenes/levels/ocean_prototype.tscn"
-@export var ocean_origin: Vector2 = Vector2(0, -5619)
+enum Stage { HELL, CAPTURING, TRAVELLING, ERUPTING, OCEAN }
+@export var eruption_seconds: float = 0.7
 var stage: Stage = Stage.HELL
-var ocean: Node2D
-var _requested: bool = false
+var _eruption: Tween
+var _motor_settings: Dictionary = {}
+var _enemies_enabled: bool = true
 @onready var level: Node2D = get_parent()
 @onready var camera: FollowCamera = get_node("../Camera")
-@onready var output: Node = get_node("../CameraOutput")
 @onready var vortex: VortexExit = $Exit
 @onready var transition: VerticalSceneTransition = $VerticalTransition
-@onready var impact: CameraImpact = $CameraImpact
+@onready var ocean_mouth: Marker2D = $OceanMouth
 
 func _ready() -> void:
-    process_mode = Node.PROCESS_MODE_ALWAYS
-    process_priority = 25
     vortex.capture_started.connect(_capture)
     vortex.capture_finished.connect(_travel)
     transition.finished.connect(_arrive)
-    var status := ResourceLoader.load_threaded_get_status(OCEAN_PATH)
-    _requested = status in [ResourceLoader.THREAD_LOAD_IN_PROGRESS, ResourceLoader.THREAD_LOAD_LOADED] or ResourceLoader.load_threaded_request(OCEAN_PATH, "PackedScene") == OK
 
-func _process(_delta: float) -> void:
-    if ocean == null and _requested and ResourceLoader.load_threaded_get_status(OCEAN_PATH) == ResourceLoader.THREAD_LOAD_LOADED:
-        _prepare_ocean(ResourceLoader.load_threaded_get(OCEAN_PATH))
-    if stage == Stage.HELL:
-        vortex.eligible_body = level.demon if is_instance_valid(ocean) and not level.dead and level.demon.get_node("Host").claimed else null
-
-func _prepare_ocean(scene: PackedScene) -> void:
-    ocean = scene.instantiate()
-    ocean.name = "Ocean"
-    ocean.position = ocean_origin
-    ocean.process_mode = Node.PROCESS_MODE_DISABLED
-    var settings: FollowCamera = ocean.get_node("FollowCamera")
-    settings.enabled = false
-    settings.world_bounds.position += to_global(ocean_origin)
-    ocean.get_node("Fish").process_mode = Node.PROCESS_MODE_PAUSABLE
-    add_child(ocean)
-    ocean.camera = camera
-    ocean.possession.camera = camera
-    ocean.possession.shot._camera = camera
-    for name in ["Background", "Foreground"]:
-        var layer = ocean.get_node(name)
-        layer._camera = camera
-        layer.align_vertical_edges = true
-        layer.reset_reference()
-    ocean.jungle.set_camera(camera)
-    impact.camera = camera
-    ocean.launch.erupted.connect(impact.kick_up)
-    ocean.launch.finished.connect(func(): eruption_finished.emit())
-    ocean.round_restarted.connect(impact.reset)
-    ocean.round_restarted.connect(func(): Bgm.play_track(Bgm.Track.OCEAN))
-    ocean.shore.landed_on_shore.connect(func(): Bgm.play_track(Bgm.Track.JUNGLE))
-    ocean.jungle.sky_exit.arrived.connect(func(): Bgm.play_track(Bgm.Track.SKY))
-    ocean.jungle.sky_exit.sky.heaven_exit.arrived.connect(func(_ghost): Bgm.play_track(Bgm.Track.HEAVEN))
+func _physics_process(_delta: float) -> void:
+    if stage != Stage.HELL: return
+    vortex.eligible_body = level.demon if level.player == level.demon and not level.dead and not level.exit_in_progress and level.demon.get_node("Host").claimed else null
+    # 在口边重新起跳也能钻入，不依赖首次进入 Area 的事件。
+    for body in vortex.get_overlapping_bodies():
+        if vortex.try_capture(body): break
 
 func _capture(body: CharacterBody2D) -> void:
     stage = Stage.CAPTURING
@@ -64,47 +32,90 @@ func _capture(body: CharacterBody2D) -> void:
     var zoom_before := camera.zoom
     level.possession.shot.cancel()
     camera.zoom = zoom_before
-    level.get_node("Fork").reset()
-    level.get_node("Fork").set_physics_process(false)
-    level.get_node("Fork").set_process_unhandled_input(false)
+    var rig = level.get_node("Fork")
+    rig.reset()
+    rig.set_physics_process(false)
+    rig.set_process_unhandled_input(false)
     level.possession.enabled = false
     level.get_node("CameraAttention").enabled = false
-    body.get_node("Movement").enabled = false
+    var enemies = level.get_node("FlyingEnemies")
+    _enemies_enabled = enemies.enabled
+    enemies.enabled = false
+    enemies.reset()
+    var motor = body.get_node("Movement")
+    for property in [&"move_speed", &"acceleration", &"braking", &"jump_speed", &"gravity", &"max_fall_speed", &"fast_fall_multiplier"]:
+        _motor_settings[property] = motor.get(property)
+    motor.enabled = false
     body.get_node("Input").enabled = false
     body.get_node("Input").clear()
+    body.get_node("Visual").reset()
+    body.get_node("Visual").position = Vector2.ZERO
     body.velocity = Vector2.ZERO
     camera.clear_impulse()
-    camera.adopt_view(camera.global_position, zoom_before)
-    camera.set_follow_target(body)
-    transition.prepare(camera, zoom_before)
+    transition.prepare(camera, camera.zoom)
 
-func _travel(_body: CharacterBody2D) -> void:
+func _travel(body: CharacterBody2D) -> void:
     stage = Stage.TRAVELLING
-    level.process_mode = Node.PROCESS_MODE_DISABLED
-    output.process_mode = Node.PROCESS_MODE_ALWAYS
-    level.get_node("TextureStreamer").process_mode = Node.PROCESS_MODE_ALWAYS
-    level.get_node("MusicRegions").enabled = false
-    var half_view := camera.get_viewport_rect().size * 0.5 / transition.rest_zoom
-    var destination := ocean.to_global(Vector2(960,3240)) - Vector2(0,half_view.y)
-    transition.travel(camera, destination)
+    body.get_node("Visual").hide()
+    transition.travel(camera,ocean_mouth.global_position+Vector2(0,-300))
 
 func _arrive() -> void:
-    stage = Stage.OCEAN
-    var settings: FollowCamera = ocean.get_node("FollowCamera")
-    for property in [&"framing_offset", &"dead_zone", &"follow_speed", &"horizontal_look_ahead", &"upward_look_ahead", &"max_impulse_pixels", &"impulse_decay"]:
-        camera.set(property, settings.get(property))
-    camera.world_bounds = settings.world_bounds
-    camera.process_mode = Node.PROCESS_MODE_ALWAYS
-    camera.resume_follow_from_current_position(ocean.demon)
-    camera.set_process(true)
-    for name in ["Background", "Foreground"]: ocean.get_node(name).reset_reference()
-    ocean.process_mode = Node.PROCESS_MODE_INHERIT
-    ocean.fish.process_mode = Node.PROCESS_MODE_INHERIT
-    Bgm.play_track(Bgm.Track.OCEAN)
+    stage = Stage.ERUPTING
     ocean_entered.emit()
+    Bgm.play_track(Bgm.Track.OCEAN)
+    var visual = level.demon.get_node("Visual")
+    visual.rotation = 0.0
+    visual.modulate = Color.WHITE
+    visual.show()
+    _sample_eruption(0.0)
+    _eruption = create_tween()
+    _eruption.tween_method(_sample_eruption,0.0,1.0,eruption_seconds)
+    _eruption.tween_callback(_finish_eruption)
 
-func _input(event: InputEvent) -> void:
+func _sample_eruption(u: float) -> void:
+    var body = level.demon
+    var visual = body.get_node("Visual")
+    body.global_position = ocean_mouth.global_position+Vector2(0,80.0-440.0*u+120.0*u*u)
+    var amount := lerpf(0.06,1.0,ease(minf(u/.45,1.0),0.4))
+    visual.scale = Vector2.ONE*amount
+    visual.position = visual.get_node("Sprite").position*(1.0-amount)
+    visual.modulate.a = smoothstep(0.0,.18,u)
+
+func _finish_eruption() -> void:
+    stage = Stage.OCEAN
+    level.exit_in_progress = false
+    var body = level.demon
+    body.reset_physics_interpolation()
+    var visual = body.get_node("Visual")
+    visual.reset()
+    visual.position = Vector2.ZERO
+    visual.set_process(true)
+    var motor = body.get_node("Movement")
+    motor.move_speed = 110.0
+    motor.acceleration = 360.0
+    motor.braking = 600.0
+    motor.jump_speed = 160.0
+    motor.gravity = 180.0
+    motor.max_fall_speed = 120.0
+    motor.fast_fall_multiplier = 1.2
+    body.velocity = Vector2(0,-100)
+    motor.enabled = true
+    body.get_node("Input").enabled = true
+    camera.resume_follow_from_current_position(body)
+    camera.set_process(true)
+    eruption_finished.emit()
+
+func reset() -> void:
     if stage == Stage.HELL: return
-    if event.is_action_pressed(&"restart") and not event.is_echo():
-        if stage == Stage.OCEAN: ocean.restart()
-        get_viewport().set_input_as_handled()
+    if _eruption != null: _eruption.kill()
+    transition.cancel()
+    vortex.reset()
+    var motor = level.demon.get_node("Movement")
+    for property in _motor_settings: motor.set(property,_motor_settings[property])
+    _motor_settings.clear()
+    level.exit_in_progress = false
+    level.get_node("FlyingEnemies").enabled = _enemies_enabled
+    level.get_node("CameraAttention").enabled = true
+    level.get_node("Fork").set_physics_process(true)
+    level.get_node("Fork").set_process_unhandled_input(true)
+    stage = Stage.HELL

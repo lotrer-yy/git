@@ -2,75 +2,69 @@ extends SceneTree
 var failures:Array[String]=[]
 func _initialize():run.call_deferred()
 func check(ok:bool,message:String):
-	if not ok: failures.append(message);push_error(message)
-func wait_for(predicate:Callable,frames:int=2400)->bool:
-	for i in frames:
-		if predicate.call():return true
-		await process_frame
-	return false
+    if not ok:failures.append(message);push_error(message)
 func run():
-	var menu=load("res://scenes/ui/main_menu.tscn").instantiate()
-	root.add_child(menu)
-	current_scene=menu
-	await process_frame
-	menu.get_node("Start").pressed.emit()
-	var handoff=menu.get_node("GameHandoff")
-	check(await wait_for(func():return handoff.switched and handoff.gameplay.get_node("WallEntry").completed,7000),"Real opening reaches formal map")
-	var game=handoff.gameplay
-	game.get_node("FlyingEnemies").enabled=false # 单项检查不运行定时敌人。
-	var link=game.get_node("OceanLink")
-	check(await wait_for(func():return is_instance_valid(link.ocean)),"Ocean preloads in the background")
-	var display_id=root.get_camera_2d().get_instance_id()
-	check(link.ocean.launch.elapsed==0.0,"Hidden ocean does not erupt early")
-	check(not link.vortex.try_capture(game.soul),"Unpossessed ghost cannot enter the demon exit")
-	game.soul.position=game.demon.position+Vector2(-90,0)
-	for i in 5:await physics_frame
-	check(game.possession.request_possession(),"Formal demon can be possessed")
-	await create_timer(2.6).timeout
-	game.demon.get_node("Movement").enabled=false
-	game.demon.get_node("Input").enabled=false
-	game.demon.global_position=link.vortex.global_position+Vector2(0,100)
-	game.camera.set_follow_target(game.demon,true)
-	game.demon.velocity=Vector2(0,100)
-	check(not link.vortex.try_capture(game.demon),"Falling into the exit does not trigger it")
-	await process_frame
-	game.demon.velocity=Vector2(0,-600)
-	check(link.vortex.try_capture(game.demon),"Upward possessed body triggers capture")
-	check(not game.demon.get_node("Input").enabled,"Capture locks movement input")
-	game.die()
-	check(not game.dead,"Exit cannot race the death interface")
-	check(await wait_for(func():return link.stage==link.Stage.TRAVELLING),"Capture flows into the strata camera move")
-	var previous:Vector2=game.camera.global_position
-	var largest:=0.0
-	var monotonic:=true
-	while link.stage==link.Stage.TRAVELLING:
-		await process_frame
-		var point:Vector2=game.camera.global_position
-		largest=maxf(largest,point.distance_to(previous))
-		if point.y>previous.y+.01:monotonic=false
-		previous=point
-	check(link.stage==link.Stage.OCEAN,"Transition arrives in ocean")
-	check(monotonic and largest<180,"Camera travels upward without a scene-cut jump")
-	check(root.get_camera_2d().get_instance_id()==display_id,"The opening display camera stays active through both worlds")
-	check(game.camera.global_position.distance_to(link.transition._end)<3,"Ocean arrival adopts the final camera pose")
-	check(await wait_for(func():return not link.ocean.launch.active),"Volcano preparation and eruption complete")
-	check(link.ocean.demon.get_node("Input").enabled,"Demon control is restored after eruption")
-	check(link.ocean.possession.enabled,"Fish possession is available after eruption")
-	link.ocean.demon.get_node("Movement").enabled=false
-	link.ocean.demon.global_position=link.ocean.fish.get_node("Host").focus_position()+Vector2(-90,0)
-	link.ocean.demon.velocity=Vector2.ZERO
-	await create_timer(.2).timeout
-	check(link.ocean.possession.request_possession(),"Ocean demon can begin transferring into the fish")
-	check(await wait_for(func():return link.ocean.player==link.ocean.fish),"Fish possession completes in the connected world")
-	check(link.ocean.fish.get_node("Input").enabled,"Fish receives swim control")
-	var key=InputEventKey.new()
-	key.physical_keycode=KEY_R
-	key.pressed=true
-	root.push_input(key,true)
-	await process_frame
-	check(current_scene==menu and link.ocean.launch.active,"R restarts the ocean instead of reloading the opening")
-	check(not root.has_node("Sfx"),"Withdrawn sounds remain absent")
-	print("FORMAL_OCEAN_FAILURES=",failures.size()," MAX_CAMERA_STEP=",largest)
-	menu.queue_free()
-	for i in 3:await process_frame
-	quit(0 if failures.is_empty() else 1)
+    var game=load("res://scenes/levels/formal_hell_entry.tscn").instantiate()
+    game.get_node("FlyingEnemies").enabled=false
+    root.add_child(game)
+    current_scene=game
+    await create_timer(.85).timeout
+    var link=game.get_node("OceanLink")
+    var display_id=root.get_camera_2d().get_instance_id()
+    check(link.get_node_or_null("Ocean")==null,"No duplicate ocean prototype is loaded")
+    check(link.find_children("*","Sprite2D",true,false).is_empty(),"Passage adds no replacement map artwork")
+    var original_tiles=game.get_node("Map/ImageTiles").get_child_count()
+    var platform_positions:Array[Vector2]=[]
+    for platform in game.get_node("Platforms").get_children():platform_positions.append(platform.position)
+    check(not link.vortex.try_capture(game.soul),"Ghost cannot enter the demon crater")
+    game.soul.position=game.demon.position+Vector2(-90,0)
+    for i in 5:await physics_frame
+    check(game.possession.request_possession(),"Demon can be possessed")
+    await create_timer(2.6).timeout
+    game.demon.get_node("Movement").enabled=false
+    game.demon.get_node("Input").enabled=false
+    game.demon.global_position=link.vortex.global_position+Vector2(0,70)
+    game.camera.set_follow_target(game.demon,true)
+    game.demon.velocity=Vector2(0,100)
+    for i in 3:await physics_frame
+    check(link.stage==link.Stage.HELL,"Falling at the crater does not trigger entry")
+    game.demon.velocity=Vector2(0,-600)
+    for i in 5:
+        await physics_frame
+        if link.stage!=link.Stage.HELL:break
+    check(link.stage==link.Stage.CAPTURING,"Upward contact with the original crater starts entry")
+    check(link.vortex.position.is_equal_approx(Vector2(940,41780)),"Entry matches the original hell ceiling")
+    check(link.ocean_mouth.position.is_equal_approx(Vector2(990,38995)),"Exit matches the original seabed crater")
+    game.die()
+    check(not game.dead,"Death cannot interrupt the passage")
+    var previous:Vector2=game.camera.global_position
+    var largest:=0.0
+    var uniform:=true
+    var travelled:=false
+    for i in 800:
+        await process_frame
+        var visual=game.demon.get_node("Visual")
+        if link.stage in [link.Stage.CAPTURING,link.Stage.ERUPTING]:
+            uniform=uniform and absf(visual.scale.x-visual.scale.y)<.001
+        if link.stage==link.Stage.TRAVELLING:
+            travelled=true
+            largest=maxf(largest,game.camera.global_position.distance_to(previous))
+        previous=game.camera.global_position
+        if link.stage==link.Stage.OCEAN:break
+    check(travelled and link.stage==link.Stage.OCEAN,"Entry travels through the original strata and erupts into the original ocean")
+    check(uniform,"Entry and emergence preserve character proportions")
+    check(largest<100,"Camera travels continuously through the original map")
+    check(root.get_camera_2d().get_instance_id()==display_id,"The original display camera remains active")
+    check(game.demon.global_position.y<link.ocean_mouth.global_position.y-150,"Same demon emerges above the original seabed crater")
+    check(game.demon.get_node("Input").enabled and game.demon.get_node("Movement").enabled,"Player control returns after emergence")
+    await create_timer(5.5).timeout
+    check(game.demon.is_on_floor() and game.demon.global_position.y<39105,"The original seabed outline supports the demon after it falls back")
+    check(game.get_node("Map/ImageTiles").get_child_count()==original_tiles,"Original map tiles are retained")
+    check(game.get_node("Platforms").get_child_count()==platform_positions.size(),"No platforms were added to the author's layout")
+    game.restart()
+    check(link.stage==link.Stage.HELL and not link.vortex.active and not game.exit_in_progress,"Restart cleans up the passage")
+    check(game.demon.get_node("Movement").gravity==2200.0,"Restart restores original hell movement")
+    print("FORMAL_OCEAN_FAILURES=",failures.size()," MAX_CAMERA_STEP=",largest)
+    game.queue_free()
+    for i in 3:await process_frame
+    quit(0 if failures.is_empty() else 1)

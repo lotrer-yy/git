@@ -5,8 +5,6 @@
 [ext_resource type="Script" path="res://modules/camera/possession_camera.gd" id="shot"]
 
 [node name="FishStage" type="Node2D"]
-process_mode = 4
-visible = false
 script = ExtResource("assembly")
 
 [node name="Fish" parent="." instance=ExtResource("fish")]

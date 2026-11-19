@@ -22,10 +22,6 @@ func activate() -> void:
     active = true
     process_mode = Node.PROCESS_MODE_INHERIT
     show()
-    fish.position = _spawn
-    fish.reset_physics_interpolation()
-    host.reset()
-    fish.get_node("Patrol").center = _spawn
     # 避免第二个控制器在地狱开场期间隐藏共用幽灵。
     possession.soul_initially_hidden = true
     possession.reset()
@@ -46,12 +42,11 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
-    if not active: return
-    possession.reset()
+    if active: possession.reset()
     possession.enabled = false
     fish.position = _spawn
     fish.get_node("Patrol").center = _spawn
     host.reset()
     active = false
-    hide()
-    process_mode = Node.PROCESS_MODE_DISABLED
+    show()
+    process_mode = Node.PROCESS_MODE_INHERIT

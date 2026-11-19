@@ -16,11 +16,11 @@ func run():
     var fish=stage.fish
     var breath=link.get_node("Breath")
     await create_timer(.85).timeout
-    check(not stage.active and not fish.is_visible_in_tree(),"Fish stays hidden and inactive during hell")
+    check(not stage.active and fish.is_visible_in_tree() and not stage.possession.enabled,"Fish exists and patrols before the hell exit, without early possession")
     check(not stage.host.is_in_group("possessable_hosts"),"Hell selection cannot pick the ocean fish")
     var fish_spawn:Vector2=fish.position
     await create_timer(.2).timeout
-    check(fish.position==fish_spawn,"Hidden fish does not patrol before ocean entry")
+    check(fish.position.distance_to(fish_spawn)>1,"Fish patrol is already running before the transition")
     game.soul.position=game.demon.position+Vector2(-90,0)
     await ticks()
     check(game.possession.request_possession(),"Hell possession still works")
@@ -31,10 +31,14 @@ func run():
     game.demon.velocity=Vector2(0,-600)
     game.camera.set_follow_target(game.demon,true)
     var camera_id=root.get_camera_2d().get_instance_id()
+    var patrol_before_activation:=0.0
     for i in 600:
         await process_frame
+        if link.stage==link.Stage.ERUPTING:
+            patrol_before_activation=fish.get_node("Patrol")._time
         if link.stage==link.Stage.OCEAN:break
     check(stage.active and fish.is_visible_in_tree(),"Real volcano exit activates the fish in the original map")
+    check(fish.get_node("Patrol")._time>=patrol_before_activation,"Ocean arrival does not respawn the fish or reset its existing patrol")
     check(breath.active and game.player==game.demon,"Emerged demon remains the breath-holding controlled actor")
     check(not link.has_node("Ocean") and not link.has_node("ApproachSteps"),"No old ocean scene or approach platforms are imported")
     check(fish.get_node("Movement").get_script().resource_path.ends_with("swim_motor.gd"),"Fish reuses the existing inertial swimming code")
@@ -74,7 +78,7 @@ func run():
     await create_timer(.3).timeout
     check(not game.dead,"Expired abandoned-demon breath cannot kill the fish player")
     game.restart()
-    check(not stage.active and not fish.is_visible_in_tree() and not stage.host.claimed,"Restart resets and hides the ocean fish")
+    check(not stage.active and fish.is_visible_in_tree() and not stage.host.claimed,"Restart resets the fish and keeps it present in the ocean")
     check(game.player==game.soul and not breath.active,"Restart returns control to the original hell ghost")
     check(is_equal_approx(Engine.time_scale,1.0),"Transfer slow motion is cleared")
     print("FORMAL_OCEAN_FISH_FAILURES=",failures.size())

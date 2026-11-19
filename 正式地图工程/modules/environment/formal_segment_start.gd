@@ -1,5 +1,6 @@
 extends Node
-## 快捷入口只组装正式场景已有的洞口弹出与海底喷出，不加载旧原型地图。
+## 快捷入口只定位到正式地图原有入口，不加载旧原型地图。
+const SURFACE = preload("res://modules/environment/hell_surface.gd")
 @onready var level: Node2D = get_parent()
 
 func start_segment(index: int) -> void:
@@ -24,10 +25,11 @@ func start_segment(index: int) -> void:
         level.player = level.demon
         level.possession.state = PossessionController.State.POSSESSED
         level.possession.enabled = false
-        var link = level.get_node("OceanLink")
-        link._capture(level.demon)
-        link.transition.cancel()
-        camera.adopt_view(link.ocean_mouth.global_position+Vector2(0,-300),Vector2.ONE)
-        camera.set_process(false)
+        level.demon.global_position = SURFACE.landing_on(level.get_node("Platforms/Breakable09"))+Vector2(0,-3)
+        level.demon.velocity = Vector2.ZERO
+        level.demon.reset_physics_interpolation()
+        camera.zoom = Vector2.ONE
+        camera.set_follow_target(level.demon,true)
+        camera.set_process(true)
         camera.make_current()
-        link._arrive()
+        Bgm.play_track(Bgm.Track.HELL)

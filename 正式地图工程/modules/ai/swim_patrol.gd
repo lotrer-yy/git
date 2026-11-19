@@ -30,9 +30,10 @@ func _physics_process(delta: float) -> void:
 	# Brake at each edge using ordinary water acceleration, preserving inertia.
 	_reader.move_axis = clampf((direction * cruise_speed - body.velocity.x) * 3.0 / _motor.horizontal_acceleration, -0.65, 0.65)
 	var target_y := center.y + sin(_time * 1.4) * vertical_radius
-	var desired_y := clampf((target_y - body.position.y) * 2.0, -65.0, 65.0)
-	_reader.up_held = body.velocity.y > desired_y
-	_reader.down_held = false
+	var desired_y := clampf((target_y-body.position.y)*2.0+cos(_time*1.4)*vertical_radius*1.4,-65.0,65.0)
+	# 连续补偿重力与阻力，不在每个物理帧切换 W 输入。
+	var force := (desired_y-body.velocity.y)*3.0+_motor.vertical_drag*body.velocity.y-_motor.sinking_acceleration
+	_reader.external_vertical_axis = clampf(force/(_motor.upward_thrust if force<0.0 else _motor.downward_thrust),-1.0,1.0)
 
 func start() -> void:
 	enabled = true
@@ -41,6 +42,7 @@ func start() -> void:
 	_reader.external_control = true
 	_reader.enabled = true
 	_reader.clear()
+	_reader.use_analog_thrust = true
 	_motor.enabled = true
 
 func stop() -> void:

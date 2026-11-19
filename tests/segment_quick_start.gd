@@ -34,16 +34,31 @@ func run():
     var old_id:int=game.get_instance_id()
     var previous:int=started.size()
     press(KEY_2)
-    check(await wait_started(2,previous),"Key 2 starts the ocean eruption directly")
+    check(await wait_started(2,previous),"Key 2 starts just before the hell exit transition")
     game=current_scene
     var link=game.get_node("OceanLink")
     check(game.get_instance_id()!=old_id,"Stage switch clears the previous scene")
-    check(link.stage==link.Stage.ERUPTING and not game.get_node("WallEntry").playing,"Key 2 begins at eruption without replaying the hell route")
+    check(link.stage==link.Stage.HELL and not game.get_node("WallEntry").playing,"Key 2 waits below the original hell crater without triggering the transition")
     check(game.player==game.demon and game.demon.get_node("Host").claimed,"Ocean shortcut begins with the possessed demon")
     var breath=link.get_node("Breath")
-    check(breath.active and game.demon.get_node("Visual/Sprite").texture.atlas==breath.LIVE_ART,"The first ocean frame already uses the breath-holding image")
+    check(not breath.active and game.demon.get_node("Input").enabled,"Key 2 leaves the demon controllable before ocean entry")
+    check(game.demon.global_position.y>link.vortex.global_position.y,"Key 2 lands below the original hell exit")
     check(not link.has_node("Ocean") and not link.has_node("ApproachSteps"),"Shortcut does not import an old map or extra platforms")
-    await create_timer(1.0).timeout
+    await create_timer(.2).timeout
+    check(game.demon.is_on_floor(),"Shortcut uses the original last platform")
+    var reader=game.demon.get_node("Input")
+    reader.external_control=true
+    reader.jump_pressed=true
+    reader.jump_held=true
+    for i in 170:
+        await physics_frame
+        reader.move_axis=clampf((link.vortex.global_position.x-game.demon.global_position.x)/45.0,-1.0,1.0)
+        if game.demon.velocity.y<0:reader.jump_pressed=false
+        if link.stage!=link.Stage.HELL:break
+    check(link.stage==link.Stage.CAPTURING,"Player jump from shortcut position triggers the original transition")
+    for i in 600:
+        await process_frame
+        if link.stage==link.Stage.OCEAN:break
     check(link.stage==link.Stage.OCEAN and game.demon.get_node("Input").enabled,"Ocean eruption restores player control")
     check(link.get_node("FishStage").active,"Ocean shortcut also activates fish selection and swimming")
     breath.breath_duration=.01

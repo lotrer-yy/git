@@ -7,6 +7,9 @@ var external_control: bool = false
 var move_axis: float = 0.0
 var up_held: bool = false
 var down_held: bool = false
+## 巡游 AI 使用连续推力，玩家仍使用原有 WASD 按键。
+var use_analog_thrust: bool = false
+var external_vertical_axis: float = 0.0
 
 
 func _ready() -> void:
@@ -30,6 +33,13 @@ func clear() -> void:
 	move_axis = 0.0
 	up_held = false
 	down_held = false
+	use_analog_thrust = false
+	external_vertical_axis = 0.0
+
+func get_vertical_axis() -> float:
+	if external_control and use_analog_thrust:
+		return clampf(external_vertical_axis,-1.0,1.0)
+	return float(down_held)-float(up_held)
 
 
 func get_visual_direction() -> Vector2:
@@ -37,7 +47,7 @@ func get_visual_direction() -> Vector2:
 	if not enabled:
 		return Vector2.ZERO
 	if external_control:
-		return Vector2(move_axis, float(down_held) - float(up_held))
+		return Vector2(move_axis,get_vertical_axis())
 	return Vector2(Input.get_axis(&"swim_left", &"swim_right"), Input.get_axis(&"swim_up", &"swim_down"))
 
 

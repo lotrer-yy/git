@@ -8,6 +8,7 @@ extends Node2D
 @export var artwork_faces_right: bool = false
 @export var max_bank_degrees: float = 22.0
 @export var turn_response: float = 24.0
+@export var patrol_bank_speed_degrees: float = 70.0
 
 var _body: CharacterBody2D
 var _sprite: Sprite2D
@@ -32,6 +33,9 @@ func _process(delta: float) -> void:
 		remaining -= step
 	scale = _spring_position
 	var direction := _reader.get_visual_direction()
+	if _reader.external_control and _reader.use_analog_thrust:
+		# 巡游根据实际速度摆身；刹车推力的正负不应使鱼来回翻面。
+		direction = _body.velocity/90.0
 	var axis := direction.x
 	if absf(axis) > 0.05:
 		_facing = signf(axis)
@@ -39,7 +43,10 @@ func _process(delta: float) -> void:
 	var vertical_input := direction.y
 	var angle := atan2(vertical_input, maxf(absf(axis), 0.6)) * _facing
 	angle = clampf(angle, -deg_to_rad(max_bank_degrees), deg_to_rad(max_bank_degrees))
-	rotation = lerp_angle(rotation, angle, 1.0 - exp(-turn_response * delta))
+	if _reader.external_control and _reader.use_analog_thrust:
+		rotation = rotate_toward(rotation,angle,deg_to_rad(patrol_bank_speed_degrees)*minf(delta,1.0/30.0))
+	else:
+		rotation = lerp_angle(rotation, angle, 1.0 - exp(-turn_response * delta))
 
 
 func reset() -> void:

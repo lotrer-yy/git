@@ -32,10 +32,8 @@ func _physics_process(delta: float) -> void:
 	if not enabled:
 		return
 	var force_y := sinking_acceleration
-	if reader.up_held and not reader.down_held:
-		force_y -= upward_thrust
-	elif reader.down_held and not reader.up_held:
-		force_y += downward_thrust
+	var vertical_axis := reader.get_vertical_axis()
+	force_y += vertical_axis*(upward_thrust if vertical_axis<0.0 else downward_thrust)
 	body.velocity.x = _drag_step(body.velocity.x, reader.move_axis * horizontal_acceleration, horizontal_drag, delta)
 	body.velocity.y = _drag_step(body.velocity.y, force_y, vertical_drag, delta)
 	body.velocity.x = clampf(body.velocity.x, -max_horizontal_speed, max_horizontal_speed)

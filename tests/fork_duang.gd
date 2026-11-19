@@ -41,20 +41,32 @@ func run() -> void:
 		var previous:Vector2=camera.global_position
 		var largest_step:=0.0
 		var demon_pop:=false
+		var demon_tiny:=false
+		var arrival_centered:=true
+		var arrival_uniform:=true
 		var ball_pop:=false
 		var composite_restored:=false
 		rig._swap_and_bounce()
 		for frame in 180:
 			await process_frame
 			if rig.held:
-				demon_pop=demon_pop or (game.demon.get_node("Visual").scale.x>1.15)
+				var visual=game.demon.get_node("Visual")
+				if rig.swapping or rig.launching:
+					var center:Vector2=visual.get_node("Sprite").position
+					arrival_centered=arrival_centered and (visual.position+center*visual.scale).distance_to(center)<.01
+					arrival_uniform=arrival_uniform and absf(visual.scale.x-visual.scale.y)<.001
+					demon_tiny=demon_tiny or visual.scale.x<.2
+					demon_pop=demon_pop or visual.scale.x>1.15
 				ball_pop=ball_pop or (target.art.visible and target.state==0 and target.art.scale.x>1.1)
 			if rig.launching and target.state==0 and target.art.scale.is_equal_approx(Vector2.ONE):
 				composite_restored=not target.art.visible and not target._platform_art.material.get_shader_parameter("hide_ball") if target._platform_art!=null else true
 			var step:float=camera.global_position.distance_to(previous)
 			largest_step=maxf(largest_step,step)
 			previous=camera.global_position
-		check(demon_pop,"Arriving demon has its own visible squash and rebound")
+		check(demon_tiny,"Arriving demon starts tiny")
+		check(demon_pop,"Arriving demon overshoots normal size before settling")
+		check(arrival_centered,"Teleport pop keeps the artwork center fixed relative to the body")
+		check(arrival_uniform,"Teleport pop preserves the artwork proportions")
 		check(ball_pop,"Composite target stays independently visible for the teleport bounce")
 		check(composite_restored,"Bounce settles and restores the composite before normal targeting resumes")
 		check(largest_step<70.0,"Exchange has no camera position snap")

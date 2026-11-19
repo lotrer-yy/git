@@ -61,6 +61,8 @@
 [ext_resource type="Texture2D" uid="uid://druls3abs7vib" path="res://assets/art/hell/layers/wall_right/25.png" id="wall_right_25"]
 [ext_resource type="Texture2D" uid="uid://bgme0ckr31w40" path="res://assets/art/hell/new/zzz.png" id="zzz_art"]
 
+[ext_resource type="Texture2D" path="res://assets/art/ocean/formal/side_walls.png" id="ocean_side_walls"]
+
 [sub_resource type="ShaderMaterial" id="targetmaterial1"]
 shader = ExtResource("target_shader")
 shader_parameter/visibility_mask = ExtResource("targetmask1")
@@ -1322,6 +1324,12 @@ position = Vector2(953, 50097.5)
 texture = ExtResource("support_horizontal")
 
 [node name="WorldLayers" type="Node2D" parent="." unique_id=695204269]
+
+[node name="OceanWalls" type="Sprite2D" parent="WorldLayers"]
+z_index = 17
+position = Vector2(0, 29847)
+texture = ExtResource("ocean_side_walls")
+centered = false
 
 [node name="Walls" type="Node2D" parent="WorldLayers" unique_id=2127768791]
 z_index = 7

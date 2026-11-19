@@ -9,6 +9,8 @@ signal finished
 @export var chase_camera_path: NodePath = ^"../ChaseCamera"
 @export var hold_time: float = 0.65
 @export var pan_duration: float = 1.35
+## 开场追逐可推近，正式游玩统一使用与分段入口相同的取景大小。
+@export var gameplay_zoom: Vector2 = Vector2.ONE
 var join_x: float = 0.0
 @export var connected_floor_y: float = 1100.0
 @export var gameplay_entry_path: NodePath = ^"LandingPoint"
@@ -20,6 +22,7 @@ var revealed: bool = false
 var panning: bool = false
 var _pan_from: Vector2
 var _pan_to: Vector2
+var _pan_zoom_from: Vector2
 var _pan_elapsed: float = 0.0
 @onready var camera: Camera2D = get_node(old_camera_path)
 @onready var chase_motion: Node = get_node(chase_camera_path)
@@ -46,7 +49,7 @@ func prepare() -> void:
 	gameplay.visible = false
 	var game_camera: Camera2D = gameplay.get_node("Camera")
 	game_camera.world_bounds.position += gameplay.position
-	game_camera.zoom = Vector2.ONE * 1.35
+	game_camera.zoom = gameplay_zoom
 	get_parent().add_child(gameplay)
 	# 隐藏时仍让流式加载器预载附近高清切片，但禁止隐藏相机移动。
 	game_camera.set_process(false)
@@ -77,12 +80,16 @@ func _process(delta: float) -> void:
 		panning = true
 		chase_motion.active = false
 		_pan_from = camera.global_position
-		var half_width: float = get_viewport().get_visible_rect().size.x / (2.0 * camera.zoom.x)
+		_pan_zoom_from = camera.zoom
+		var half_width: float = get_viewport().get_visible_rect().size.x / (2.0 * gameplay_zoom.x)
 		_pan_to = Vector2(gameplay.position.x + half_width, _pan_from.y)
+		# 拉远后的视野更高，横移终点也须落在正式地图边界内，避免接管时再跳一下。
+		_pan_to = gameplay.get_node("Camera")._clamp_center(_pan_to)
 		pan_started.emit()
 	_pan_elapsed = minf(_pan_elapsed + delta, pan_duration)
 	var u: float = _pan_elapsed / pan_duration
 	var eased: float = u * u * (3.0 - 2.0 * u)
+	camera.zoom = _pan_zoom_from.lerp(gameplay_zoom, eased)
 	camera.global_position = _pan_from.lerp(_pan_to,eased)
 	if u >= 1.0:
 		playing = false

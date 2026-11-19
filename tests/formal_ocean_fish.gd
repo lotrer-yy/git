@@ -50,7 +50,9 @@ func run():
     await ticks()
     var selected=fish.get_node("Visual/SelectedSprite")
     check(selected.visible and not fish.get_node("Visual/Sprite").visible,"Nearby demon selects the fish using its separate selection image")
-    check(selected.texture.atlas.resource_path.ends_with("fish_selected_v001.png") and not selected.flip_h,"Selection uses the supplied SHIFT image without mirroring its lettering")
+    var selection_art: Texture2D = selected.texture
+    var correct_art: bool = selection_art.resource_path.ends_with("selected_right.png") if fish.get_node("Visual/Sprite").flip_h else selection_art is AtlasTexture and selection_art.atlas.resource_path.ends_with("fish_selected_v001.png")
+    check(correct_art and not selected.flip_h,"Selection follows fish facing using supplied artwork without mirroring SHIFT lettering")
     var key=InputEventKey.new()
     key.physical_keycode=KEY_SHIFT
     key.location=KEY_LOCATION_LEFT

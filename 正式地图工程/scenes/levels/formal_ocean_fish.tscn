@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://modules/camera/possession_camera.gd" id="shot"]
 [ext_resource type="Script" path="res://modules/movement/fish_teleport.gd" id="teleport"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/fish/abilities/fish.png" id="fish_art"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/fish/abilities/selected_right.png" id="selected_right"]
 
 [node name="FishStage" type="Node2D"]
 script = ExtResource("assembly")
@@ -12,6 +13,9 @@ script = ExtResource("assembly")
 [node name="Fish" parent="." instance=ExtResource("fish")]
 position = Vector2(1288,38848)
 z_index = 15
+
+[node name="Visual" parent="Fish" index="3"]
+selected_right_texture = ExtResource("selected_right")
 
 [node name="Sprite" parent="Fish/Visual" index="0"]
 texture = ExtResource("fish_art")

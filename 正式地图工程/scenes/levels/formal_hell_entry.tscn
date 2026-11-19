@@ -23,6 +23,7 @@
 [ext_resource type="Texture2D" uid="uid://bas2x65pu77fd" path="res://assets/art/hell/new/platform_ball_group.png" id="group_flat"]
 [ext_resource type="Shader" uid="uid://lxj1kitnjs28" path="res://shaders/hell_platform_group.gdshader" id="group_shader"]
 [ext_resource type="Script" uid="uid://4dklqv8fa1mi" path="res://modules/environment/formal_hell.gd" id="hell"]
+[ext_resource type="Script" path="res://modules/environment/formal_segment_start.gd" id="segment_start"]
 [ext_resource type="PackedScene" path="res://scenes/map/hell_background.tscn" id="hell_background"]
 [ext_resource type="Texture2D" uid="uid://cohyxxiqj4ois" path="res://assets/art/hell/layers/ground.png" id="layer_ground"]
 [ext_resource type="Texture2D" uid="uid://cv43kubgw5syg" path="res://assets/art/hell/layers/lava.png" id="layer_lava"]
@@ -1436,5 +1437,8 @@ script = ExtResource("death_flow")
 script = ExtResource("camera_attention")
 
 [node name="OceanLink" parent="." unique_id=324476620 instance=ExtResource("ocean_link")]
+
+[node name="SegmentStart" type="Node" parent="."]
+script = ExtResource("segment_start")
 
 [node name="FlyingEnemies" parent="." unique_id=382193664 instance=ExtResource("flying_enemies")]

@@ -109,6 +109,9 @@ func _home() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and (event.physical_keycode in [KEY_1,KEY_2] or event.keycode in [KEY_1,KEY_2]):
+		# 分段试玩入口由全局处理，死亡和回程阶段也允许直接切换。
+		return
 	if state != State.PLAYING and event is InputEventKey:
 		# 界面关闭后的回程也不允许首页 R/ESC 重载整段开场。
 		if state in [State.RETURNING, State.ENTERING, State.HOME] or (state == State.DEAD and not overlay.visible):

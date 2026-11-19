@@ -18,6 +18,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 
+SegmentQuickStart="*res://modules/input/segment_quick_start.gd"
 Bgm="*res://modules/audio/bgm.gd"
 PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
 GlobalTweens="*res://addons/global_tweens/GlobalTweens.gd"

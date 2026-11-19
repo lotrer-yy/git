@@ -74,8 +74,6 @@ func _physics_process(delta: float) -> void:
 		zzz.hide()
 		demon.get_node("Visual").show()
 		possession.enabled = true
-	if demon.get_node("Host").claimed and not $Fork.flying:
-		demon.get_node("Visual/Sprite").texture = load("res://assets/art/hell/new/right.png")
 	if player.position.y > 52120:
 		die()
 

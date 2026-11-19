@@ -11,6 +11,7 @@ var demon: CharacterBody2D
 var targets: Array[Node2D] = []
 var selected: Node2D
 var lodged: Node2D
+var held: bool = true
 var flying: bool = false
 var launching: bool = false
 var swapping: bool = false
@@ -19,12 +20,17 @@ var motion: Tween
 var _ball_feedback: Tween
 var detector: Area2D
 var _visual: Node2D
+var _held_material: ShaderMaterial
 var _destination: Node2D
 var _launch_start: Vector2
 
 func _ready() -> void:
     demon = get_parent().get_node("Demon")
     _visual = demon.get_node("Visual")
+    _held_material = ShaderMaterial.new()
+    _held_material.shader = preload("res://shaders/demon_held_fork.gdshader")
+    _visual.get_node("Sprite").material = _held_material
+    _visual.get_node("SelectedSprite").material = _held_material
     fork = $ForkSprite
     targets.assign($Targets.get_children())
     detector = load("res://addons/nodes_plus/nodes/target2D.gd").new()
@@ -80,7 +86,7 @@ func _throw() -> void:
     fork.global_rotation = incoming - deg_to_rad(fork_tip_angle_degrees)
     lodged.hit_angle = incoming
     fork.show()
-    _visual.get_node("Sprite").texture = load("res://assets/art/hell/new/throw.png")
+    _set_held(false)
     var start := fork.global_position
     motion = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
     motion.tween_method(func(u: float): fork.global_position = start.lerp(lodged.global_position,u),0.0,1.0,throw_seconds)
@@ -88,8 +94,7 @@ func _throw() -> void:
         flying = false
         lodged.set_state(2)
         fork.hide()
-        lodged.art.scale = Vector2(1.15,0.78)
-        _visual.get_node("Sprite").texture = load("res://assets/art/hell/new/right.png"))
+        lodged.art.scale = Vector2(1.15,0.78))
     motion.tween_property(lodged.art,"scale",Vector2(1.08,0.84),0.22).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 
 func _swap_and_bounce() -> void:
@@ -130,10 +135,10 @@ func _lock_control() -> void:
     demon.velocity = Vector2.ZERO
 
 func _exchange() -> void:
-    var previous := demon.global_position
     demon.global_position = lodged.get_node("SwapPoint").global_position
-    fork.global_position = previous + Vector2(0,-60)
-    fork.show()
+    fork.hide()
+    lodged.set_state(0)
+    _set_held(true)
     demon.reset_physics_interpolation()
     exchanged.emit(demon)
 
@@ -175,6 +180,7 @@ func reset() -> void:
     if _ball_feedback != null:
         _ball_feedback.kill()
     fork.hide()
+    _set_held(true)
     selected = null
     lodged = null
     flying = false
@@ -193,3 +199,10 @@ func camera_interest() -> Node2D:
     if is_instance_valid(lodged):
         return lodged
     return selected if is_instance_valid(selected) else null
+
+func _set_held(value: bool) -> void:
+    held = value
+    _held_material.set_shader_parameter("has_fork", held)
+    var texture = load("res://assets/art/hell/new/right.png")
+    _visual.get_node("Sprite").texture = texture
+    _visual.get_node("SelectedSprite").texture = texture

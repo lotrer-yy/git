@@ -6,6 +6,8 @@ const SURFACE = preload("res://modules/environment/hell_surface.gd")
 func start_segment(index: int) -> void:
     var entry = level.get_node("WallEntry")
     var camera: FollowCamera = level.camera
+    # 对齐正常开场完成后的 1.35 倍视野；先设缩放，再计算入口构图和边界。
+    camera.zoom = Vector2.ONE * 1.35
     if index == 1:
         entry.reset_for_replay()
         camera.set_follow_target(level.soul,true)
@@ -28,7 +30,6 @@ func start_segment(index: int) -> void:
         level.demon.global_position = SURFACE.landing_on(level.get_node("Platforms/Breakable09"))+Vector2(0,-3)
         level.demon.velocity = Vector2.ZERO
         level.demon.reset_physics_interpolation()
-        camera.zoom = Vector2.ONE
         camera.set_follow_target(level.demon,true)
         camera.set_process(true)
         camera.make_current()

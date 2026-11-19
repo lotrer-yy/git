@@ -28,9 +28,16 @@ func run():
     check(game.scene_file_path.ends_with("formal_hell_entry.tscn"),"Shortcut uses the original formal-map scene")
     check(game.get_node("WallEntry").playing and not game.get_node("WallEntry").completed,"Key 1 replays the ghost popping out of the doorway")
     check(game.soul.visible and game.player==game.soul,"Key 1 begins as the original ghost")
+    check(game.camera.zoom.is_equal_approx(Vector2.ONE*1.35),"Key 1 matches the normal opening gameplay zoom")
+    check(game.camera.target==game.soul and game.camera.is_processing() and root.get_camera_2d()==game.camera,"Key 1 enables normal ghost camera following")
     check(not game.has_node("OpeningChase"),"Menu chase and descent are skipped")
     await create_timer(.8).timeout
     check(game.get_node("WallEntry").completed and game.soul.get_node("Input").enabled,"Ghost entry restores playable control")
+    var camera_before:Vector2=game.camera.global_position
+    game.soul.get_node("Movement").enabled=false
+    game.soul.position+=Vector2(1200,-700)
+    await create_timer(.6).timeout
+    check(game.camera.global_position.x>camera_before.x+100 and game.camera.global_position.y<camera_before.y-100,"Key 1 retains horizontal and vertical camera motion")
     var old_id:int=game.get_instance_id()
     var previous:int=started.size()
     press(KEY_2)
@@ -40,6 +47,8 @@ func run():
     check(game.get_instance_id()!=old_id,"Stage switch clears the previous scene")
     check(link.stage==link.Stage.HELL and not game.get_node("WallEntry").playing,"Key 2 waits below the original hell crater without triggering the transition")
     check(game.player==game.demon and game.demon.get_node("Host").claimed,"Ocean shortcut begins with the possessed demon")
+    check(game.camera.zoom.is_equal_approx(Vector2.ONE*1.35),"Key 2 matches normal gameplay zoom instead of widening the view")
+    check(game.camera.target==game.demon and game.camera.is_processing() and game.get_node("CameraAttention").enabled,"Key 2 keeps demon following and mechanism framing enabled")
     var breath=link.get_node("Breath")
     check(not breath.active and game.demon.get_node("Input").enabled,"Key 2 leaves the demon controllable before ocean entry")
     check(game.demon.global_position.y>link.vortex.global_position.y,"Key 2 lands below the original hell exit")
@@ -60,6 +69,7 @@ func run():
         await process_frame
         if link.stage==link.Stage.OCEAN:break
     check(link.stage==link.Stage.OCEAN and game.demon.get_node("Input").enabled,"Ocean eruption restores player control")
+    check(game.camera.zoom.is_equal_approx(Vector2.ONE*1.35),"Shortcut volcano transition preserves normal gameplay framing")
     check(link.get_node("FishStage").active,"Ocean shortcut also activates fish selection and swimming")
     breath.breath_duration=.01
     for i in 60:

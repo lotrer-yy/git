@@ -56,15 +56,19 @@ func _physics_process(_delta: float) -> void:
     detector.global_position = demon.global_position + Vector2(0,-60)
     if not demon.get_node("Host").claimed or flying or launching or swapping or is_instance_valid(lodged):
         return
-    detector.acquire_nearest()
-    var nearest: Node2D = detector.get_target()
-    if is_instance_valid(nearest) and nearest.is_in_group("hell_flying_enemies"):
-        nearest=null
-        var best_ball:=INF
-        for candidate in detector.get_all_targets():
-            if is_instance_valid(candidate) and not candidate.is_in_group("hell_flying_enemies"):
-                var gap:float=detector.global_position.distance_squared_to(candidate.global_position)
-                if gap<best_ball:best_ball=gap;nearest=candidate
+    var nearest: Node2D
+    var best_ball := lock_distance*lock_distance
+    # 先按原比例模型的头顶高度筛选，再从合格团团里选最近的。
+    # 不读取跳跃/落地时的临时拉伸，避免瞄准跟着形变闪烁。
+    for candidate in detector.get_all_targets():
+        if not is_instance_valid(candidate) or candidate.is_in_group("hell_flying_enemies") or not _ball_is_above_player(candidate):
+            continue
+        var gap: float = detector.global_position.distance_squared_to(candidate.global_position)
+        if gap < best_ball:
+            best_ball = gap
+            nearest = candidate
+    if is_instance_valid(nearest): detector.set_target(nearest)
+    else: detector.clear_target()
     var best_enemy := enemy_lock_distance*enemy_lock_distance
     # 动态入场的敌人不能只依赖 Area 首次进入事件：入场时它尚不可选。
     for candidate in get_tree().get_nodes_in_group("hell_flying_enemies"):
@@ -80,6 +84,11 @@ func _physics_process(_delta: float) -> void:
     selected = nearest
     if is_instance_valid(selected):
         selected.set_state(1)
+
+func _ball_is_above_player(target: Node2D) -> bool:
+    var sprite: Sprite2D = _visual.get_node("Sprite")
+    var head_y := demon.to_global(sprite.position+Vector2(0,sprite.get_rect().position.y)).y
+    return target.global_position.y < head_y
 
 func _unhandled_input(event: InputEvent) -> void:
     if not event.is_action_pressed(&"possess") or event.is_echo() or not demon.get_node("Host").claimed:
@@ -101,6 +110,11 @@ func _throw() -> void:
         return
     if selected.is_in_group("hell_flying_enemies"):
         _throw_at_enemy()
+        return
+    # 输入事件可能发生在下一个物理帧前，投叉时再核对一次高度。
+    if not _ball_is_above_player(selected):
+        selected.set_state(0)
+        selected = null
         return
     flying = true
     lodged = selected

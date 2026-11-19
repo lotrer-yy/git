@@ -4,6 +4,7 @@ signal ocean_entered
 signal eruption_finished
 enum Stage { HELL, CAPTURING, TRAVELLING, ERUPTING, OCEAN }
 @export var eruption_seconds: float = 0.7
+@export var ocean_follow_blend_seconds: float = 0.65
 var stage: Stage = Stage.HELL
 var _eruption: Tween
 var _motor_settings: Dictionary = {}
@@ -105,6 +106,8 @@ func _finish_eruption() -> void:
     camera.resume_follow_from_current_position(body)
     camera.set_process(true)
     $FishStage.activate()
+    # 喷出时镜头静止，交还控制后从零位移渐进跟随，避免第一帧突然追赶。
+    camera.blend_to_target(body,ocean_follow_blend_seconds)
     eruption_finished.emit()
 
 func reset() -> void:

@@ -90,6 +90,7 @@ func restart() -> void:
 	dead = false
 	death_reason = &"impact"
 	$Fork.reset()
+	$FlyingEnemies.reset()
 	possession.reset()
 	demon.get_node("Host").reset()
 	demon.get_node("Patrol").process_mode = Node.PROCESS_MODE_DISABLED

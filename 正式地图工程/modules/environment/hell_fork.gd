@@ -3,6 +3,9 @@ extends Node2D
 const SURFACE = preload("res://modules/environment/hell_surface.gd")
 signal exchanged(body: Node2D)
 signal interaction_reset
+@export_range(0.0,1.0) var enemy_hit_chance: float = 0.8
+var _enemy_attack_target: Node2D
+var _combat_rng := RandomNumberGenerator.new()
 @export var lock_distance: float = 610.0
 @export var fork_tip_angle_degrees: float = -25.0
 @export var throw_seconds: float = 0.28
@@ -25,6 +28,7 @@ var _destination: Node2D
 var _launch_start: Vector2
 
 func _ready() -> void:
+    _combat_rng.randomize()
     demon = get_parent().get_node("Demon")
     _visual = demon.get_node("Visual")
     _held_material = ShaderMaterial.new()
@@ -52,6 +56,21 @@ func _physics_process(_delta: float) -> void:
         return
     detector.acquire_nearest()
     var nearest: Node2D = detector.get_target()
+    if is_instance_valid(nearest) and nearest.is_in_group("hell_flying_enemies"):
+        nearest=null
+        var best_ball:=INF
+        for candidate in detector.get_all_targets():
+            if is_instance_valid(candidate) and not candidate.is_in_group("hell_flying_enemies"):
+                var gap:float=detector.global_position.distance_squared_to(candidate.global_position)
+                if gap<best_ball:best_ball=gap;nearest=candidate
+    var best_enemy := lock_distance*lock_distance
+    # 动态入场的敌人不能只依赖 Area 首次进入事件：入场时它尚不可选。
+    for candidate in get_tree().get_nodes_in_group("hell_flying_enemies"):
+        if not is_instance_valid(candidate) or not candidate.is_in_group("fork_targets") or candidate.is_defeated() or not candidate.encounter.is_on_screen(candidate.global_position):continue
+        var distance:float=detector.global_position.distance_squared_to(candidate.global_position)
+        if distance<best_enemy and get_world_2d().direct_space_state.intersect_ray(PhysicsRayQueryParameters2D.create(detector.global_position,candidate.global_position,9)).is_empty():
+            best_enemy=distance
+            nearest=candidate
     if nearest == selected:
         return
     if is_instance_valid(selected):
@@ -77,6 +96,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _throw() -> void:
     if flying or swapping or launching or not is_instance_valid(selected):
+        return
+    if selected.is_in_group("hell_flying_enemies"):
+        _throw_at_enemy()
         return
     flying = true
     lodged = selected
@@ -185,6 +207,8 @@ func reset() -> void:
     flying = false
     swapping = false
     launching = false
+    if is_instance_valid(_enemy_attack_target): _enemy_attack_target.set_state(0)
+    _enemy_attack_target = null
     _visual.scale = Vector2.ONE
     _visual.position = Vector2.ZERO
     _visual.set_process(true)
@@ -193,6 +217,7 @@ func reset() -> void:
         target.set_state(0)
 
 func camera_interest() -> Node2D:
+    if is_instance_valid(_enemy_attack_target): return _enemy_attack_target
     if launching and is_instance_valid(_destination):
         return _destination
     if is_instance_valid(lodged):
@@ -205,3 +230,39 @@ func _set_held(value: bool) -> void:
     var texture = load("res://assets/art/hell/new/right.png")
     _visual.get_node("Sprite").texture = texture
     _visual.get_node("SelectedSprite").texture = texture
+
+func _throw_at_enemy() -> void:
+    var victim:Node2D=selected
+    selected=null
+    _enemy_attack_target=victim
+    flying=true
+    _set_held(false)
+    fork.global_position=demon.global_position+Vector2(45*demon.get_node("Movement").facing,-65)
+    fork.show()
+    var start:=fork.global_position
+    var hit:=_combat_rng.randf()<enemy_hit_chance
+    var miss_point:=victim.global_position+Vector2(145 if _combat_rng.randf()<.5 else -145,-105)
+    motion=create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+    motion.tween_method(func(u:float):
+        var destination:Vector2=victim.global_position if hit and is_instance_valid(victim) else miss_point
+        fork.global_position=start.lerp(destination,u)
+        fork.global_rotation=(destination-start).angle()-deg_to_rad(fork_tip_angle_degrees),0.0,1.0,.23)
+    motion.tween_callback(func():
+        if is_instance_valid(victim):
+            victim.set_state(0)
+            if hit: victim.take_hit()
+        _enemy_attack_target=null)
+    motion.tween_callback(_return_enemy_fork)
+
+func _return_enemy_fork() -> void:
+    var start:=fork.global_position
+    motion=create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+    motion.tween_method(func(u:float):
+        var hand:=demon.global_position+Vector2(45*demon.get_node("Movement").facing,-65)
+        fork.global_position=start.lerp(hand,u)
+        fork.global_rotation=(hand-start).angle()-deg_to_rad(fork_tip_angle_degrees),0.0,1.0,.23)
+    motion.tween_callback(func():
+        fork.hide()
+        _set_held(true)
+        flying=false
+        _visual.play_fork_recall_pulse())

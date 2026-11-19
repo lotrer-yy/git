@@ -81,3 +81,7 @@ func reset() -> void:
 	scale = Vector2.ONE
 	rotation = 0.0
 	_on_facing_changed(_motor.facing)
+
+func play_fork_recall_pulse() -> void:
+	_spring_position = Vector2(1.18,0.84)
+	_spring_velocity = Vector2(1.3,-1.3)

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/enemies/flying_encounter.gd" id="script"]
+[node name="FlyingEnemies" type="Node2D"]
+script=ExtResource("script")
+[node name="Enemies" type="Node2D" parent="."]
+[node name="Projectiles" type="Node2D" parent="."]

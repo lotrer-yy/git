@@ -17,6 +17,7 @@ func run():
 	var handoff=menu.get_node("GameHandoff")
 	check(await wait_for(func():return handoff.switched and handoff.gameplay.get_node("WallEntry").completed,7000),"Real opening reaches formal map")
 	var game=handoff.gameplay
+	game.get_node("FlyingEnemies").enabled=false # 单项检查不运行定时敌人。
 	var link=game.get_node("OceanLink")
 	check(await wait_for(func():return is_instance_valid(link.ocean)),"Ocean preloads in the background")
 	var display_id=root.get_camera_2d().get_instance_id()

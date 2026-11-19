@@ -7,6 +7,7 @@ func check(ok:bool,message:String) -> void:
 		push_error(message)
 func run() -> void:
 	var game=load("res://scenes/levels/formal_hell_entry.tscn").instantiate()
+	game.get_node("FlyingEnemies").enabled=false # 单项检查不运行定时敌人。
 	root.add_child(game)
 	current_scene=game
 	await create_timer(.85).timeout

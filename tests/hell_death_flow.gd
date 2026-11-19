@@ -19,6 +19,7 @@ func run() -> void:
 	var handoff=menu.get_node("GameHandoff")
 	check(await wait_for(func():return handoff.switched and handoff.gameplay.get_node("WallEntry").completed,6000),"Actual opening reaches gameplay")
 	var game=handoff.gameplay
+	game.get_node("FlyingEnemies").enabled=false # 单项检查不运行定时敌人。
 	var flow=game.get_node("DeathFlow")
 	var ui=flow.overlay
 	var active_id=root.get_camera_2d().get_instance_id()

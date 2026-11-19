@@ -13,6 +13,7 @@ func effective_z(item:CanvasItem)->int:
 	return result
 func run():
 	var game=load("res://scenes/levels/formal_hell_entry.tscn").instantiate()
+	game.get_node("FlyingEnemies").enabled=false # 单项检查不运行定时敌人。
 	root.add_child(game)
 	current_scene=game
 	await process_frame

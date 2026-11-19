@@ -69,6 +69,8 @@
 
 [ext_resource type="PackedScene" path="res://scenes/levels/formal_hell_ocean_link.tscn" id="ocean_link"]
 
+[ext_resource type="PackedScene" path="res://scenes/enemies/flying_encounter.tscn" id="flying_enemies"]
+
 [sub_resource type="ShaderMaterial" id="attach_left"]
 shader = ExtResource("attach_shader")
 shader_parameter/fill_left = true
@@ -1473,3 +1475,5 @@ script = ExtResource("death_flow")
 script = ExtResource("camera_attention")
 
 [node name="OceanLink" parent="." instance=ExtResource("ocean_link")]
+
+[node name="FlyingEnemies" parent="." instance=ExtResource("flying_enemies")]

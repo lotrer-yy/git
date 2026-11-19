@@ -4,10 +4,13 @@ extends Node
 @export var maximum_peek_pixels: Vector2 = Vector2(160, 250)
 @export_range(0.0, 0.5) var interest_weight: float = 0.34
 @export var interest_radius: float = 1000.0
+@export_range(0.0,0.5) var incoming_interest_weight: float = 0.16
 @export var bias_response: float = 4.5
 @export var exchange_blend_seconds: float = 0.28
 const SURFACE = preload("res://modules/environment/hell_surface.gd")
 @export var screen_margin_pixels: float = 90.0
+var _incoming: Node2D
+var _incoming_seconds: float = 0.0
 var _platform_interest: Node2D
 @onready var level: Node2D = get_parent()
 @onready var camera: FollowCamera = get_node("../Camera")
@@ -21,13 +24,16 @@ func _ready() -> void:
 	level.died.connect(clear)
 
 func _process(delta: float) -> void:
+	_incoming_seconds=maxf(0.0,_incoming_seconds-delta)
 	var desired := Vector2.ZERO
 	camera.precise_framing = false
 	if enabled and not level.dead and demon.get_node("Host").claimed and camera.target == demon:
 		var interest: Node2D = fork.camera_interest()
+		if _incoming_seconds>0 and is_instance_valid(_incoming) and not _incoming.is_defeated() and not fork.flying and not fork.launching and not fork.swapping:
+			interest=_incoming
 		# 已经在脚下的锁定球不是下一步；投出、插中和弹射中的主动目标仍优先。
 		var active_action: bool = fork.flying or fork.swapping or fork.launching or is_instance_valid(fork.lodged)
-		if not active_action and is_instance_valid(interest) and interest.global_position.y > demon.global_position.y - 80.0:
+		if not active_action and is_instance_valid(interest) and not interest.is_in_group("hell_flying_enemies") and interest.global_position.y > demon.global_position.y - 80.0:
 			interest = null
 		if not is_instance_valid(interest): interest = _nearby_platform()
 		if is_instance_valid(interest):
@@ -37,7 +43,8 @@ func _process(delta: float) -> void:
 				var landing: Vector2 = SURFACE.landing_on(interest)
 				if is_finite(landing.y): point = landing
 			var base := demon.global_position + camera.framing_offset
-			var center := base.lerp(point, interest_weight)
+			var arriving := interest==_incoming and _incoming_seconds>0 and not active_action
+			var center := base.lerp(point, incoming_interest_weight if arriving else interest_weight)
 			var half_view := camera.get_viewport_rect().size * 0.5 / camera.zoom
 			var margin := Vector2.ONE * screen_margin_pixels / camera.zoom
 			# 把上方机关从屏幕边缘带入安全区，同时保留主角下方的空间。
@@ -80,7 +87,13 @@ func _nearby_platform() -> Node2D:
 func _on_exchanged(body: Node2D) -> void:
 	camera.blend_to_target(body, exchange_blend_seconds)
 
+func notify_incoming(enemy: Node2D) -> void:
+	_incoming=enemy
+	_incoming_seconds=1.25
+
 func clear() -> void:
+	_incoming=null
+	_incoming_seconds=0.0
 	_platform_interest = null
 	camera.precise_framing = false
 	camera.framing_bias = Vector2.ZERO

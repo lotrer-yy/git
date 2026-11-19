@@ -1,0 +1,36 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/enemies/flying_demon.gd" id="ai"]
+[ext_resource type="Script" path="res://modules/enemies/flying_motion.gd" id="flight"]
+[ext_resource type="Texture2D" path="res://assets/art/enemies/flying_demon/windup.png" id="windup"]
+[ext_resource type="Texture2D" path="res://assets/art/enemies/flying_demon/lock.png" id="lock"]
+[sub_resource type="CircleShape2D" id="body"]
+radius=44.0
+[sub_resource type="CircleShape2D" id="detection"]
+radius=62.0
+[sub_resource type="AtlasTexture" id="pose"]
+atlas=ExtResource("windup")
+region=Rect2(0,104,168,157)
+filter_clip=true
+[node name="FlyingDemon" type="CharacterBody2D"]
+collision_layer=128
+collision_mask=9
+motion_mode=1
+z_index=15
+script=ExtResource("ai")
+[node name="Collision" type="CollisionShape2D" parent="."]
+shape=SubResource("body")
+[node name="Visual" type="Node2D" parent="."]
+[node name="Art" type="Sprite2D" parent="Visual"]
+texture=SubResource("pose")
+[node name="Lock" type="Sprite2D" parent="."]
+visible=false
+z_index=1
+position=Vector2(0,-5)
+texture=ExtResource("lock")
+[node name="Detection" type="Area2D" parent="."]
+collision_layer=64
+collision_mask=0
+[node name="Shape" type="CollisionShape2D" parent="Detection"]
+shape=SubResource("detection")
+[node name="Flight" type="Node" parent="."]
+script=ExtResource("flight")

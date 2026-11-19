@@ -1,7 +1,7 @@
 extends Node
 ## 死亡冻结期间只写相机偏移，真实时间衰减，不改跟随中心或物理位置。
-@export_range(0.0, 10.0) var strength_pixels: float = 5.0
-@export_range(0.01, 0.4) var duration: float = 0.12
+@export_range(0.0, 30.0) var strength_pixels: float = 18.0
+@export_range(0.01, 0.4) var duration: float = 0.20
 @export_range(0.0, 1.0) var fall_multiplier: float = 0.35
 var _camera: FollowCamera
 var _motion: Tween
@@ -22,8 +22,8 @@ func play(camera: FollowCamera, falling: bool = false) -> void:
     _motion.tween_callback(stop)
 
 func _sample(u: float) -> void:
-    var envelope := (1.0 - u) * (1.0 - u)
-    var pixels := Vector2(cos(u * TAU * 1.5), sin(u * TAU * 2.0) * 0.55) * _strength * envelope
+    var envelope := pow(1.0 - u, 1.4)
+    var pixels := Vector2(sin(u * TAU * 2.0) * 0.45, -cos(u * TAU * 1.5)) * _strength * envelope
     var center := _camera.global_position
     _camera.offset = _camera._clamp_center(center + pixels / _camera.zoom) - center
 

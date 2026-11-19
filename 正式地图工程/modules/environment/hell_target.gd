@@ -4,6 +4,9 @@ enum State { NORMAL, LOCKED, HIT }
 const TEXTURES = [preload("res://assets/art/hell/new/target.png"), preload("res://assets/art/hell/new/locked.png"), preload("res://assets/art/hell/new/hit.png")]
 const PIVOTS = [Vector2(67,66.5), Vector2(81,82.5), Vector2(113,66.5)]
 @export var platform_art_path: NodePath
+@export var selection_pop_scale: Vector2 = Vector2(1.25, 0.80)
+@export var selection_pop_seconds: float = 0.32
+var _selection_tween: Tween
 var state: State = State.NORMAL
 var hit_angle: float = 0.0
 @onready var art: Sprite2D = $Art
@@ -14,6 +17,10 @@ func _ready() -> void:
 	set_state(State.NORMAL)
 
 func set_state(value: State) -> void:
+	var entering_selection := value == State.LOCKED and state != State.LOCKED
+	if _selection_tween != null:
+		_selection_tween.kill()
+		_selection_tween = null
 	state = value
 	art.texture = TEXTURES[value]
 	art.offset = art.texture.get_size() * 0.5 - PIVOTS[value]
@@ -28,3 +35,7 @@ func set_state(value: State) -> void:
 		art.visible = value != State.NORMAL
 	else:
 		art.show()
+	if entering_selection:
+		art.scale = selection_pop_scale
+		_selection_tween = create_tween()
+		_selection_tween.tween_property(art, "scale", Vector2.ONE, selection_pop_seconds).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)

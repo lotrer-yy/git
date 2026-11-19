@@ -31,7 +31,7 @@ func run():
 	for sample in 26:
 		await create_timer(.01,true,false,true).timeout
 		peak=maxf(peak,(game.camera.offset*game.camera.zoom).length())
-	check(peak>0.05 and peak<=5.01,"Death shake is visible and capped at five screen pixels")
+	check(peak>8.0 and peak<=18.01,"Death shake is visible and capped at eighteen screen pixels")
 	check(game.camera.offset.is_zero_approx(),"Shake finishes at exactly zero before the corpse falls")
 	check(animation.corpse.global_position.y<start.y-25,"Death bounces visibly upward")
 	await create_timer(.55,true,false,true).timeout
@@ -45,14 +45,14 @@ func run():
 		if flow.overlay.state==flow.overlay.State.OPEN:break
 	flow.impact_shake.play(game.camera,true)
 	var fall_peak:=0.0
-	for sample in 16:
+	for sample in 24:
 		await create_timer(.01,true,false,true).timeout
 		fall_peak=maxf(fall_peak,(game.camera.offset*game.camera.zoom).length())
-	check(fall_peak<=1.76,"Falling death uses a lighter shake")
+	check(fall_peak<=6.31,"Falling death uses a lighter shake")
 	flow.impact_shake.strength_pixels=0
 	flow.impact_shake.play(game.camera)
 	check(game.camera.offset.is_zero_approx(),"Zero strength disables death shake")
-	flow.impact_shake.strength_pixels=5
+	flow.impact_shake.strength_pixels=18
 	flow.overlay.retry.pressed.emit()
 	for i in 1800:
 		await process_frame

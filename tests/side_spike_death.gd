@@ -26,6 +26,9 @@ func run() -> void:
         var actor = game.get_node(actor_name)
         game.player = actor
         actor.get_node("Visual").show()
+        if actor_name=="Demon":
+            actor.get_node("Visual").set_process(false)
+            actor.get_node("Visual").scale=Vector2(1.3,.72)
         # The visible right-facing spike is at (674.5, 50840).
         actor.global_position = game.to_global(Vector2(800,50892))
         for i in 60:
@@ -35,9 +38,14 @@ func run() -> void:
             if game.dead: break
         check(game.dead and game.death_reason==&"impact", actor_name+" dies on physical contact with the side spike")
         if game.dead:
+            var proportions_ok:=true
             for i in 480:
                 if game.get_node("DeathFlow").overlay.visible: break
                 await process_frame
+                var corpse=game.get_node("DeathFlow").death_animation.corpse
+                if actor_name=="Demon" and is_instance_valid(corpse):
+                    proportions_ok=proportions_ok and absf(corpse.scale.x-corpse.scale.y)<.001
+            check(proportions_ok,"Side-spike death keeps original artwork proportions throughout the animation")
             check(game.get_node("DeathFlow").overlay.visible, "Side spike uses the normal death interface")
         game.queue_free()
         for i in 3: await process_frame

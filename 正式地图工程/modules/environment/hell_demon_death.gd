@@ -3,7 +3,7 @@ extends Node2D
 const ART = preload("res://assets/art/hell/new/demon_dead.png")
 @export var jump_speed: float = 650.0
 @export var fall_gravity: float = 2200.0
-@export var squash_seconds: float = 0.07
+@export var recoil_seconds: float = 0.07
 var corpse: Sprite2D
 var _original: Node2D
 var _was_visible: bool
@@ -33,7 +33,8 @@ func play(body: Node2D, camera: Camera2D, has_fork: bool) -> void:
         corpse.material = material
     corpse.z_index = 40
     add_child(corpse)
-    corpse.global_transform = source.global_transform
+    # 使用角色和原图的基础比例，不继承落地或传送期间 Visual 的临时形变。
+    corpse.global_transform = body.global_transform * Transform2D(_original.rotation, Vector2.ZERO) * source.transform
     _original.hide()
     _origin = corpse.global_position
     _rest_scale = corpse.scale
@@ -42,7 +43,7 @@ func play(body: Node2D, camera: Camera2D, has_fork: bool) -> void:
     var distance := maxf(500.0, bottom + ART.get_height() * absf(corpse.global_scale.y) - _origin.y)
     var seconds := (jump_speed + sqrt(jump_speed * jump_speed + 2.0 * fall_gravity * distance)) / fall_gravity
     _motion = create_tween().set_ignore_time_scale(true)
-    _motion.tween_property(corpse, "scale", _rest_scale * Vector2(1.22, 0.78), squash_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+    _motion.tween_property(corpse, "scale", _rest_scale * 0.92, recoil_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
     _motion.tween_method(_sample, 0.0, seconds, seconds)
     await _motion.finished
     corpse.hide()
@@ -50,7 +51,7 @@ func play(body: Node2D, camera: Camera2D, has_fork: bool) -> void:
 func _sample(t: float) -> void:
     corpse.global_position = _origin + Vector2(0.0, -jump_speed * t + 0.5 * fall_gravity * t * t)
     var settle := minf(t / 0.14, 1.0)
-    corpse.scale = _rest_scale * Vector2(1.22, 0.78).lerp(Vector2(0.94, 1.06), settle)
+    corpse.scale = _rest_scale * lerpf(0.92, 1.0, settle)
     corpse.rotation = _rest_rotation + deg_to_rad(12.0) * minf(t / 0.5, 1.0)
 
 func reset() -> void:

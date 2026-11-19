@@ -17,16 +17,26 @@ func run():
 	game.demon.get_node("Input").enabled=false
 	game.demon.velocity=Vector2.ZERO
 	var original:Vector2=game.demon.global_position
+	# Reproduce a death during the landing squash rather than a neutral pose.
+	var visual=game.demon.get_node("Visual")
+	visual.set_process(false)
+	visual.scale=Vector2(1.30,.72)
 	game.die()
 	await process_frame
 	await process_frame
 	var flow=game.get_node("DeathFlow")
 	var animation=flow.death_animation
 	check(is_instance_valid(animation.corpse),"Demon death creates the visual replacement")
+	check(animation._rest_scale.is_equal_approx(Vector2.ONE),"Death starts from the artwork proportions instead of inheriting a flattened live pose")
 	var start:Vector2=animation.corpse.global_position
 	var view:Vector2=game.camera.global_position
 	check(not game.demon.get_node("Visual").visible,"Normal visual is hidden during death")
 	check(not flow.overlay.visible,"End card waits for the death arc")
+	var proportions_ok:=true
+	for i in 20:
+		await process_frame
+		proportions_ok=proportions_ok and absf(animation.corpse.scale.x-animation.corpse.scale.y)<.001
+	check(proportions_ok,"Death recoil and takeoff preserve the artwork proportions")
 	game.die()
 	await create_timer(.26,true,false,true).timeout
 	check(animation.corpse.global_position.y<start.y-25,"Death bounces visibly upward")

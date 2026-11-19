@@ -67,6 +67,8 @@
 
 [ext_resource type="Script" path="res://modules/camera/hell_camera_attention.gd" id="camera_attention"]
 
+[ext_resource type="PackedScene" path="res://scenes/levels/formal_hell_ocean_link.tscn" id="ocean_link"]
+
 [sub_resource type="ShaderMaterial" id="attach_left"]
 shader = ExtResource("attach_shader")
 shader_parameter/fill_left = true
@@ -1469,3 +1471,5 @@ script = ExtResource("death_flow")
 
 [node name="CameraAttention" type="Node" parent="."]
 script = ExtResource("camera_attention")
+
+[node name="OceanLink" parent="." instance=ExtResource("ocean_link")]

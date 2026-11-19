@@ -2,6 +2,7 @@ extends Node2D
 ## 正式地狱组装；沿用原角色、附身控制器及附身运镜。
 const SURFACE = preload("res://modules/environment/hell_surface.gd")
 signal died
+var exit_in_progress: bool = false
 var dead: bool = false
 var death_reason: StringName = &"impact"
 var _demon_spawn: Vector2
@@ -64,7 +65,7 @@ func _ready() -> void:
 		$WallEntry.play()
 
 func _physics_process(delta: float) -> void:
-	if dead:
+	if dead or exit_in_progress:
 		return
 	elapsed += delta
 	zzz.position = _zzz_origin - Vector2(0,fmod(elapsed*12,22))
@@ -79,7 +80,7 @@ func _physics_process(delta: float) -> void:
 		die(&"fall")
 
 func die(reason: StringName = &"impact") -> void:
-	if dead or not visible or not $WallEntry.completed:
+	if dead or exit_in_progress or not visible or not $WallEntry.completed:
 		return
 	dead = true
 	death_reason = reason

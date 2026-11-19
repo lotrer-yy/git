@@ -358,6 +358,10 @@ position = Vector2(0, 19.296875)
 scale = Vector2(1, 1.0634766)
 polygon = PackedVector2Array(15, -650.03516, 233, -647.21094, 258, -630.28516, 231, -560.7031, 179, -536.2539, 125, -522.15234, 75, -534.375, 27, -561.64453, 8, -611.48047)
 
+[node name="UpperArt" type="Sprite2D" parent="Platforms/Static04"]
+position = Vector2(132, -604)
+texture = ExtResource("53_o7s3p")
+
 [node name="Static05" type="AnimatableBody2D" parent="Platforms" unique_id=921480172]
 z_index = 11
 position = Vector2(961, 47367)

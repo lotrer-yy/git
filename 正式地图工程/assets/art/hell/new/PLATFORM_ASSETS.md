@@ -8,10 +8,12 @@
 | support_vertical.png | 游戏画面-升降平台支架.png |
 | support_horizontal.png | 游戏画面-水平移动平台支架.png |
 | spiked_platform.png | 游戏画面-浮空平台带刺的.png |
+| platform.png | 游戏画面-浮空平台4.png |
 
 在 `formal_hell_entry.tscn` 中编辑：
 
 - `Platforms/Moving19..23`：移动平台本体、可编辑的承重多边形、运动方向及距离。
+- `Platforms/Static04/UpperArt`：为该节点上方已有的第二块承重碰撞补齐普通平台原图；保持现有多边形、世界位置和落脚高度不变。
 - `PlatformSupports/Support19..23`：固定支架，独立于移动平台。
 - `Terrain/Rock09/ThornArt1`、`Terrain/Rock10/ThornArt2`、`Terrain/Rock11/ThornArt3..4`、`Platforms/Static06..07/Art`：六处带刺平台单体。
 - `Hazards/Thorn01..06/Left` 和 `Right`：左右尖刺各一个缩小的三角形触发区。

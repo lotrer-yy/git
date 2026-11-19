@@ -1060,6 +1060,15 @@ polygon = PackedVector2Array(-211.68488, -86.554955, -216.97632, -79.181984, -21
 
 [node name="Hazards" type="Node2D" parent="." unique_id=1281931140]
 
+[node name="SideSpike06" type="Area2D" parent="Hazards"]
+position = Vector2(960, 51013)
+collision_layer = 0
+collision_mask = 6
+
+[node name="Collision" type="CollisionPolygon2D" parent="Hazards/SideSpike06"]
+position = Vector2(-2, -19)
+polygon = PackedVector2Array(-311, -203, -249, -175, -249, -144, -280, -125, -318, -105, -314, -169)
+
 [node name="Hazard01" type="Area2D" parent="Hazards" unique_id=1023001436]
 position = Vector2(690, 42150)
 collision_layer = 0

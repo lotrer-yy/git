@@ -7,6 +7,7 @@ const OVERLAY = preload("res://scenes/ui/hell_death_overlay.tscn")
 @export var return_max_seconds: float = 1.35
 @export var return_pixels_per_second: float = 18000.0
 var state: State = State.PLAYING
+var death_animation: Node2D
 var overlay: CanvasLayer
 var _saved_mode: int
 var _saved_output_mode: int
@@ -21,6 +22,9 @@ var _return_tween: Tween
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	process_priority = 20
+	death_animation = preload("res://modules/environment/hell_demon_death.gd").new()
+	death_animation.name = "DemonDeath"
+	add_child(death_animation)
 	overlay = OVERLAY.instantiate()
 	add_child(overlay)
 	level.died.connect(_on_death)
@@ -42,6 +46,8 @@ func _freeze() -> void:
 	# 相机输出与切片预载在回程中继续工作，其余关卡逻辑冻结。
 	output.process_mode = Node.PROCESS_MODE_ALWAYS
 	streamer.process_mode = Node.PROCESS_MODE_ALWAYS
+	if level.player == level.demon:
+		await death_animation.play(level.demon, camera, level.get_node("Fork").held)
 	overlay.show_death()
 
 func _retry() -> void:
@@ -51,6 +57,7 @@ func _retry() -> void:
 	await overlay.dismiss()
 	var from: Vector2 = camera.global_position
 	var from_zoom: Vector2 = camera.zoom
+	death_animation.reset()
 	level.restart()
 	level.dead = true
 	entry.reset_for_replay()
@@ -95,5 +102,5 @@ func _home() -> void:
 func _input(event: InputEvent) -> void:
 	if state != State.PLAYING and event is InputEventKey:
 		# 界面关闭后的回程也不允许首页 R/ESC 重载整段开场。
-		if state in [State.RETURNING, State.ENTERING, State.HOME]:
+		if state in [State.RETURNING, State.ENTERING, State.HOME] or (state == State.DEAD and not overlay.visible):
 			get_viewport().set_input_as_handled()

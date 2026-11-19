@@ -7,6 +7,7 @@ const OVERLAY = preload("res://scenes/ui/hell_death_overlay.tscn")
 @export var return_max_seconds: float = 1.35
 @export var return_pixels_per_second: float = 18000.0
 var state: State = State.PLAYING
+var impact_shake: Node
 var death_animation: Node2D
 var overlay: CanvasLayer
 var _saved_mode: int
@@ -22,6 +23,9 @@ var _return_tween: Tween
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	process_priority = 20
+	impact_shake = preload("res://modules/camera/death_impact_shake.gd").new()
+	impact_shake.name = "ImpactShake"
+	add_child(impact_shake)
 	death_animation = preload("res://modules/environment/hell_demon_death.gd").new()
 	death_animation.name = "DemonDeath"
 	add_child(death_animation)
@@ -46,6 +50,7 @@ func _freeze() -> void:
 	# 相机输出与切片预载在回程中继续工作，其余关卡逻辑冻结。
 	output.process_mode = Node.PROCESS_MODE_ALWAYS
 	streamer.process_mode = Node.PROCESS_MODE_ALWAYS
+	impact_shake.play(camera, level.death_reason == &"fall")
 	if level.player == level.demon:
 		await death_animation.play(level.demon, camera, level.get_node("Fork").held)
 	overlay.show_death()
@@ -57,6 +62,7 @@ func _retry() -> void:
 	await overlay.dismiss()
 	var from: Vector2 = camera.global_position
 	var from_zoom: Vector2 = camera.zoom
+	impact_shake.stop()
 	death_animation.reset()
 	level.restart()
 	level.dead = true
@@ -95,6 +101,7 @@ func _entry_finished() -> void:
 func _home() -> void:
 	if state != State.DEAD:
 		return
+	impact_shake.stop()
 	state = State.HOME
 	await overlay.dismiss()
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")

@@ -3,6 +3,7 @@ extends Node2D
 const SURFACE = preload("res://modules/environment/hell_surface.gd")
 signal died
 var dead: bool = false
+var death_reason: StringName = &"impact"
 var _demon_spawn: Vector2
 var _ghost_spawn: Vector2
 var _zzz_origin: Vector2
@@ -75,16 +76,18 @@ func _physics_process(delta: float) -> void:
 		demon.get_node("Visual").show()
 		possession.enabled = true
 	if player.position.y > 52120:
-		die()
+		die(&"fall")
 
-func die() -> void:
+func die(reason: StringName = &"impact") -> void:
 	if dead or not visible or not $WallEntry.completed:
 		return
 	dead = true
+	death_reason = reason
 	died.emit()
 
 func restart() -> void:
 	dead = false
+	death_reason = &"impact"
 	$Fork.reset()
 	possession.reset()
 	demon.get_node("Host").reset()

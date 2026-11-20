@@ -25,7 +25,6 @@ func run():
     enemy.ink_sprayed.connect(func():shots+=1)
     enemy._appear(Vector2(-180,-120))
     player.position = Vector2(5000,5000)
-    player.position = Vector2(5000,5000)
     advance(enemy,.15)
     var old: Vector2 = enemy.global_position
     camera.position += Vector2(350,-600)
@@ -36,19 +35,33 @@ func run():
     camera.position = Vector2.ZERO
     camera.force_update_scroll()
     enemy.reset()
-    enemy._appear(Vector2(-120,-80))
-    player.position = Vector2(0,20)
+    enemy._appear(Vector2(-240,-160))
+    player.position = Vector2(40,40)
     advance(enemy,.01)
     check(enemy.state==enemy.State.SQUASHING,"Nearby fish starts one readable anticipation")
-    advance(enemy,.31)
-    check(enemy.state==enemy.State.INKING,"Anticipation leads to reference ink sequence")
+    var start: Vector2 = enemy.global_position
+    var start_gap := start.distance_to(player.global_position)
+    advance(enemy,.3)
+    check(enemy.global_position.distance_to(player.global_position)>start_gap+55,"Windup visibly retreats away from the player")
+    var farthest: Vector2 = enemy.global_position
+    advance(enemy,.19)
+    check(enemy.global_position.distance_to(player.global_position)<farthest.distance_to(player.global_position),"End of charge rebounds forward before the dash")
+    advance(enemy,.02)
+    check(enemy.state==enemy.State.DASHING and shots==0,"A full readable windup precedes the forward dash")
+    var dash_start: Vector2 = enemy.global_position
+    var dash_direction: Vector2 = enemy._jet_direction
+    player.position = Vector2(5000,5000)
+    advance(enemy,enemy._dash_seconds+.01)
+    check(enemy.state==enemy.State.INKING,"Dash arrives before the close-range spray")
+    check((enemy.global_position-dash_start).dot(dash_direction)>150,"Charge makes a substantial forward lunge")
+    check(enemy._jet_direction==dash_direction,"Moving the player cannot steer a launched dash")
+    check(absf(enemy.global_position.distance_to(Vector2(40,40))-enemy.spray_standoff)<2,"Dash stops short of the locked player position")
     var head_anchor: Vector2 = enemy.global_position
-    advance(enemy,.95)
+    advance(enemy,.22)
     check(not enemy._sprayed and shots==0,"No instant screen splatter before the jet detaches")
     check(enemy.sprite.frame==5,"Reference jet grows through the full sixth pose")
     check(enemy.global_position.distance_to(head_anchor)<1,"Spraying does not move body due to ink bounds")
     check(is_equal_approx(enemy.sprite.scale.x,.42),"Swim and ink retain identical artwork scale")
-    player.position = Vector2(5000,5000)
     advance(enemy,.15)
     check(enemy._sprayed and is_instance_valid(enemy._cloud),"Jet detaches into a world ink cloud at 1.08 seconds")
     var cloud_position: Vector2 = enemy._cloud.global_position

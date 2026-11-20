@@ -2,10 +2,15 @@ extends Node2D
 ## 世界坐标游动，参考动画的头部注册与喷墨后反冲。
 signal ink_sprayed
 signal appeared
-enum State { WAITING, ENTERING, SWIMMING, SQUASHING, INKING, EXITING }
+enum State { WAITING, ENTERING, SWIMMING, SQUASHING, INKING, EXITING, DASHING }
 @export var spawn_interval: float = 3.0
 @export var automatic_spawning: bool = true
-@export var proximity_radius: float = 230.0
+@export var proximity_radius: float = 460.0
+@export var windup_seconds: float = .5
+@export var windup_retreat: float = 72.0
+@export var dash_speed: float = 1000.0
+@export var dash_max_distance: float = 520.0
+@export var spray_standoff: float = 110.0
 @export var visible_seconds: float = 5.0
 @export var swim_speed: float = 85.0
 @export var artwork_scale: float = .42
@@ -34,6 +39,11 @@ var _cloud: Sprite2D
 var _cloud_elapsed: float = 0.0
 var _cloud_hit: bool = false
 var _cloud_scale: float = 1.0
+var _windup_origin := Vector2.ZERO
+var _windup_direction := Vector2.DOWN
+var _dash_origin := Vector2.ZERO
+var _dash_distance: float = 0.0
+var _dash_seconds: float = .2
 const CLOUD = preload("res://assets/art/ocean/octopus/ink-splatter.png")
 const INK_TIMES = [.30, .48, .72, .80, .94, 1.08, 1.20, 1.36]
 const SWIM_ORDER = [6, 0, 1, 2, 3, 4, 5]
@@ -73,18 +83,41 @@ func _physics_process(delta: float) -> void:
             if state == State.ENTERING and _view_rect().grow(-35).has_point(global_position): _change_state(State.SWIMMING)
             if not _finishing_visit and global_position.distance_to(target.global_position) <= proximity_radius:
                 _jet_direction = global_position.direction_to(target.global_position)
-                var painted_jet := Vector2(.76,.65)*Vector2(-float(_side),1)
-                _aim_rotation = wrapf(_jet_direction.angle()-painted_jet.angle(),-PI,PI)
+                _update_aim()
+                _windup_origin = global_position
+                _windup_direction = _jet_direction
                 _change_state(State.SQUASHING)
         State.SQUASHING:
-            visual.rotation = lerp_angle(0,_aim_rotation,smoothstep(0,.3,state_elapsed))
-            var squeeze := sin(clampf(state_elapsed/.3,0,1)*TAU)*.07
+            var u := clampf(state_elapsed/windup_seconds,0,1)
+            # 先后缩，再轻轻向前回弹；冲刺前一直能读清蓄力方向。
+            var retreat := windup_retreat*(1-pow(1-minf(u/.7,1),3))
+            if u>.7: retreat -= windup_retreat*.18*smoothstep(.7,1,u)
+            global_position = _windup_origin-_windup_direction*retreat
+            _jet_direction = global_position.direction_to(target.global_position)
+            _update_aim()
+            visual.rotation = lerp_angle(visual.rotation,_aim_rotation,1-exp(-delta*12))
+            var squeeze := sin(u*PI)*.1
             visual.scale = Vector2(-float(_side)*(1+squeeze),1-squeeze)
-            global_position += _velocity*exp(-state_elapsed*10)*delta
-            if state_elapsed >= .3:
+            _pose(&"ink",mini(2,int(u*3)))
+            if state_elapsed >= windup_seconds:
                 visual.scale = Vector2(-float(_side),1)
                 visual.rotation = _aim_rotation
+                _dash_origin = global_position
+                _dash_distance = clampf(global_position.distance_to(target.global_position)-spray_standoff,0,dash_max_distance)
+                _dash_seconds = clampf(_dash_distance/dash_speed,.14,.45)
+                _change_state(State.DASHING)
+        State.DASHING:
+            # 出手时固定世界方向，玩家移动/瞬移可躲开，不追着镜头拐弯。
+            var u := clampf(state_elapsed/_dash_seconds,0,1)
+            global_position = _dash_origin+_jet_direction*_dash_distance*(1-pow(1-u,3))
+            _pose(&"ink",2 if u<.8 else 3)
+            var stretch := sin(u*PI)*.08
+            visual.scale = Vector2(-float(_side)*(1-stretch),1+stretch)
+            if u>=1:
+                visual.scale = Vector2(-float(_side),1)
                 _change_state(State.INKING)
+                # 前三帧蓄力已在后缩与冲刺中播放，接着喷口出墨。
+                state_elapsed = .72
         State.INKING:
             var frame_index := 7
             for i in INK_TIMES.size():
@@ -120,6 +153,10 @@ func _show_swim() -> void:
         if phase < SWIM_TIMES[i]:
             _pose(&"swim",SWIM_ORDER[i])
             return
+
+func _update_aim() -> void:
+    var painted_jet := Vector2(.76,.65)*Vector2(-float(_side),1)
+    _aim_rotation = wrapf(_jet_direction.angle()-painted_jet.angle(),-PI,PI)
 
 func _pose(animation: StringName, frame_index: int) -> void:
     sprite.animation = animation
@@ -207,6 +244,10 @@ func reset() -> void:
     _visit_elapsed = 0
     _swim_clock = 0
     _velocity = Vector2.ZERO
+    _windup_origin = Vector2.ZERO
+    _windup_direction = Vector2.DOWN
+    _dash_origin = Vector2.ZERO
+    _dash_distance = 0
     if is_instance_valid(_cloud): _cloud.queue_free()
     _cloud = null
     if is_instance_valid(target): _previous_player_y = target.global_position.y

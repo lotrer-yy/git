@@ -8,6 +8,8 @@ enum State { WAITING, LOCKING, DASHING }
 @export var spawn_interval: float = 6.0
 @export var lock_seconds: float = 1.0
 @export var dash_speed: float = 2200.0
+@export var prediction_max_seconds: float = .4
+@export var prediction_max_pixels: float = 180.0
 @export var bob_pixels: float = 12.0
 @export var entrance_rebound_pixels: float = 28.0
 @export var windup_pullback_pixels: float = 42.0
@@ -60,7 +62,7 @@ func _physics_process(delta: float) -> void:
             if cycle_elapsed >= spawn_interval: _begin_lock()
         State.LOCKING:
             _follow_lock_view()
-            locked_point = _target_center()
+            locked_point = _predicted_target(global_position)
             var aim := locked_point-global_position
             if not aim.is_zero_approx():
                 _face(Vector2.RIGHT.rotated(lerp_angle(global_rotation,aim.angle(),1.0-exp(-12.0*delta))))
@@ -88,7 +90,7 @@ func _begin_lock() -> void:
     sprite.play(&"idle")
     show()
     _follow_lock_view()
-    _face((_target_center()-global_position).normalized())
+    _face((_predicted_target(global_position)-global_position).normalized())
     lock_started.emit()
 
 func _follow_lock_view() -> void:
@@ -102,7 +104,7 @@ func _follow_lock_view() -> void:
     var windup := smoothstep(maxf(0.0,lock_seconds-3.0/11.0),lock_seconds,state_elapsed)
     var bob := sin(state_elapsed*TAU/1.25)*bob_pixels*entrance*(1.0-windup)
     var anchor := view.position+Vector2(lerpf(start_x,_screen_anchor.x,entrance)+rebound,_screen_anchor.y+bob)
-    var aim := (_target_center()-anchor).normalized()
+    var aim := (_predicted_target(anchor)-anchor).normalized()
     global_position = anchor-aim*windup_pullback_pixels*windup
     visual.modulate.a = smoothstep(0.0,minf(.12,lock_seconds*.2),state_elapsed)
 
@@ -110,7 +112,7 @@ func _begin_dash() -> void:
     state = State.DASHING
     state_elapsed = 0.0
     _hit_reported = false
-    locked_point = _target_center()
+    locked_point = _predicted_target(global_position)
     dash_direction = (locked_point-global_position).normalized()
     if dash_direction.is_zero_approx(): dash_direction = Vector2(float(-_side),0)
     _face(dash_direction)
@@ -142,6 +144,17 @@ func _fully_offscreen() -> bool:
 func _target_center() -> Vector2:
     var collision := target.get_node_or_null("Collision") as CollisionShape2D
     return collision.global_position if collision != null else target.global_position
+
+func _predicted_target(origin: Vector2) -> Vector2:
+    var center := _target_center()
+    var velocity := target.velocity.limit_length(850)
+    # 短距离提前量：迭代飞行时间，并补上开头 0.08 秒加速损失的 0.026 秒。
+    var seconds := origin.distance_to(center)/maxf(dash_speed,1)+.026
+    var lead := Vector2.ZERO
+    for iteration in 6:
+        lead = (velocity*minf(seconds,prediction_max_seconds)).limit_length(prediction_max_pixels)
+        seconds = origin.distance_to(center+lead)/maxf(dash_speed,1)+.026
+    return center+lead
 
 func _touches_target(from: Vector2, to: Vector2) -> bool:
     var teleport := target.get_node_or_null("Teleport")

@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://modules/effects/ocean_ink_overlay.gd" id="behavior"]
+[ext_resource type="Texture2D" path="res://assets/art/ocean/octopus/ink-splatter.png" id="art"]
+[ext_resource type="Shader" path="res://shaders/ocean_octopus_clean.gdshader" id="clean"]
+
+[sub_resource type="ShaderMaterial" id="clean_material"]
+shader = ExtResource("clean")
+
+[node name="InkOverlay" type="CanvasLayer"]
+layer = 40
+script = ExtResource("behavior")
+
+[node name="Splatter" type="TextureRect" parent="."]
+material = SubResource("clean_material")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("art")
+expand_mode = 1
+stretch_mode = 5

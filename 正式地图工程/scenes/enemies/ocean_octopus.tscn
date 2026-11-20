@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://modules/enemies/ocean_octopus.gd" id="behavior"]
+[ext_resource type="SpriteFrames" path="res://assets/art/ocean/octopus/octopus_frames.tres" id="frames"]
+[ext_resource type="Shader" path="res://shaders/ocean_octopus_clean.gdshader" id="clean"]
+
+[sub_resource type="ShaderMaterial" id="clean_material"]
+shader = ExtResource("clean")
+
+[node name="Octopus" type="Node2D"]
+z_index = 16
+script = ExtResource("behavior")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Art" type="AnimatedSprite2D" parent="Visual"]
+material = SubResource("clean_material")
+sprite_frames = ExtResource("frames")
+animation = &"swim"

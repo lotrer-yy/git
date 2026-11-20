@@ -24,23 +24,28 @@ func run():
     game.player = game.demon
     game.demon.get_node("Host").take_control()
     game.demon.get_node("Movement").enabled = false
-    game.get_node("Fork").exchanged.emit(game.demon)
-    check(lava.armed and lava.visible,"First successful fork exchange arms the lava")
-    var initial: float = lava.surface_y
-    lava._physics_process(7.9)
-    check(is_equal_approx(lava.surface_y,initial),"Eight-second learning grace does not raise the surface")
-    lava._physics_process(1.1)
-    check(absf(lava.surface_y-(initial-24))<.02,"Only time after grace advances at a gentle 24 pixels per second")
+    game.demon.position = Vector2(500,51796)
+    lava._physics_process(2)
+    check(not lava.armed,"Possession on the starting ledge leaves time to learn")
+    game.demon.position = lava._first_platform_top
+    var initial: float = lava.initial_surface_y
+    lava._physics_process(.1)
+    check(lava.armed and lava.visible and is_zero_approx(lava.grace_remaining),"Reaching the first platform starts lava immediately without a fork exchange")
+    check(absf(lava.surface_y-(initial-6))<.02,"Lava immediately rises at 60 pixels per second")
+    game.demon.position.y -= 800
     var height: float = lava.surface_y
     game.camera.global_position += Vector2(300,-2000)
     game.demon.position.y -= 1500
     lava._physics_process(1)
-    check(absf(lava.surface_y-(height-24))<.02,"Camera or player movement never pulls the lava upward")
+    check(absf(lava.surface_y-(height-60))<.02,"Camera or player movement never pulls the lava upward")
     height = lava.surface_y
     game.get_node("Fork").launching = true
     lava._physics_process(5)
-    check(is_equal_approx(lava.surface_y,height),"Uncontrollable fork launch pauses the pressure")
+    check(absf(lava.surface_y-(height-300))<.02,"Lava continues rising throughout fork launch")
     game.get_node("Fork").launching = false
+    height = lava.surface_y
+    game.get_node("Fork").exchanged.emit(game.demon)
+    check(is_equal_approx(lava.surface_y,height),"Later exchanges never restart or lower the lava")
     game.get_node("OceanLink").stage = 2
     lava._physics_process(10)
     check(is_equal_approx(lava.surface_y,height),"Volcano transition and ocean do not advance lava")
@@ -55,7 +60,7 @@ func run():
     lava.reset()
     check(not lava.armed and not lava.visible and is_equal_approx(lava.surface_y,initial),"Retry resets world height, grace and visibility")
     game.get_node("SegmentStart").start_segment(2)
-    check(lava.armed and is_equal_approx(lava.grace_remaining,8),"Shortcut 2 prepares a nearby lava surface with the same grace")
+    check(lava.armed and is_zero_approx(lava.grace_remaining),"Shortcut 2 starts nearby lava with no extra startup delay")
     check(absf(lava.surface_y-game.demon.position.y-650)<.1,"Shortcut lava starts safely below the last platform")
     lava.reset()
     game.demon.position = Vector2(500,51000)

@@ -9,8 +9,13 @@ enum State { WAITING, ENTERING, SWIMMING, SQUASHING, INKING, EXITING, DASHING }
 @export var windup_seconds: float = .5
 @export var windup_retreat: float = 72.0
 @export var dash_speed: float = 1000.0
-@export var dash_max_distance: float = 520.0
+@export var dash_max_distance: float = 1300.0
+@export var dash_max_seconds: float = .65
 @export var spray_standoff: float = 110.0
+@export var prediction_max_seconds: float = 1.1
+@export var prediction_max_distance: float = 900.0
+@export var spray_delay: float = .36
+@export var cloud_contact_delay: float = .08
 @export var visible_seconds: float = 5.0
 @export var swim_speed: float = 85.0
 @export var artwork_scale: float = .42
@@ -44,6 +49,12 @@ var _windup_direction := Vector2.DOWN
 var _dash_origin := Vector2.ZERO
 var _dash_distance: float = 0.0
 var _dash_seconds: float = .2
+var _predicted_point := Vector2.ZERO
+var _last_target_velocity := Vector2.ZERO
+var _target_acceleration := Vector2.ZERO
+var _prediction_drag := Vector2(1.15,.75)
+var _prediction_min_velocity := Vector2(-470,-420)
+var _prediction_max_velocity := Vector2(470,680)
 const CLOUD = preload("res://assets/art/ocean/octopus/ink-splatter.png")
 const INK_TIMES = [.30, .48, .72, .80, .94, 1.08, 1.20, 1.36]
 const SWIM_ORDER = [6, 0, 1, 2, 3, 4, 5]
@@ -59,9 +70,18 @@ func configure(player: CharacterBody2D, view: Camera2D) -> void:
     target = player
     camera = view
     _previous_player_y = player.global_position.y
+    _last_target_velocity = player.velocity
+    _target_acceleration = Vector2.ZERO
+    var motor := player.get_node_or_null("Movement")
+    if motor is SwimMotor:
+        _prediction_drag = Vector2(motor.horizontal_drag,motor.vertical_drag)
+        _prediction_min_velocity = Vector2(-motor.max_horizontal_speed,-motor.max_rise_speed)
+        _prediction_max_velocity = Vector2(motor.max_horizontal_speed,motor.max_sink_speed)
 
 func _physics_process(delta: float) -> void:
     if not enabled or not is_instance_valid(target) or not is_instance_valid(camera): return
+    _target_acceleration = ((target.velocity-_last_target_velocity)/maxf(delta,.001)).limit_length(1400)
+    _last_target_velocity = target.velocity
     _tick_cloud(delta)
     var rising := target.global_position.y < _previous_player_y-.01
     _previous_player_y = target.global_position.y
@@ -93,7 +113,7 @@ func _physics_process(delta: float) -> void:
             var retreat := windup_retreat*(1-pow(1-minf(u/.7,1),3))
             if u>.7: retreat -= windup_retreat*.18*smoothstep(.7,1,u)
             global_position = _windup_origin-_windup_direction*retreat
-            _jet_direction = global_position.direction_to(target.global_position)
+            _plan_intercept(maxf(0,windup_seconds-state_elapsed))
             _update_aim()
             visual.rotation = lerp_angle(visual.rotation,_aim_rotation,1-exp(-delta*12))
             var squeeze := sin(u*PI)*.1
@@ -103,8 +123,6 @@ func _physics_process(delta: float) -> void:
                 visual.scale = Vector2(-float(_side),1)
                 visual.rotation = _aim_rotation
                 _dash_origin = global_position
-                _dash_distance = clampf(global_position.distance_to(target.global_position)-spray_standoff,0,dash_max_distance)
-                _dash_seconds = clampf(_dash_distance/dash_speed,.14,.45)
                 _change_state(State.DASHING)
         State.DASHING:
             # 出手时固定世界方向，玩家移动/瞬移可躲开，不追着镜头拐弯。
@@ -117,7 +135,7 @@ func _physics_process(delta: float) -> void:
                 visual.scale = Vector2(-float(_side),1)
                 _change_state(State.INKING)
                 # 前三帧蓄力已在后缩与冲刺中播放，接着喷口出墨。
-                state_elapsed = .72
+                state_elapsed = 1.08-spray_delay
         State.INKING:
             var frame_index := 7
             for i in INK_TIMES.size():
@@ -157,6 +175,34 @@ func _show_swim() -> void:
 func _update_aim() -> void:
     var painted_jet := Vector2(.76,.65)*Vector2(-float(_side),1)
     _aim_rotation = wrapf(_jet_direction.angle()-painted_jet.angle(),-PI,PI)
+
+func _plan_intercept(remaining_windup: float) -> void:
+    # 预判的是墨团展开能接触小鱼的时刻，不能只瞄冲刺结束时的旧位置。
+    var seconds := .2
+    for iteration in 8:
+        var horizon := minf(prediction_max_seconds,remaining_windup+seconds+spray_delay+cloud_contact_delay)
+        var lead := _predict_swim_displacement(horizon).limit_length(prediction_max_distance)
+        _predicted_point = target.global_position+lead
+        _dash_distance = clampf(global_position.distance_to(_predicted_point)-spray_standoff,0,dash_max_distance)
+        seconds = clampf(_dash_distance/dash_speed,.14,dash_max_seconds)
+    _dash_seconds = seconds
+    _jet_direction = global_position.direction_to(_predicted_point)
+
+func _predict_swim_displacement(seconds: float) -> Vector2:
+    # 小鱼仍在加速时，用观察到的加速度和真实水阻力/速度上限外推。
+    var velocity := target.velocity.limit_length(850)
+    var acceleration := _target_acceleration
+    var displacement := Vector2.ZERO
+    var step := seconds/12.0
+    var decay := Vector2(exp(-_prediction_drag.x*step),exp(-_prediction_drag.y*step))
+    var gain := Vector2(step if _prediction_drag.x<.001 else (1-decay.x)/_prediction_drag.x,step if _prediction_drag.y<.001 else (1-decay.y)/_prediction_drag.y)
+    for index in 12:
+        var next := velocity+acceleration*gain
+        next = next.clamp(_prediction_min_velocity,_prediction_max_velocity)
+        displacement += (velocity+next)*(.5*step)
+        velocity = next
+        acceleration *= decay
+    return displacement
 
 func _pose(animation: StringName, frame_index: int) -> void:
     sprite.animation = animation
@@ -248,6 +294,9 @@ func reset() -> void:
     _windup_direction = Vector2.DOWN
     _dash_origin = Vector2.ZERO
     _dash_distance = 0
+    _predicted_point = Vector2.ZERO
+    _target_acceleration = Vector2.ZERO
+    if is_instance_valid(target): _last_target_velocity = target.velocity
     if is_instance_valid(_cloud): _cloud.queue_free()
     _cloud = null
     if is_instance_valid(target): _previous_player_y = target.global_position.y

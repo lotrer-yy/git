@@ -7,9 +7,11 @@ const BURST = preload("res://assets/art/characters/fish/abilities/teleport.png")
 @export var anticipation_seconds: float = 0.04
 @export var minimum_distance: float = 12.0
 @export var camera_blend_seconds: float = 0.25
+@export var arrival_invulnerability_seconds: float = 0.18
 var enabled: bool = false
 var cooldown_remaining: float = 0.0
 var _busy: bool = false
+var _invulnerability_remaining: float = 0.0
 var _windup: Tween
 var _motor_was_enabled: bool = false
 var _visual_was_visible: bool = false
@@ -23,6 +25,10 @@ var _effects: Array[Sprite2D] = []
 
 func _physics_process(delta: float) -> void:
     cooldown_remaining = maxf(0.0,cooldown_remaining-delta)
+    _invulnerability_remaining = maxf(0.0,_invulnerability_remaining-delta)
+
+func is_invulnerable() -> bool:
+    return enabled and (_busy or _invulnerability_remaining>0.0)
 
 func _unhandled_input(event: InputEvent) -> void:
     if not event.is_action_pressed(&"possess") or event.is_echo(): return
@@ -63,6 +69,7 @@ func _perform(direction: Vector2) -> void:
     body.reset_physics_interpolation()
     visual.visible = _visual_was_visible
     motor.enabled = _motor_was_enabled
+    _invulnerability_remaining = arrival_invulnerability_seconds
     _busy = false
     _burst(body.global_position,direction)
     stage.level.camera.blend_to_target(body,camera_blend_seconds)
@@ -87,6 +94,7 @@ func reset() -> void:
         visual.visible = _visual_was_visible
         motor.enabled = _motor_was_enabled and not stage.level.dead
     _busy = false
+    _invulnerability_remaining = 0.0
     cooldown_remaining = 0.0
     for effect in _effects:
         if is_instance_valid(effect): effect.queue_free()

@@ -16,6 +16,30 @@ func _ready() -> void:
     possession.possession_started.connect(_on_transfer_started)
     possession.possession_finished.connect(_on_transfer_finished)
     level.died.connect(_on_player_died)
+    $Shark.configure(fish,get_node("../../Camera"))
+    $Shark.player_hit.connect(_on_shark_hit)
+    $Octopus.configure(fish,get_node("../../Camera"))
+    $Octopus.ink_sprayed.connect($InkOverlay.splash)
+    for lane in $PinkSharks.get_children():
+        lane.configure(fish,get_node("../../Camera"))
+        lane.player_hit.connect(_on_pink_shark_hit)
+
+func _physics_process(_delta: float) -> void:
+    var y: float = level.to_local(fish.global_position).y
+    var can_attack: bool = active and host.claimed and level.player == fish and not level.dead and not level.exit_in_progress and level.visible and y >= 29978.0 and y <= 39138.0
+    $Shark.enabled = can_attack
+    for lane in $PinkSharks.get_children(): lane.damage_enabled = can_attack
+    if not (level.dead and level.death_reason in [&"shark",&"pink_shark"]):
+        $Octopus.enabled = can_attack
+        if not can_attack: $InkOverlay.reset()
+
+func _on_shark_hit(direction: Vector2) -> void:
+    $SharkKnockback.impact_direction = direction
+    level.die(&"shark")
+
+func _on_pink_shark_hit(direction: Vector2) -> void:
+    $SharkKnockback.impact_direction = direction
+    level.die(&"pink_shark")
 
 func activate() -> void:
     if active: return
@@ -34,9 +58,18 @@ func _on_transfer_started(_chosen_host: PossessableHost) -> void:
 func _on_transfer_finished(chosen_host: PossessableHost) -> void:
     level.player = chosen_host.body
     fish.get_node("Teleport").enabled = true
+    for lane in $PinkSharks.get_children(): lane.running = true
 
 func _on_player_died() -> void:
     if not active: return
+    $Shark.enabled = false
+    for lane in $PinkSharks.get_children(): lane.damage_enabled = false
+    if level.death_reason in [&"shark",&"pink_shark"]:
+        $Octopus.finish_current_visit()
+        $InkOverlay.process_mode = Node.PROCESS_MODE_ALWAYS
+    else:
+        $Octopus.enabled = false
+        $InkOverlay.reset()
     fish.get_node("Teleport").enabled = false
     fish.get_node("Teleport").reset()
     if possession.state == PossessionController.State.TRANSFERRING:
@@ -45,6 +78,14 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
+    for lane in $PinkSharks.get_children(): lane.reset()
+    $Octopus.enabled = false
+    $Octopus.reset()
+    $InkOverlay.reset()
+    $InkOverlay.process_mode = Node.PROCESS_MODE_INHERIT
+    $Shark.enabled = false
+    $Shark.reset()
+    $SharkKnockback.reset()
     $SideTentacle.reset()
     fish.get_node("Teleport").enabled = false
     fish.get_node("Teleport").reset()

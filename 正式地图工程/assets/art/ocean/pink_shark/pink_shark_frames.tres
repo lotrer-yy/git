@@ -1,0 +1,36 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/ocean/pink_shark/mouth_sheet.png" id="sheet"]
+
+[sub_resource type="AtlasTexture" id="frame0"]
+atlas = ExtResource("sheet")
+region = Rect2(0, 0, 512, 512)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame1"]
+atlas = ExtResource("sheet")
+region = Rect2(512, 0, 512, 512)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame2"]
+atlas = ExtResource("sheet")
+region = Rect2(1024, 0, 512, 512)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame3"]
+atlas = ExtResource("sheet")
+region = Rect2(0, 512, 512, 512)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame4"]
+atlas = ExtResource("sheet")
+region = Rect2(512, 512, 512, 512)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame5"]
+atlas = ExtResource("sheet")
+region = Rect2(1024, 512, 512, 512)
+filter_clip = true
+
+[resource]
+animations = [{"frames": [{"duration": 1.0, "texture": SubResource("frame0")}, {"duration": 1.0, "texture": SubResource("frame1")}, {"duration": 1.0, "texture": SubResource("frame2")}, {"duration": 1.0, "texture": SubResource("frame3")}, {"duration": 1.0, "texture": SubResource("frame4")}, {"duration": 1.0, "texture": SubResource("frame5")}], "loop": true, "name": &"mouth", "speed": 6.0}]

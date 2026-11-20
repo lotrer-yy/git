@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://modules/enemies/ocean_shark.gd" id="shark"]
+[ext_resource type="SpriteFrames" path="res://assets/art/ocean/shark/shark_frames.tres" id="frames"]
+[ext_resource type="Shader" path="res://shaders/ocean_shark_aura.gdshader" id="aura"]
+
+[sub_resource type="ShaderMaterial" id="aura_material"]
+resource_local_to_scene = true
+shader = ExtResource("aura")
+shader_parameter/outline_pixels = 4.0
+
+[node name="Shark" type="Node2D"]
+z_index = 16
+script = ExtResource("shark")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Art" type="AnimatedSprite2D" parent="Visual"]
+material = SubResource("aura_material")
+sprite_frames = ExtResource("frames")
+animation = &"idle"

@@ -1,0 +1,52 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/ocean/shark/idle.png" id="idle"]
+[ext_resource type="Texture2D" path="res://assets/art/ocean/shark/dash_sheet.png" id="sheet"]
+
+[sub_resource type="AtlasTexture" id="frame0"]
+atlas = ExtResource("sheet")
+region = Rect2(0, 238, 370, 215)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame1"]
+atlas = ExtResource("sheet")
+region = Rect2(370, 238, 310, 215)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame2"]
+atlas = ExtResource("sheet")
+region = Rect2(680, 238, 270, 215)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame3"]
+atlas = ExtResource("sheet")
+region = Rect2(950, 238, 380, 215)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame4"]
+atlas = ExtResource("sheet")
+region = Rect2(1330, 238, 470, 215)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame5"]
+atlas = ExtResource("sheet")
+region = Rect2(1800, 238, 372, 215)
+filter_clip = true
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("idle")}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("frame0")}, {"duration": 1.0, "texture": SubResource("frame1")}, {"duration": 1.0, "texture": SubResource("frame2")}],
+"loop": false,
+"name": &"windup",
+"speed": 11.0
+}, {
+"frames": [{"duration": 1.0, "texture": SubResource("frame3")}, {"duration": 1.0, "texture": SubResource("frame4")}, {"duration": 1.0, "texture": SubResource("frame5")}],
+"loop": true,
+"name": &"dash",
+"speed": 22.0
+}]

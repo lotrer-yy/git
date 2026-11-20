@@ -167,6 +167,7 @@ func _sample_attack() -> void:
         level.die(&"tentacle")
 
 func _touches_fish() -> bool:
+    if fish.get_node("Teleport").is_invulnerable(): return false
     var shape := fish.get_node("Collision") as CollisionShape2D
     var center := _rig.to_local(shape.global_position)
     var radius: float = shape.shape.radius / artwork_scale

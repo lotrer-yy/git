@@ -58,6 +58,7 @@ func run():
     check(not fish.test_move(fish.global_transform,Vector2.ZERO), "Arrival is outside the wall")
     blink.reset()
     check(not blink.try_teleport(Vector2.RIGHT) and is_zero_approx(blink.cooldown_remaining), "Blocked blink neither spends cooldown nor animates")
+    check(not blink.is_invulnerable(), "A blocked teleport grants no invulnerability")
     fish.global_position = origin
     blink.reset()
     fish.get_node("Visual/Sprite").flip_h = false

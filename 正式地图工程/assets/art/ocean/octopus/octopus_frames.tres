@@ -1,0 +1,86 @@
+[gd_resource type="SpriteFrames" format=3]
+[ext_resource type="Texture2D" path="res://assets/art/ocean/octopus/swim-frames.png" id="swim"]
+[ext_resource type="Texture2D" path="res://assets/art/ocean/octopus/ink-frames.png" id="ink"]
+
+[sub_resource type="AtlasTexture" id="swim0"]
+atlas = ExtResource("swim")
+region = Rect2(0.0, 0.0, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="swim1"]
+atlas = ExtResource("swim")
+region = Rect2(443.5, 0.0, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="swim2"]
+atlas = ExtResource("swim")
+region = Rect2(887.0, 0.0, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="swim3"]
+atlas = ExtResource("swim")
+region = Rect2(1330.5, 0.0, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="swim4"]
+atlas = ExtResource("swim")
+region = Rect2(0.0, 443.5, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="swim5"]
+atlas = ExtResource("swim")
+region = Rect2(443.5, 443.5, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="swim6"]
+atlas = ExtResource("swim")
+region = Rect2(887.0, 443.5, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="swim7"]
+atlas = ExtResource("swim")
+region = Rect2(1330.5, 443.5, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="ink0"]
+atlas = ExtResource("ink")
+region = Rect2(0.0, 0.0, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="ink1"]
+atlas = ExtResource("ink")
+region = Rect2(443.5, 0.0, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="ink2"]
+atlas = ExtResource("ink")
+region = Rect2(887.0, 0.0, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="ink3"]
+atlas = ExtResource("ink")
+region = Rect2(1330.5, 0.0, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="ink4"]
+atlas = ExtResource("ink")
+region = Rect2(0.0, 443.5, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="ink5"]
+atlas = ExtResource("ink")
+region = Rect2(443.5, 443.5, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="ink6"]
+atlas = ExtResource("ink")
+region = Rect2(887.0, 443.5, 443.5, 443.5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="ink7"]
+atlas = ExtResource("ink")
+region = Rect2(1330.5, 443.5, 443.5, 443.5)
+filter_clip = true
+
+[resource]
+animations = [{"frames": [{"duration": 1.0, "texture": SubResource("swim0")}, {"duration": 1.0, "texture": SubResource("swim1")}, {"duration": 1.0, "texture": SubResource("swim2")}, {"duration": 1.0, "texture": SubResource("swim3")}, {"duration": 1.0, "texture": SubResource("swim4")}, {"duration": 1.0, "texture": SubResource("swim5")}, {"duration": 1.0, "texture": SubResource("swim6")}, {"duration": 1.0, "texture": SubResource("swim7")}], "loop": true, "name": &"swim", "speed": 7.0}, {"frames": [{"duration": 1.0, "texture": SubResource("ink0")}, {"duration": 1.0, "texture": SubResource("ink1")}, {"duration": 1.0, "texture": SubResource("ink2")}, {"duration": 1.0, "texture": SubResource("ink3")}, {"duration": 1.0, "texture": SubResource("ink4")}, {"duration": 1.0, "texture": SubResource("ink5")}, {"duration": 1.0, "texture": SubResource("ink6")}, {"duration": 1.0, "texture": SubResource("ink7")}], "loop": false, "name": &"ink", "speed": 12.0}]

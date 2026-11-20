@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://modules/enemies/ocean_octopus_encounters.gd" id="encounters"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/ocean_octopus.tscn" id="visitor"]
+
+[node name="Octopus" type="Node2D"]
+script = ExtResource("encounters")
+
+[node name="First" parent="." instance=ExtResource("visitor")]
+automatic_spawning = false
+
+[node name="Second" parent="." instance=ExtResource("visitor")]
+automatic_spawning = false

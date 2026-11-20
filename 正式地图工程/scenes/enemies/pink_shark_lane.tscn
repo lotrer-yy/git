@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://modules/enemies/pink_shark_lane.gd" id="behavior"]
+[ext_resource type="SpriteFrames" path="res://assets/art/ocean/pink_shark/pink_shark_frames.tres" id="frames"]
+[ext_resource type="Shader" path="res://shaders/ocean_octopus_clean.gdshader" id="clean"]
+
+[sub_resource type="ShaderMaterial" id="clean_material"]
+shader = ExtResource("clean")
+
+[node name="PinkSharkLane" type="Node2D"]
+z_index = 16
+script = ExtResource("behavior")
+
+[node name="Lead" type="Area2D" parent="."]
+scale = Vector2(0.416,0.416)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="Art" type="AnimatedSprite2D" parent="Lead"]
+material = SubResource("clean_material")
+sprite_frames = ExtResource("frames")
+animation = &"mouth"
+
+[node name="Collision" type="CollisionPolygon2D" parent="Lead"]
+polygon = PackedVector2Array(-237,-27,-216,36,-238,84,-177,55,-164,81,-133,105,-42,127,52,128,149,106,180,76,196,27,192,-13,168,-20,158,-57,130,-89,54,-122,-2,-174,-41,-186,-79,-180,-57,-153,-56,-125,-126,-75,-174,6,-208,-20)
+
+[node name="Follower" type="Area2D" parent="."]
+scale = Vector2(0.416,0.416)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="Art" type="AnimatedSprite2D" parent="Follower"]
+material = SubResource("clean_material")
+sprite_frames = ExtResource("frames")
+animation = &"mouth"
+
+[node name="Collision" type="CollisionPolygon2D" parent="Follower"]
+polygon = PackedVector2Array(-237,-27,-216,36,-238,84,-177,55,-164,81,-133,105,-42,127,52,128,149,106,180,76,196,27,192,-13,168,-20,158,-57,130,-89,54,-122,-2,-174,-41,-186,-79,-180,-57,-153,-56,-125,-126,-75,-174,6,-208,-20)
+
+[node name="Follower2" type="Area2D" parent="."]
+scale = Vector2(0.416,0.416)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="Art" type="AnimatedSprite2D" parent="Follower2"]
+material = SubResource("clean_material")
+sprite_frames = ExtResource("frames")
+animation = &"mouth"
+
+[node name="Collision" type="CollisionPolygon2D" parent="Follower2"]
+polygon = PackedVector2Array(-237,-27,-216,36,-238,84,-177,55,-164,81,-133,105,-42,127,52,128,149,106,180,76,196,27,192,-13,168,-20,158,-57,130,-89,54,-122,-2,-174,-41,-186,-79,-180,-57,-153,-56,-125,-126,-75,-174,6,-208,-20)
+
+[node name="Follower3" type="Area2D" parent="."]
+scale = Vector2(0.416,0.416)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="Art" type="AnimatedSprite2D" parent="Follower3"]
+material = SubResource("clean_material")
+sprite_frames = ExtResource("frames")
+animation = &"mouth"
+
+[node name="Collision" type="CollisionPolygon2D" parent="Follower3"]
+polygon = PackedVector2Array(-237,-27,-216,36,-238,84,-177,55,-164,81,-133,105,-42,127,52,128,149,106,180,76,196,27,192,-13,168,-20,158,-57,130,-89,54,-122,-2,-174,-41,-186,-79,-180,-57,-153,-56,-125,-126,-75,-174,6,-208,-20)

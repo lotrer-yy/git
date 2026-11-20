@@ -1,5 +1,5 @@
 extends Node2D
-## 上游时从视野上方遇见，缓慢经过镜头；屏幕墨迹由独立模块接收信号。
+## 世界坐标游动，参考动画的头部注册与喷墨后反冲。
 signal ink_sprayed
 signal appeared
 enum State { WAITING, ENTERING, SWIMMING, SQUASHING, INKING, EXITING }
@@ -7,10 +7,9 @@ enum State { WAITING, ENTERING, SWIMMING, SQUASHING, INKING, EXITING }
 @export var automatic_spawning: bool = true
 @export var proximity_radius: float = 230.0
 @export var visible_seconds: float = 5.0
-@export var swim_amplitude: float = 28.0
-@export var swim_period: float = 2.4
-@export var lateral_amplitude: float = 18.0
-@export var lateral_period: float = 6.0
+@export var swim_speed: float = 85.0
+@export var artwork_scale: float = .42
+@export var ink_radius: float = 130.0
 @export var enabled: bool = false:
     set(value):
         if enabled == value: return
@@ -22,19 +21,28 @@ var state: State = State.WAITING
 var cycle_elapsed: float = 0.0
 var state_elapsed: float = 0.0
 var _side: int = 1
-var _anchor := Vector2.ZERO
 var _visit_elapsed: float = 0.0
 var _previous_player_y: float = 0.0
 var _sprayed: bool = false
 var _finishing_visit: bool = false
 var _anchors: Dictionary
+var _velocity := Vector2.ZERO
+var _jet_direction := Vector2.DOWN
+var _aim_rotation: float = 0.0
+var _swim_clock: float = 0.0
+var _cloud: Sprite2D
+var _cloud_elapsed: float = 0.0
+var _cloud_hit: bool = false
+var _cloud_scale: float = 1.0
+const CLOUD = preload("res://assets/art/ocean/octopus/ink-splatter.png")
+const INK_TIMES = [.30, .48, .72, .80, .94, 1.08, 1.20, 1.36]
+const SWIM_ORDER = [6, 0, 1, 2, 3, 4, 5]
+const SWIM_TIMES = [.22, .38, .45, .51, .61, .72, 1.0]
 @onready var visual: Node2D = $Visual
 @onready var sprite: AnimatedSprite2D = $Visual/Art
 
 func _ready() -> void:
     _anchors = JSON.parse_string(FileAccess.get_file_as_string("res://assets/art/ocean/octopus/anchors.json"))
-    sprite.frame_changed.connect(_register_frame)
-    sprite.animation_changed.connect(_register_frame)
     reset()
 
 func configure(player: CharacterBody2D, view: Camera2D) -> void:
@@ -44,109 +52,165 @@ func configure(player: CharacterBody2D, view: Camera2D) -> void:
 
 func _physics_process(delta: float) -> void:
     if not enabled or not is_instance_valid(target) or not is_instance_valid(camera): return
-    if _finishing_visit and state == State.WAITING: return
+    _tick_cloud(delta)
     var rising := target.global_position.y < _previous_player_y-.01
     _previous_player_y = target.global_position.y
-    cycle_elapsed += delta
+    if state == State.WAITING:
+        cycle_elapsed = cycle_elapsed+delta if rising else 0.0
+        if automatic_spawning and not _finishing_visit and cycle_elapsed >= spawn_interval and is_available(): _appear()
+        return
     state_elapsed += delta
-    if state != State.WAITING:
-        _visit_elapsed += delta
-        _follow_view()
-        if _visit_elapsed >= visible_seconds:
-            hide()
-            sprite.pause()
-            _change_state(State.WAITING)
+    _visit_elapsed += delta
+    _swim_clock += delta
     match state:
-        State.WAITING:
-            if automatic_spawning and not _finishing_visit and cycle_elapsed >= spawn_interval and rising: _appear()
-        State.ENTERING:
-            if _visit_elapsed >= visible_seconds*.2: _change_state(State.SWIMMING)
-        State.SWIMMING:
-            if not _finishing_visit and not _sprayed and _visit_elapsed <= visible_seconds-.3-8.0/12.0 and global_position.distance_to(target.global_position) <= proximity_radius:
+        State.ENTERING, State.SWIMMING:
+            var phase := fposmod(_swim_clock,1.12)/1.12
+            var pulse := .35
+            if phase >= .38 and phase <= .63: pulse += 1.8*pow(sin((phase-.38)/.25*PI),2)
+            _velocity = Vector2(float(_side)*12,-swim_speed)*pulse
+            global_position += _velocity*delta
+            _show_swim()
+            if state == State.ENTERING and _view_rect().grow(-35).has_point(global_position): _change_state(State.SWIMMING)
+            if not _finishing_visit and global_position.distance_to(target.global_position) <= proximity_radius:
+                _jet_direction = global_position.direction_to(target.global_position)
+                var painted_jet := Vector2(.76,.65)*Vector2(-float(_side),1)
+                _aim_rotation = wrapf(_jet_direction.angle()-painted_jet.angle(),-PI,PI)
                 _change_state(State.SQUASHING)
-            elif _visit_elapsed >= visible_seconds*.8:
-                _change_state(State.EXITING)
         State.SQUASHING:
-            if state_elapsed < .1:
-                visual.scale = Vector2.ONE.lerp(Vector2(1.18,.8),smoothstep(0,.1,state_elapsed))
-            elif state_elapsed < .21:
-                visual.scale = Vector2(1.18,.8).lerp(Vector2(.92,1.12),smoothstep(.1,.21,state_elapsed))
-            else:
-                visual.scale = Vector2(.92,1.12).lerp(Vector2.ONE,smoothstep(.21,.3,state_elapsed))
+            visual.rotation = lerp_angle(0,_aim_rotation,smoothstep(0,.3,state_elapsed))
+            var squeeze := sin(clampf(state_elapsed/.3,0,1)*TAU)*.07
+            visual.scale = Vector2(-float(_side)*(1+squeeze),1-squeeze)
+            global_position += _velocity*exp(-state_elapsed*10)*delta
             if state_elapsed >= .3:
-                visual.scale = Vector2.ONE
-                _sprayed = false
-                sprite.play(&"ink")
+                visual.scale = Vector2(-float(_side),1)
+                visual.rotation = _aim_rotation
                 _change_state(State.INKING)
         State.INKING:
-            if not _sprayed and state_elapsed >= 3.0/12.0:
+            var frame_index := 7
+            for i in INK_TIMES.size():
+                if state_elapsed < INK_TIMES[i]:
+                    frame_index = i
+                    break
+            _pose(&"ink",frame_index)
+            if not _sprayed and state_elapsed >= 1.08:
                 _sprayed = true
-                var teleport := target.get_node_or_null("Teleport")
-                if teleport == null or not teleport.is_invulnerable(): ink_sprayed.emit()
-            if state_elapsed >= 8.0/12.0:
-                sprite.play(&"swim")
-                _change_state(State.SWIMMING)
-    visual.scale.x = absf(visual.scale.x)*(-1.0 if _side>0 else 1.0)
+                _release_cloud()
+            if _sprayed:
+                var recoil := clampf((state_elapsed-1.08)/.28,0,1)
+                global_position -= _jet_direction*180*recoil*delta
+            if state_elapsed >= 1.36:
+                _swim_clock = 0
+                _change_state(State.EXITING)
+        State.EXITING:
+            _show_swim()
+            var phase := fposmod(_swim_clock,1.12)/1.12
+            var pulse := .35+1.6*pow(sin(clampf((phase-.38)/.25,0,1)*PI),2)
+            global_position -= _jet_direction*180*pulse*delta
+            visual.rotation = lerp_angle(visual.rotation,_aim_rotation+float(_side)*.35,1-exp(-delta*4))
+    # 只在整个身体出画后回收，不在屏幕中间按时隐藏。
+    if _visit_elapsed > .7 and not _view_rect().grow(180).has_point(global_position): _finish_body()
+    elif _visit_elapsed > visible_seconds+3 and state in [State.ENTERING,State.SWIMMING]:
+        _jet_direction = Vector2(-float(_side)*.55,.84)
+        _aim_rotation = visual.rotation
+        _change_state(State.EXITING)
 
-func _process(_delta: float) -> void:
-    if enabled and state != State.WAITING: _follow_view()
+func _show_swim() -> void:
+    var phase := fposmod(_swim_clock,1.12)/1.12
+    for i in SWIM_TIMES.size():
+        if phase < SWIM_TIMES[i]:
+            _pose(&"swim",SWIM_ORDER[i])
+            return
+
+func _pose(animation: StringName, frame_index: int) -> void:
+    sprite.animation = animation
+    sprite.frame = frame_index
+    sprite.pause()
+    _register_frame()
 
 func _view_rect() -> Rect2:
     var size := camera.get_viewport_rect().size/camera.zoom
-    return Rect2(camera.global_position+camera.offset-size*.5,size)
+    return Rect2(camera.get_screen_center_position()-size*.5,size)
 
-func _appear() -> void:
-    cycle_elapsed = 0.0
-    _visit_elapsed = 0.0
+func is_available() -> bool:
+    return state == State.WAITING and not is_instance_valid(_cloud)
+
+func _appear(spawn_point: Vector2 = Vector2.INF) -> void:
+    cycle_elapsed = 0
+    _visit_elapsed = 0
+    _swim_clock = 0
     _sprayed = false
-    _side = -_side
     var view := _view_rect()
-    var player_screen := target.global_position-view.position
-    _anchor = player_screen+Vector2(float(_side)*180,0)
-    visual.scale = Vector2(-1.0 if _side>0 else 1.0,1.0)
-    sprite.play(&"swim")
+    var x := clampf(target.global_position.x+float(_side)*180,view.position.x+140,view.end.x-140)
+    global_position = Vector2(x,view.position.y-110) if spawn_point == Vector2.INF else spawn_point
+    visual.scale = Vector2(-float(_side),1)
+    visual.rotation = 0
+    _show_swim()
     _change_state(State.ENTERING)
-    _follow_view()
     show()
     appeared.emit()
 
-func _follow_view() -> void:
-    var view := _view_rect()
-    # 章鱼相对上游镜头向下经过，不再横向快速入场或喷完立即退场。
-    var phase := clampf(_visit_elapsed/visible_seconds,0.0,1.0)
-    var margin := minf(130.0,view.size.x*.4)
-    var drift := sin(_visit_elapsed*TAU/lateral_period)*lateral_amplitude
-    var bob := sin(_visit_elapsed*TAU/swim_period)*swim_amplitude*sin(phase*PI)
-    var point := Vector2(clampf(_anchor.x+drift,margin,view.size.x-margin),lerpf(-100.0,view.size.y+110.0,phase)+bob)
-    global_position = view.position+point
+func _release_cloud() -> void:
+    _cloud = Sprite2D.new()
+    _cloud.texture = CLOUD
+    _cloud.material = sprite.material
+    _cloud.z_index = z_index
+    get_parent().add_child(_cloud)
+    _cloud.global_position = global_position+_jet_direction*112
+    _cloud_scale = 260.0/CLOUD.get_width()
+    _cloud.scale = Vector2.ONE*_cloud_scale*.55
+    _cloud_elapsed = 0
+    _cloud_hit = false
+
+func _tick_cloud(delta: float) -> void:
+    if not is_instance_valid(_cloud): return
+    _cloud_elapsed += delta
+    var expand := 1-pow(1-clampf(_cloud_elapsed/.2,0,1),3)
+    _cloud.scale = Vector2.ONE*_cloud_scale*lerpf(.55,1,expand)
+    _cloud.modulate.a = 1-clampf((_cloud_elapsed-3.2)/.65,0,1)
+    if not _cloud_hit and not _finishing_visit and target.global_position.distance_to(_cloud.global_position) <= ink_radius*lerpf(.55,1,expand):
+        var teleport := target.get_node_or_null("Teleport")
+        if teleport == null or not teleport.is_invulnerable():
+            _cloud_hit = true
+            ink_sprayed.emit()
+    if _cloud_elapsed >= 3.85:
+        _cloud.queue_free()
+        _cloud = null
 
 func _change_state(next: State) -> void:
     state = next
-    state_elapsed = 0.0
+    state_elapsed = 0
+
+func _finish_body() -> void:
+    hide()
+    _change_state(State.WAITING)
+    cycle_elapsed = 0
 
 func finish_current_visit() -> void:
-    # 鲨鱼击落只停止新交互；当前游动、受惊和吐墨动画仍按原进度完成。
     _finishing_visit = true
     process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _register_frame() -> void:
+    # 头部注册不包含喷出的墨汁，切换动作使用同一比例。
     var pivot: Array = _anchors[sprite.animation][sprite.frame]
     var texture := sprite.sprite_frames.get_frame_texture(sprite.animation,sprite.frame)
     sprite.offset = texture.get_size()*.5-Vector2(pivot[0],pivot[1])
-    sprite.scale = Vector2.ONE*(.42 if sprite.animation==&"swim" else .48)
+    sprite.scale = Vector2.ONE*artwork_scale
 
 func reset() -> void:
     process_mode = Node.PROCESS_MODE_INHERIT
     _finishing_visit = false
     state = State.WAITING
-    cycle_elapsed = 0.0
-    state_elapsed = 0.0
+    cycle_elapsed = 0
+    state_elapsed = 0
     _side = 1
     _sprayed = false
-    _visit_elapsed = 0.0
+    _visit_elapsed = 0
+    _swim_clock = 0
+    _velocity = Vector2.ZERO
+    if is_instance_valid(_cloud): _cloud.queue_free()
+    _cloud = null
     if is_instance_valid(target): _previous_player_y = target.global_position.y
     hide()
     visual.scale = Vector2.ONE
-    sprite.play(&"swim")
-    sprite.stop()
-    _register_frame()
+    visual.rotation = 0
+    _pose(&"swim",0)

@@ -185,10 +185,9 @@ func run():
         await physics_frame
         if not prepared_octopus and enemy.state==enemy.State.LOCKING and enemy.state_elapsed>.7:
             octopus.enabled = true
-            octopus._appear()
+            octopus._appear(fish.global_position+Vector2(300,-100))
             octopus._visit_elapsed = 1.4
             octopus._change_state(octopus.State.SWIMMING)
-            octopus._follow_view()
             ink.splash()
             prepared_octopus = true
         if game.dead:break

@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://modules/environment/rising_hell_lava.gd" id="behavior"]
+[ext_resource type="Texture2D" path="res://assets/art/hell/layers/lava.png" id="original_art"]
+
+[node name="RisingLava" type="Node2D"]
+z_index = 16
+script = ExtResource("behavior")
+
+[node name="Fill" type="Polygon2D" parent="."]
+color = Color(0.95686275,0.30588236,0.0627451,1)
+
+[node name="Surface" type="Sprite2D" parent="."]
+texture = ExtResource("original_art")
+centered = false
+region_enabled = true
+region_rect = Rect2(840,80,750,167)

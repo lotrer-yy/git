@@ -30,6 +30,7 @@ func start_segment(index: int) -> void:
         level.demon.global_position = SURFACE.landing_on(level.get_node("Platforms/Breakable09"))+Vector2(0,-3)
         level.demon.velocity = Vector2.ZERO
         level.demon.reset_physics_interpolation()
+        level.get_node("RisingLava").start_at_checkpoint(level.demon)
         camera.set_follow_target(level.demon,true)
         camera.set_process(true)
         camera.make_current()

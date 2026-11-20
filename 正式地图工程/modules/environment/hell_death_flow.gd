@@ -53,6 +53,8 @@ func _freeze() -> void:
 	impact_shake.play(camera, level.death_reason == &"fall")
 	if level.death_reason == &"drown":
 		await level.get_node("OceanLink/Breath").play_death()
+	elif level.death_reason == &"tentacle":
+		await level.get_node("OceanLink/FishStage/SideTentacle").play_death()
 	elif level.player == level.demon:
 		await death_animation.play(level.demon, camera, level.get_node("Fork").held)
 	overlay.show_death()

@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://modules/movement/fish_teleport.gd" id="teleport"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/fish/abilities/fish.png" id="fish_art"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/fish/abilities/selected_right.png" id="selected_right"]
+[ext_resource type="Script" path="res://modules/environment/ocean_side_tentacle.gd" id="tentacle"]
 
 [node name="FishStage" type="Node2D"]
 script = ExtResource("assembly")
@@ -36,3 +37,6 @@ host_group = &"formal_ocean_fish_hosts"
 [node name="PossessionCamera" type="Node" parent="."]
 script = ExtResource("shot")
 camera_path = NodePath("../../../Camera")
+
+[node name="SideTentacle" type="Node2D" parent="."]
+script = ExtResource("tentacle")

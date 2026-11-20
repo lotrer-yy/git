@@ -45,6 +45,7 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
+    $SideTentacle.reset()
     fish.get_node("Teleport").enabled = false
     fish.get_node("Teleport").reset()
     if active: possession.reset()

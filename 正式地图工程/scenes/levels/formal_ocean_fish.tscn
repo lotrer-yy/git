@@ -7,6 +7,11 @@
 [ext_resource type="Texture2D" path="res://assets/art/characters/fish/abilities/fish.png" id="fish_art"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/fish/abilities/selected_right.png" id="selected_right"]
 [ext_resource type="Script" path="res://modules/environment/ocean_side_tentacle.gd" id="tentacle"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/ocean_shark.tscn" id="shark"]
+[ext_resource type="Script" path="res://modules/enemies/shark_knockback.gd" id="shark_knockback"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/ocean_octopus_encounters.tscn" id="octopus"]
+[ext_resource type="PackedScene" path="res://scenes/effects/ocean_ink_overlay.tscn" id="ink_overlay"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/ocean_pink_sharks.tscn" id="pink_sharks"]
 
 [node name="FishStage" type="Node2D"]
 script = ExtResource("assembly")
@@ -40,3 +45,15 @@ camera_path = NodePath("../../../Camera")
 
 [node name="SideTentacle" type="Node2D" parent="."]
 script = ExtResource("tentacle")
+
+[node name="Shark" parent="." instance=ExtResource("shark")]
+
+[node name="SharkKnockback" type="Node2D" parent="."]
+z_index = 15
+script = ExtResource("shark_knockback")
+
+[node name="Octopus" parent="." instance=ExtResource("octopus")]
+
+[node name="InkOverlay" parent="." instance=ExtResource("ink_overlay")]
+
+[node name="PinkSharks" parent="." instance=ExtResource("pink_sharks")]

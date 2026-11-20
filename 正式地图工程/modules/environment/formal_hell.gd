@@ -80,6 +80,9 @@ func _physics_process(delta: float) -> void:
 func die(reason: StringName = &"impact") -> void:
 	if dead or exit_in_progress or not visible or not $WallEntry.completed:
 		return
+	var teleport := player.get_node_or_null("Teleport")
+	if teleport != null and teleport.is_invulnerable():
+		return
 	dead = true
 	death_reason = reason
 	died.emit()

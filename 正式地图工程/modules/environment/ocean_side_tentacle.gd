@@ -9,6 +9,7 @@ const FLEX = preload("res://modules/visual/tentacle_flex_visual.gd")
 @export var edge_band_width: float = 320.0
 @export var linger_seconds: float = 2.0
 @export var artwork_scale: float = 1.7
+@export var spawn_above_pixels: float = 180.0
 @export var emerge_seconds: float = 0.28
 @export var raise_seconds: float = 0.34
 @export var strike_seconds: float = 0.16
@@ -119,18 +120,20 @@ func _begin_attack() -> void:
     _clock = 0.0
     linger_elapsed = 0.0
     var point := to_local(fish.global_position)
-    var bounds := _bounds_at(point.y)
+    var spawn_y := point.y-spawn_above_pixels
+    var bounds := _bounds_at(spawn_y)
     # 左墙向右伸，右墙向左伸；攻击地点在触发时锁定，之后可以躲开。
     var inward := -side
-    _anchor = Vector2(bounds.x-28.0 if side < 0 else bounds.y+28.0, point.y)
-    var local_x := (point.x-_anchor.x)/(float(inward)*artwork_scale)
+    _anchor = Vector2(bounds.x-28.0 if side < 0 else bounds.y+28.0, spawn_y)
+    # 根部明确出现在鱼上方，再让下拍弧线经过出招时的鱼位；不是把伤害框往下挪。
+    var aim := Vector2((point.x-_anchor.x)*float(inward),point.y-_anchor.y)/artwork_scale
     var closest := Vector2.ZERO
     var distance := INF
     for p in _centerline:
-        if absf(p.x-local_x) < distance:
+        if not p.is_zero_approx() and absf(p.length()-aim.length()) < distance:
             closest = p
-            distance = absf(p.x-local_x)
-    _anchor.y -= closest.y*artwork_scale
+            distance = absf(p.length()-aim.length())
+    _flex.root_slap_degrees = clampf(root_slap_degrees+rad_to_deg(aim.angle()-closest.angle()),5.0,80.0)
     _rig.scale = Vector2(float(inward)*artwork_scale,artwork_scale)
     _rig.show()
     _sample_attack()

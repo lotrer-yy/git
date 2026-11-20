@@ -50,7 +50,8 @@ func run():
     check(attacks.is_empty(),"No attack occurs before two continuous seconds on the same side")
     await create_timer(.14).timeout
     check(attacks==[-1] and trap.attacking,"Two seconds at the left wall starts a left-wall attack")
-    check(trap._anchor.x<bounds.x and trap._rig.scale.x>0,"Left tentacle is rooted behind the wall and faces into the water")
+    check(trap._anchor.x<trap._bounds_at(y-trap.spawn_above_pixels).x and trap._rig.scale.x>0,"Left tentacle is rooted behind the wall and faces into the water")
+    check(absf(trap._anchor.y-(y-180.0))<.01,"Left tentacle emerges 180 pixels above the fish to block its upward route")
     check(trap.z_index<game.get_node("WorldLayers/OceanWalls").z_index,"Wall foreground covers the tentacle root")
     check(fish.get_node("Teleport").try_teleport(Vector2.RIGHT),"Fish can use its real Shift skill during the attack anticipation")
     await create_timer(trap.emerge_seconds+trap.raise_seconds+trap.strike_seconds+trap.retract_seconds+.1).timeout
@@ -61,7 +62,8 @@ func run():
     fish.velocity = Vector2.ZERO
     game.camera.set_follow_target(fish,true)
     await create_timer(.09).timeout
-    check(attacks==[-1,1] and trap._rig.scale.x<0 and trap._anchor.x>bounds.y,"Right wall attack mirrors the arm while preserving its root")
+    check(attacks==[-1,1] and trap._rig.scale.x<0 and trap._anchor.x>trap._bounds_at(y-trap.spawn_above_pixels).y,"Right wall attack mirrors the arm while preserving its root")
+    check(absf(trap._anchor.y-(y-180.0))<.01,"Right tentacle uses the same above-fish emergence height")
     for i in 160:
         await physics_frame
         if game.dead: break

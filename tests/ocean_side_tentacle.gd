@@ -53,7 +53,7 @@ func run():
     check(trap._anchor.x<bounds.x and trap._rig.scale.x>0,"Left tentacle is rooted behind the wall and faces into the water")
     check(trap.z_index<game.get_node("WorldLayers/OceanWalls").z_index,"Wall foreground covers the tentacle root")
     check(fish.get_node("Teleport").try_teleport(Vector2.RIGHT),"Fish can use its real Shift skill during the attack anticipation")
-    await create_timer(.75).timeout
+    await create_timer(trap.emerge_seconds+trap.raise_seconds+trap.strike_seconds+trap.retract_seconds+.1).timeout
     check(not game.dead and not trap.attacking,"Blinking beyond the locked attack avoids damage and the arm retracts")
     trap.reset()
     trap.linger_seconds = .05
@@ -62,7 +62,7 @@ func run():
     game.camera.set_follow_target(fish,true)
     await create_timer(.09).timeout
     check(attacks==[-1,1] and trap._rig.scale.x<0 and trap._anchor.x>bounds.y,"Right wall attack mirrors the arm while preserving its root")
-    for i in 80:
+    for i in 160:
         await physics_frame
         if game.dead: break
     check(game.dead and game.death_reason==&"tentacle","The visible fast slap kills a fish that remains in its actual silhouette")

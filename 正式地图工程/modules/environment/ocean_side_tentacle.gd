@@ -5,14 +5,17 @@ signal fish_hit
 const SHEET = preload("res://assets/art/ocean/tentacle/slap_sheet.png")
 const ANCHORS = "res://assets/art/ocean/tentacle/anchors.json"
 const WHITE_KEY = preload("res://shaders/tentacle_white_key.gdshader")
+const FLEX = preload("res://modules/visual/tentacle_flex_visual.gd")
 @export var edge_band_width: float = 320.0
 @export var linger_seconds: float = 2.0
 @export var artwork_scale: float = 1.7
-@export var emerge_seconds: float = 0.14
-@export var raise_seconds: float = 0.18
-@export var strike_seconds: float = 0.10
-@export var retract_seconds: float = 0.28
+@export var emerge_seconds: float = 0.28
+@export var raise_seconds: float = 0.34
+@export var strike_seconds: float = 0.16
+@export var retract_seconds: float = 0.40
 @export var cooldown_seconds: float = 0.8
+@export var root_lift_degrees: float = 28.0
+@export var root_slap_degrees: float = 18.0
 @export var down_speed: float = 900.0
 @export var down_gravity: float = 1800.0
 var linger_elapsed: float = 0.0
@@ -24,7 +27,7 @@ var _cooldown: float = 0.0
 var _hit: bool = false
 var _anchor := Vector2.ZERO
 var _rig: Node2D
-var _sprite: Sprite2D
+var _flex: Node2D
 var _frames: Array
 var _stroke := PackedVector2Array()
 var _centerline := PackedVector2Array()
@@ -46,17 +49,15 @@ func _ready() -> void:
     _walls_image = walls.texture.get_image()
     _rig = Node2D.new()
     add_child(_rig)
-    _sprite = Sprite2D.new()
-    _sprite.texture = SHEET
-    _sprite.centered = false
-    _sprite.region_enabled = true
-    _sprite.region_filter_clip_enabled = true
     var key := ShaderMaterial.new()
     key.shader = WHITE_KEY
-    _sprite.material = key
-    _rig.add_child(_sprite)
+    _flex = FLEX.new()
+    _rig.add_child(_flex)
+    _flex.root_lift_degrees = root_lift_degrees
+    _flex.root_slap_degrees = root_slap_degrees
+    _flex.configure(SHEET,_frames[0],key)
     _rig.hide()
-    _build_stroke()
+    _centerline = _flex.strike_centerline
 
 func _eligible() -> bool:
     var ocean_y: float = level.to_local(fish.global_position).y
@@ -135,27 +136,19 @@ func _begin_attack() -> void:
     _sample_attack()
     attack_started.emit(side)
 
-func _show_frame(index: int) -> void:
-    var frame: Dictionary = _frames[index]
-    var rect: Array = frame.region
-    _sprite.region_rect = Rect2(rect[0],rect[1],rect[2],rect[3])
-    _sprite.position = -Vector2(frame.pivot[0],frame.pivot[1])
-
 func _sample_attack() -> void:
     var strike_start := emerge_seconds+raise_seconds
     var retract_start := strike_start+strike_seconds
     var finish := retract_start+retract_seconds
     var retreat := 0.0
+    var hidden_distance: float = _flex.reach*artwork_scale+60.0
     if _clock < emerge_seconds:
-        _show_frame(0)
-        retreat = 100.0*(1.0-smoothstep(0.0,emerge_seconds,_clock))
-    elif _clock < strike_start:
-        _show_frame(1 if _clock < emerge_seconds+raise_seconds*.5 else 2)
+        retreat = hidden_distance*(1.0-_flex._ease(_clock/emerge_seconds))
     elif _clock < retract_start:
-        _show_frame(3 if _clock < strike_start+strike_seconds*.2 else 4)
+        retreat = 0.0
     elif _clock < finish:
-        _show_frame(5 if _clock < retract_start+retract_seconds*.4 else 0)
-        retreat = 470.0*smoothstep(retract_start,finish,_clock)
+        # 先让末端回弹，再收进墙后；拍下那一刻不会突然开始整条平移。
+        retreat = hidden_distance*_flex._ease((_clock-retract_start-retract_seconds*.22)/(retract_seconds*.78))
     else:
         attacking = false
         side = 0
@@ -163,32 +156,12 @@ func _sample_attack() -> void:
         _rig.hide()
         return
     _rig.position = _anchor + Vector2(float(side)*retreat,0)
-    if _clock >= strike_start+strike_seconds*.2 and _clock < retract_start and not _hit and _touches_fish():
+    _flex.sample(_clock,emerge_seconds,raise_seconds,strike_seconds,retract_seconds)
+    _stroke = _flex.outline
+    if _clock >= strike_start+strike_seconds*.45 and _clock < retract_start+_flex.tip_lag_seconds and not _hit and _touches_fish():
         _hit = true
         fish_hit.emit()
         level.die(&"tentacle")
-
-func _build_stroke() -> void:
-    # 从拍下那帧的原像素建立轮廓，伤害区域随朝向镜像，不用整张图的大方框。
-    var frame: Dictionary = _frames[4]
-    var rect: Array = frame.region
-    var pivot := Vector2(frame.pivot[0],frame.pivot[1])
-    var image := SHEET.get_image()
-    var lower := PackedVector2Array()
-    for x in range(12,int(rect[2])-5,5):
-        var top := -1
-        var bottom := -1
-        for y in int(rect[3]):
-            var c := image.get_pixel(int(rect[0])+x,int(rect[1])+y)
-            if minf(c.r,minf(c.g,c.b)) < 0.85:
-                if top < 0: top = y
-                bottom = y
-        if top < 0: continue
-        _stroke.append(Vector2(x,top)-pivot)
-        lower.append(Vector2(x,bottom)-pivot)
-        _centerline.append(Vector2(x,(top+bottom)*.5)-pivot)
-    lower.reverse()
-    _stroke.append_array(lower)
 
 func _touches_fish() -> bool:
     var shape := fish.get_node("Collision") as CollisionShape2D

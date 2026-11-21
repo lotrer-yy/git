@@ -4,11 +4,13 @@ signal appeared
 enum State { DORMANT, RISING, PRESENT }
 @export var enabled: bool = false
 @export var ascent_before_entrance: float = 900.0
-@export var artwork_scale: float = .56
-@export var head_offset_below_player: float = 130.0
+@export var artwork_scale: float = .95
+@export var head_offset_below_player: float = -80.0
+@export var distance_swing: float = 170.0
+@export var cruise_rise_speed: float = 200.0
 @export var maximum_rise_speed: float = 1100.0
 @export var acceleration: float = 2200.0
-@export var pulse_push: float = 210.0
+@export var pulse_push: float = 850.0
 var target: CharacterBody2D
 var camera: Camera2D
 var state: State = State.DORMANT
@@ -36,13 +38,21 @@ func _physics_process(delta: float) -> void:
         if _start_y-target.global_position.y >= ascent_before_entrance: _begin_entrance()
         return
     _clock += delta
-    visual.sample(_clock)
-    var desired_y := target.global_position.y+head_offset_below_player
-    var error := desired_y-global_position.y
-    var desired_speed := clampf(target.velocity.y+error*2.4-visual.thrust_at(_clock)*pulse_push,-maximum_rise_speed,180)
+    var gap := global_position.y-target.global_position.y
+    # 独立的收伞推进/舒展滑行，不复制小鱼速度；只在远离遭遇区时缓慢纠偏。
+    var desired_speed: float = -cruise_rise_speed-visual.thrust_at(_clock)*pulse_push
+    if state == State.RISING:
+        desired_speed = -maximum_rise_speed
+        if gap<head_offset_below_player+distance_swing*.65 and _clock>1: state = State.PRESENT
+    elif gap>head_offset_below_player+distance_swing:
+        desired_speed = minf(desired_speed,-650-(gap-head_offset_below_player-distance_swing)*2.5)
+    elif gap<head_offset_below_player-distance_swing:
+        desired_speed = clampf((head_offset_below_player-distance_swing-gap)*2.5,40,250)
+    desired_speed = clampf(desired_speed,-maximum_rise_speed,250)
     _vertical_speed = move_toward(_vertical_speed,desired_speed,acceleration*delta)
     global_position.y += _vertical_speed*delta
-    if state == State.RISING and _clock>2 and absf(error)<180: state = State.PRESENT
+    visual.update_gaze(target.global_position,delta)
+    visual.sample(_clock)
 
 func _begin_entrance() -> void:
     # 正常开场沿用显示相机，Camera 是计算视野的虚拟机位；两条入口都读同一世界构图。
@@ -65,5 +75,7 @@ func reset() -> void:
     _vertical_speed = 0
     hide()
     if is_instance_valid(visual):
+        visual.left_gaze = Vector2.ZERO
+        visual.right_gaze = Vector2.ZERO
         visual.scale = Vector2.ONE*artwork_scale
         visual.sample(0)

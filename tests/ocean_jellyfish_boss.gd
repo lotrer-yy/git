@@ -48,11 +48,50 @@ func run():
     check(boss.global_position.y<initial.y-1000,"Boss swims upward into the moving view")
     check(absf(boss.global_position.x-960)<.1,"Boss keeps its world lane")
     check(boss.state==boss.State.PRESENT,"Entrance settles into background presence")
+    check(boss.artwork_scale>=.9,"Boss is large enough to extend behind the side walls")
+    var nearest := INF
+    var farthest := -INF
+    for step in 800:
+        player.velocity = Vector2(0,-420)
+        player.position += player.velocity*.01
+        boss._physics_process(.01)
+        var gap: float = boss.global_position.y-player.global_position.y
+        nearest = minf(nearest,gap)
+        farthest = maxf(farthest,gap)
+    check(farthest-nearest>80,"Boss makes visible relative progress and falls back rather than remaining attached to the player")
     var a: PackedVector2Array = boss.visual.mesh.polygon.duplicate()
     boss.visual.sample(.4)
     var b: PackedVector2Array = boss.visual.mesh.polygon.duplicate()
     boss.visual.sample(1.1)
     check(a!=b and b!=boss.visual.mesh.polygon,"Bell and tentacles deform continuously")
+    var visual = boss.visual
+    var eyes := Vector2(0,700-visual.ART.get_height()*.19)
+    visual.update_gaze(visual.to_global(eyes+Vector2(-800,-500)),1)
+    check(visual.left_gaze.x<-.5 and visual.right_gaze.x<-.5,"Both eyes look left toward the actual player position")
+    visual.update_gaze(visual.to_global(eyes+Vector2(800,500)),1)
+    check(visual.left_gaze.x>.5 and visual.right_gaze.x>.5,"Both eyes turn right as the player passes")
+    check(visual.left_gaze.y>.4 and visual.right_gaze.y>.4,"Eyes also track vertical motion")
+    visual.update_gaze(visual.to_global(eyes),1)
+    check(visual.left_gaze.x>.5 and visual.right_gaze.x<-.5,"Each eye independently converges on a player between the eyes")
+    visual.left_gaze = Vector2.ZERO
+    visual.right_gaze = Vector2.ZERO
+    visual.sample(.4)
+    var neutral: PackedVector2Array = visual.mesh.polygon.duplicate()
+    for gaze in [Vector2.LEFT,Vector2.RIGHT,Vector2.UP,Vector2(.7,.7)]:
+        visual.left_gaze = gaze
+        visual.right_gaze = gaze
+        visual.sample(.4)
+        var moved: PackedVector2Array = visual.mesh.polygon
+        var eyes_moved := false
+        for i in moved.size():
+            if visual._eye_weights[i]>.9 and moved[i].distance_to(neutral[i])>20: eyes_moved = true
+            if is_zero_approx(visual._eye_weights[i]):
+                check(moved[i].is_equal_approx(neutral[i]),"Gaze cannot move the mouth, bell border or tentacles")
+        check(eyes_moved,"The painted eyes actually move within the face")
+        var intact := true
+        for face in visual.mesh.polygons:
+            if (moved[face[1]]-moved[face[0]]).cross(moved[face[2]]-moved[face[0]])<=0: intact = false
+        check(intact,"Eye tracking never folds or tears the textured mesh")
     check(boss.z_index>0 and boss.z_index<15,"Boss sits between background and creatures")
     boss.reset()
     check(not boss.visible and not boss.enabled,"Retry clears entrance and motion")

@@ -21,6 +21,8 @@ func _ready() -> void:
     $Octopus.configure(fish,get_node("../../Camera"))
     $Octopus.ink_sprayed.connect($InkOverlay.splash)
     $JellyfishBoss.configure(fish,get_node("../../Camera"),level.to_global(Vector2(960,0)).x)
+    $BossTentacleNet.configure(fish,$JellyfishBoss,$SideTentacle)
+    $BossTentacleNet.player_hit.connect(_on_boss_net_hit)
     for lane in $PinkSharks.get_children():
         lane.configure(fish,get_node("../../Camera"))
         lane.player_hit.connect(_on_pink_shark_hit)
@@ -30,6 +32,7 @@ func _physics_process(_delta: float) -> void:
     var can_attack: bool = active and host.claimed and level.player == fish and not level.dead and not level.exit_in_progress and level.visible and y >= 29978.0 and y <= 39138.0
     $Shark.enabled = can_attack
     $JellyfishBoss.enabled = can_attack
+    $BossTentacleNet.enabled = can_attack
     for lane in $PinkSharks.get_children(): lane.damage_enabled = can_attack
     if not (level.dead and level.death_reason in [&"shark",&"pink_shark"]):
         $Octopus.enabled = can_attack
@@ -42,6 +45,10 @@ func _on_shark_hit(direction: Vector2) -> void:
 func _on_pink_shark_hit(direction: Vector2) -> void:
     $SharkKnockback.impact_direction = direction
     level.die(&"pink_shark")
+
+func _on_boss_net_hit(direction: Vector2) -> void:
+    $SharkKnockback.impact_direction = direction
+    level.die(&"jellyfish_net")
 
 func activate() -> void:
     if active: return
@@ -65,6 +72,7 @@ func _on_transfer_finished(chosen_host: PossessableHost) -> void:
 func _on_player_died() -> void:
     if not active: return
     $JellyfishBoss.enabled = false
+    $BossTentacleNet.enabled = false
     $Shark.enabled = false
     for lane in $PinkSharks.get_children(): lane.damage_enabled = false
     if level.death_reason in [&"shark",&"pink_shark"]:
@@ -81,6 +89,7 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
+    $BossTentacleNet.reset()
     $JellyfishBoss.reset()
     for lane in $PinkSharks.get_children(): lane.reset()
     $Octopus.enabled = false

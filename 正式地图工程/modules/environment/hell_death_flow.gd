@@ -55,7 +55,7 @@ func _freeze() -> void:
 		await level.get_node("OceanLink/Breath").play_death()
 	elif level.death_reason == &"tentacle":
 		await level.get_node("OceanLink/FishStage/SideTentacle").play_death()
-	elif level.death_reason in [&"shark",&"pink_shark"]:
+	elif level.death_reason in [&"shark",&"pink_shark",&"jellyfish_net"]:
 		var knockback = level.get_node("OceanLink/FishStage/SharkKnockback")
 		await knockback.play(level.player, camera, knockback.impact_direction)
 	elif level.player == level.demon:

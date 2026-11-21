@@ -1,5 +1,5 @@
 extends Node2D
-## 从玩家前上方侧墙预警，一次预判后固定方向穿刺。
+## 在上游和下游交错布置固定障碍，保留两侧绕行通道。
 signal row_started(height: float)
 signal player_hit(direction: Vector2)
 const WARNING = preload("res://modules/visual/tentacle_warning.gd")
@@ -7,12 +7,12 @@ const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 @export var enabled: bool = false
 @export var wave_interval: float = 1.8
 @export var minimum_ascent: float = 180.0
-@export var spawn_ahead_pixels: float = 360.0
+@export var spawn_ahead_pixels: float = 600.0
+@export var retreat_offset_pixels: float = 140.0
+@export var passage_width: float = 320.0
 @export var tentacle_thickness: float = 144.0
-@export var half_row_height: float = 60.0
-@export var charge_seconds: float = 1.35
+@export var charge_seconds: float = 1.15
 @export var strike_seconds: float = .18
-@export var prediction_seconds: float = .05
 @export var maximum_rows: int = 6
 var rows: Array[Dictionary] = []
 var target: CharacterBody2D
@@ -81,8 +81,7 @@ func _spawn_row() -> void:
     var root := Node2D.new()
     add_child(root)
     var view := _view_rect()
-    root.position.y = clampf(point.y-spawn_ahead_pixels,to_local(view.position).y+240,to_local(view.end).y-150)
-    var bounds: Vector2 = edge_provider._bounds_at(root.position.y)
+    root.position.y = clampf(point.y-spawn_ahead_pixels,to_local(view.position).y+100,to_local(view.end).y-150)
     var arms: Array[Node2D] = []
     for i in 2:
         var side := _side if i==0 else -_side
@@ -91,14 +90,17 @@ func _spawn_row() -> void:
         tendril.charge_seconds = charge_seconds
         tendril.strike_seconds = strike_seconds
         tendril.delay = float(i)*.18
-        tendril.start = Vector2(bounds.x-80 if side<0 else bounds.y+80,-half_row_height)
-        tendril.finish = Vector2(bounds.y+80 if side<0 else bounds.x-80,half_row_height)
+        var lane_y: float = root.position.y if i==0 else clampf(point.y+retreat_offset_pixels,to_local(view.position).y+100,to_local(view.end).y-100)
+        var bounds: Vector2 = edge_provider._bounds_at(lane_y)
+        var local_y: float = lane_y-root.position.y
+        tendril.start = Vector2(bounds.x-80 if side<0 else bounds.y+80,local_y)
+        # 两条横向障碍一前一后、左右交错；末端留出可游过的缺口。
+        tendril.finish = Vector2(bounds.y-passage_width if side<0 else bounds.x+passage_width,local_y)
         root.add_child(tendril)
-        _aim_tendril(tendril)
         var exposed: Vector2 = tendril.start+(tendril.finish-tendril.start).normalized()*150
         var warning := WARNING.new()
         warning.name = "Warning"
-        warning.position = exposed+Vector2(0,-100)
+        warning.position = exposed+Vector2(0,100 if i==0 else -100)
         tendril.add_child(warning)
         if not view.grow(-20).has_point(tendril.to_global(exposed)):
             tendril.cancel()
@@ -110,14 +112,6 @@ func _spawn_row() -> void:
         var old: Dictionary = rows.pop_front()
         old.node.queue_free()
     row_started.emit(root.position.y)
-
-func _aim_tendril(tendril: Node2D) -> void:
-    # 只在生成时预判一次；蓄力、瞬移和镜头移动均不改变射线。
-    var aim: Vector2 = tendril.to_local(target.get_node("Collision").global_position+target.velocity*prediction_seconds)
-    var dx: float = aim.x-tendril.start.x
-    if absf(dx)<80: dx = 80.0 if tendril.finish.x>tendril.start.x else -80.0
-    var slope := clampf((aim.y-tendril.start.y)/dx,-1.5,1.5)
-    tendril.finish.y = tendril.start.y+slope*(tendril.finish.x-tendril.start.x)
 
 func _view_rect() -> Rect2:
     if not is_instance_valid(camera): return Rect2()

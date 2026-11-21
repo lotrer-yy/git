@@ -47,9 +47,13 @@ func run():
     advance(net,.25)
     check(row.node.global_position==initial_root,"Windup keeps its root fixed inside the wall")
     var aimed = row.arms[0]
-    var aimed_center: Vector2 = aimed.to_local(fish.get_node("Collision").global_position+Vector2(0,80))
-    var nearest: Vector2 = Geometry2D.get_closest_point_to_segment(aimed_center,aimed.start,aimed.finish)
-    check(nearest.distance_to(aimed_center)<1,"Direction keeps its initial predicted aim after the fish moves")
+    check(is_equal_approx(aimed.start.y,aimed.finish.y),"Upper tendril blocks a fixed horizontal lane instead of aiming at the fish")
+    var lower = row.arms[1]
+    check(lower.to_global(lower.start).y>fish.global_position.y,"The second tendril blocks retreat below the fish")
+    check(is_equal_approx(lower.start.y,lower.finish.y),"Lower barrier also keeps a fixed horizontal direction")
+    var upper_bounds: Vector2 = net.edge_provider._bounds_at(row.node.position.y)
+    check(absf(aimed.finish.x-upper_bounds.y)>=net.passage_width-.1,"Upper barrier leaves a usable passage at the opposite wall")
+    check(signf(aimed.finish.x-aimed.start.x)!=signf(lower.finish.x-lower.start.x),"Forward and retreat barriers leave gaps on alternating sides")
     var blink_aims := [row.arms[0].finish,row.arms[1].finish]
     var before_blink: Vector2 = fish.global_position
     fish.position.x += 120
@@ -89,6 +93,12 @@ func run():
             highest = minf(highest,tendril.to_global(tendril.start).y)
             highest = minf(highest,tendril.to_global(tendril.finish).y)
     fish.global_position = Vector2(960,highest-200)
+    var safe_origin: Vector2 = fish.global_position
+    var far_wall: float = upper_bounds.y if aimed.finish.x>aimed.start.x else upper_bounds.x
+    var gap_center: float = (aimed.finish.x+far_wall)*.5
+    fish.global_position = aimed.to_global(Vector2(gap_center,aimed.finish.y-140))
+    check(fish.move_and_collide(Vector2(0,280),true)==null,"The full fish body can swim through the deliberately open side passage")
+    fish.global_position = safe_origin
     var upward = fish.move_and_collide(Vector2(0,-120),true)
     check(upward==null,"The escape route above the fish remains open")
     var teleport = fish.get_node("Teleport")

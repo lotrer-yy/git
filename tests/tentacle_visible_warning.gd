@@ -43,7 +43,7 @@ func run():
     check(not warning.visible and not arm.dangerous,"Warning disappears before a separate safe reaction pause")
     check(arm.global_position==fixed_origin and arm.finish==fixed_aim,"Fish and camera movement cannot steer or drag the aimed tentacle")
     tick(net,.58)
-    check(arm.dangerous and arm.geometry_locked,"The warned attack eventually launches along its original direction")
+    check(not arm.dangerous and arm.geometry_locked and arm.body.collision_layer==16,"The warned attack eventually launches along its original direction")
     net.reset()
     net.enabled = true
     net._spawn_row()
@@ -51,7 +51,7 @@ func run():
     tick(net,.30)
     game.camera.global_position.y -= 3000
     tick(net,1.5)
-    check(arm.warning_confirmed and not arm.cancelled and arm.dangerous,"An already visible warning commits the fixed-direction attack even after the player swims past")
+    check(arm.warning_confirmed and not arm.cancelled and arm.geometry_locked and arm.body.collision_layer==16,"An already visible warning commits the fixed-direction attack even after the player swims past")
     net.reset()
     net.enabled = true
     game.camera.global_position.x += 4000

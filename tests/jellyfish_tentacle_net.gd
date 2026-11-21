@@ -68,7 +68,7 @@ func run():
     advance(net,.10)
     check(aimed.finish==locked_finish,"Aim locks before the strike so the player can dodge")
     advance(net,1.2)
-    check(row.arms[0].dangerous and row.arms[1].dangerous,"Both wall-to-wall strokes become live after their readable windup")
+    check(not row.arms[0].dangerous and not row.arms[1].dangerous and row.arms[0].body.collision_layer==16,"Finished tendrils stay solid but stop dealing damage")
     check(row.arms[0].centerline[-1].distance_to(row.arms[0].finish)<.1,"The straight original stretches all the way into the opposite wall")
     check(absf(aimed.centerline[12].y-aimed.start.y)>45,"Upper barrier keeps a visible natural arc after extending")
     check(absf(lower.centerline[12].y-lower.start.y)>30,"Retreat barrier curves in the opposite direction")
@@ -83,7 +83,7 @@ func run():
     check(net.rows.size()==2 and net.rows[1].node.position.y<row.node.position.y,"Further ascent progressively adds another row behind the fish")
     var arm = row.arms[0]
     var middle: Vector2 = arm.to_global(arm.centerline[12])
-    check(arm.touches(middle,24),"Damage follows the actual visible tendril geometry")
+    check(not arm.touches(middle,24),"Touching the finished tendril is nonlethal")
     check(not arm.touches(middle+Vector2(0,-150),24),"Water well above the net remains safe")
     fish.global_position = middle+Vector2(0,-130)
     await physics_frame
@@ -109,10 +109,24 @@ func run():
     teleport.enabled = true
     fish.global_position = middle
     advance(net,.01)
-    check(not game.dead,"Teleport immunity is respected by electric contact")
+    check(not game.dead,"Resting tendril contact does not kill the fish")
     teleport._invulnerability_remaining = 0
     advance(net,.01)
-    check(game.dead and game.death_reason==&"jellyfish_net","Contact with energized original art enters the real death flow")
+    check(not game.dead,"Resting contact remains safe without teleport immunity")
+    net.reset()
+    net.enabled = true
+    game.camera.global_position = fish.global_position
+    net._spawn_row()
+    advance(net,net.charge_seconds+.05)
+    var launching = net.rows[0].arms[0]
+    check(launching.dangerous,"Only the actual extending stroke is dangerous")
+    fish.global_position = launching.to_global(launching.centerline[12])
+    teleport._invulnerability_remaining = 1
+    advance(net,.01)
+    check(not game.dead,"Teleport immunity protects against the extending stroke")
+    teleport._invulnerability_remaining = 0
+    advance(net,.01)
+    check(game.dead and game.death_reason==&"jellyfish_net","Collision during extension enters the actual death flow")
     await create_timer(.08,true,false,true).timeout
     check(is_instance_valid(stage.get_node("SharkKnockback").corpse),"Net death plays the real fish impact animation instead of jumping straight to the overlay")
     stage.reset()

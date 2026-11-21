@@ -6,6 +6,7 @@ const SEGMENTS = 24
 @export var charge_seconds: float = .6
 @export var strike_seconds: float = .18
 @export var cap_texture_pixels: float = 64.0
+@export var curve_height: float = 0.0
 var start := Vector2.ZERO
 var finish := Vector2.ZERO
 var delay: float = 0.0
@@ -95,10 +96,14 @@ func sample(age: float) -> void:
     var cap_ratio := cap_length/maxf(reach,.001)
     for i in SEGMENTS+1:
         var s := float(i)/SEGMENTS
-        var point := start+axis*reach*s+normal*bend*sin(s*PI)
+        var curve := curve_height*clampf(reach/maxf(total,1),0,1)
+        var arc := sin(s*PI)+.18*sin(s*TAU)
+        var point := start+axis*reach*s+normal*bend*sin(s*PI)+Vector2(0,curve*arc)
+        var tangent := axis*reach+normal*bend*PI*cos(s*PI)+Vector2(0,curve*(PI*cos(s*PI)+.18*TAU*cos(s*TAU)))
+        var section_normal := tangent.normalized().orthogonal() if tangent.length_squared()>.001 else normal
         centerline.append(point)
-        vertices.append(point-normal*thickness*.5)
-        vertices.append(point+normal*thickness*.5)
+        vertices.append(point-section_normal*thickness*.5)
+        vertices.append(point+section_normal*thickness*.5)
         var source_x: float
         if cap_ratio>0 and s<cap_ratio:
             source_x = s/cap_ratio*cap_texture_pixels

@@ -5,11 +5,12 @@ signal player_hit(direction: Vector2)
 const WARNING = preload("res://modules/visual/tentacle_warning.gd")
 const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 @export var enabled: bool = false
-@export var wave_interval: float = 1.8
+@export var wave_interval: float = 1.65
 @export var minimum_ascent: float = 180.0
 @export var spawn_ahead_pixels: float = 600.0
 @export var retreat_offset_pixels: float = 140.0
-@export var passage_width: float = 320.0
+@export var passage_width: float = 280.0
+@export var retreat_passage_width: float = 360.0
 @export var tentacle_thickness: float = 144.0
 @export var charge_seconds: float = 1.15
 @export var strike_seconds: float = .18
@@ -87,6 +88,7 @@ func _spawn_row() -> void:
         var side := _side if i==0 else -_side
         var tendril := TENDRIL.new()
         tendril.thickness = tentacle_thickness
+        tendril.curve_height = 55.0 if i==0 else -40.0
         tendril.charge_seconds = charge_seconds
         tendril.strike_seconds = strike_seconds
         tendril.delay = float(i)*.18
@@ -95,7 +97,8 @@ func _spawn_row() -> void:
         var local_y: float = lane_y-root.position.y
         tendril.start = Vector2(bounds.x-80 if side<0 else bounds.y+80,local_y)
         # 两条横向障碍一前一后、左右交错；末端留出可游过的缺口。
-        tendril.finish = Vector2(bounds.y-passage_width if side<0 else bounds.x+passage_width,local_y)
+        var gap: float = passage_width if i==0 else retreat_passage_width
+        tendril.finish = Vector2(bounds.y-gap if side<0 else bounds.x+gap,local_y)
         root.add_child(tendril)
         var exposed: Vector2 = tendril.start+(tendril.finish-tendril.start).normalized()*150
         var warning := WARNING.new()

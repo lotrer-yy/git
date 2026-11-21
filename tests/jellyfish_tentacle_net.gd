@@ -70,6 +70,9 @@ func run():
     advance(net,1.2)
     check(row.arms[0].dangerous and row.arms[1].dangerous,"Both wall-to-wall strokes become live after their readable windup")
     check(row.arms[0].centerline[-1].distance_to(row.arms[0].finish)<.1,"The straight original stretches all the way into the opposite wall")
+    check(absf(aimed.centerline[12].y-aimed.start.y)>45,"Upper barrier keeps a visible natural arc after extending")
+    check(absf(lower.centerline[12].y-lower.start.y)>30,"Retreat barrier curves in the opposite direction")
+    check(net.passage_width<net.retreat_passage_width and net.passage_width>=280,"Forward obstruction is stronger while preserving a generous fish-sized passage")
     var fixed: Vector2 = row.node.global_position
     game.camera.global_position += Vector2(300,-1000)
     fish.position.y -= 400

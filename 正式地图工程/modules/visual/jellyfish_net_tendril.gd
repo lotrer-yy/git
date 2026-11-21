@@ -12,6 +12,7 @@ var delay: float = 0.0
 var centerline := PackedVector2Array()
 var dangerous: bool = false
 var cancelled: bool = false
+var warning_confirmed: bool = false
 var mesh: Polygon2D
 var sparks: Line2D
 var body: StaticBody2D

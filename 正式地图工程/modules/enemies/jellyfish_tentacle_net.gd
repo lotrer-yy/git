@@ -1,5 +1,5 @@
 extends Node2D
-## 从下方侧墙蓄力瞄准玩家，刺出后固定于原水域。
+## 从玩家前上方侧墙预警，一次预判后固定方向穿刺。
 signal row_started(height: float)
 signal player_hit(direction: Vector2)
 const WARNING = preload("res://modules/visual/tentacle_warning.gd")
@@ -7,7 +7,7 @@ const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 @export var enabled: bool = false
 @export var wave_interval: float = 1.8
 @export var minimum_ascent: float = 180.0
-@export var gap_below_player: float = 190.0
+@export var spawn_ahead_pixels: float = 360.0
 @export var tentacle_thickness: float = 144.0
 @export var half_row_height: float = 60.0
 @export var charge_seconds: float = 1.35
@@ -51,10 +51,13 @@ func _physics_process(delta: float) -> void:
         var center: Vector2 = target.get_node("Collision").global_position
         for tendril in row.arms:
             var t: float = row.age-tendril.delay
-            if not tendril.cancelled and t>=.18 and t<=charge_seconds+delta:
+            if not tendril.cancelled and not tendril.warning_confirmed and t>=.28:
                 var tip: Vector2 = tendril.to_global(tendril.start+(tendril.finish-tendril.start).normalized()*150)
-                # 蓄力阶段离开画面就取消，绝不从画外突然转成有伤害的穿刺。
-                if not _view_rect().grow(-20).has_point(tip): tendril.cancel()
+                # 确认露头和预警被看到后便承诺出手；游出镜头不会取消或转向。
+                if _view_rect().grow(-20).has_point(tip):
+                    tendril.warning_confirmed = true
+                else:
+                    tendril.cancel()
             tendril.sample(row.age)
             var warning: Node2D = tendril.get_node("Warning")
             warning.sample(t-.18)
@@ -78,7 +81,7 @@ func _spawn_row() -> void:
     var root := Node2D.new()
     add_child(root)
     var view := _view_rect()
-    root.position.y = clampf(point.y+gap_below_player,to_local(view.position).y+180,to_local(view.end).y-150)
+    root.position.y = clampf(point.y-spawn_ahead_pixels,to_local(view.position).y+240,to_local(view.end).y-150)
     var bounds: Vector2 = edge_provider._bounds_at(root.position.y)
     var arms: Array[Node2D] = []
     for i in 2:

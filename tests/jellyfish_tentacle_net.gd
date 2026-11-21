@@ -39,7 +39,7 @@ func run():
     check(net.rows.size()==1 and net.rows[0].arms.size()==2,"Boss lays two crossing tendrils from opposing walls")
     var row: Dictionary = net.rows[0]
     check(row.arms[0].thickness==144 and row.arms[0]._shapes[0].shape.radius==72,"Boss tendril and physical collision are both four times thicker")
-    check(row.node.position.y>fish.position.y,"The row starts below the fish, leaving the upward route open")
+    check(row.node.position.y<fish.position.y-200,"The warning starts ahead of the ascending fish instead of underneath it")
     check(not row.arms[0].dangerous and row.arms[0].body.collision_layer==0,"Visible windup does not create an invisible dangerous wall")
     var initial_root: Vector2 = row.node.global_position
     fish.get_node("Teleport")._invulnerability_remaining = 10

@@ -51,7 +51,7 @@ func run():
     tick(net,.30)
     game.camera.global_position.y -= 3000
     tick(net,1.5)
-    check(arm.cancelled and not arm.dangerous and arm.body.collision_layer==0,"Leaving view during warning cancels both offscreen attack and physical collision")
+    check(arm.warning_confirmed and not arm.cancelled and arm.dangerous,"An already visible warning commits the fixed-direction attack even after the player swims past")
     net.reset()
     net.enabled = true
     game.camera.global_position.x += 4000

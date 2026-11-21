@@ -15,6 +15,8 @@ var mesh: Polygon2D
 var sparks: Line2D
 var body: StaticBody2D
 var _shapes: Array[CollisionShape2D] = []
+var geometry_locked: bool = false
+var _last_electric_time: float = -INF
 
 func _ready() -> void:
     mesh = Polygon2D.new()
@@ -54,8 +56,12 @@ func sample(age: float) -> void:
     var t := age-delay
     visible = t>=0
     dangerous = t>=charge_seconds
-    body.collision_layer = 16 if dangerous else 0
+    var layer := 16 if dangerous else 0
+    if body.collision_layer!=layer: body.collision_layer = layer
     if t<0: return
+    if geometry_locked:
+        _update_electricity(age)
+        return
     var axis := (finish-start).normalized()
     var normal := axis.orthogonal()
     var total := start.distance_to(finish)
@@ -104,6 +110,18 @@ func sample(age: float) -> void:
         _shapes[i].position = (a+b)*.5
         _shapes[i].rotation = (b-a).angle()+PI*.5
         _shapes[i].shape.height = a.distance_to(b)+thickness
+    geometry_locked = t>=charge_seconds+strike_seconds
+    _last_electric_time = age
+
+func _update_electricity(age: float) -> void:
+    if not is_visible_in_tree() or age-_last_electric_time<1.0/30: return
+    _last_electric_time = age
+    var normal := (finish-start).normalized().orthogonal()
+    var points := PackedVector2Array()
+    for i in centerline.size():
+        var s := float(i)/SEGMENTS
+        points.append(centerline[i]+normal*sin(s*45-age*9)*3.5*sin(s*PI))
+    sparks.points = points
 
 func touches(world_point: Vector2, radius: float) -> bool:
     if not dangerous: return false

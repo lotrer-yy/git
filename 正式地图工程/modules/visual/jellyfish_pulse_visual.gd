@@ -1,9 +1,10 @@
 extends Node2D
 ## 同一张作者原图连续收伞、舒展与触须滞后，不拆换帧图。
 const ART = preload("res://assets/art/ocean/jellyfish/boss.png")
+const SHADER = preload("res://shaders/jellyfish_pulse.gdshader")
 const COLUMNS = 36
 const ROWS = 56
-@export var pulse_period: float = 1.65
+@export var pulse_period: float = 2.6
 @export var bell_squeeze: float = .075
 @export var tentacle_sway_pixels: float = 30.0
 @export var gaze_max_pixels := Vector2(40,28)
@@ -16,10 +17,15 @@ var _uv := PackedVector2Array()
 var _eye_weights := PackedFloat32Array()
 var _left_weights := PackedFloat32Array()
 var _right_weights := PackedFloat32Array()
+var _material: ShaderMaterial
 
 func _ready() -> void:
     mesh = Polygon2D.new()
     mesh.texture = ART
+    _material = ShaderMaterial.new()
+    _material.shader = SHADER
+    _material.set_shader_parameter("source_size",ART.get_size())
+    mesh.material = _material
     add_child(mesh)
     var size := ART.get_size()
     for y in ROWS+1:
@@ -60,6 +66,14 @@ func update_gaze(world_point: Vector2, delta: float) -> void:
 
 func sample(seconds: float) -> void:
     if mesh == null: return
+    _material.set_shader_parameter("phase",seconds/pulse_period)
+    _material.set_shader_parameter("bell_squeeze",bell_squeeze)
+    _material.set_shader_parameter("sway_pixels",tentacle_sway_pixels)
+    _material.set_shader_parameter("left_offset",left_gaze*gaze_max_pixels)
+    _material.set_shader_parameter("right_offset",right_gaze*gaze_max_pixels)
+
+func deformed_vertices(seconds: float) -> PackedVector2Array:
+    # 仅供回归检查/离线检查使用；实际动画只更新少量 GPU 参数。
     var phase := seconds/pulse_period
     var contract := maxf(0,sin(TAU*phase))
     var release := maxf(0,sin(TAU*(phase-.3)))
@@ -77,4 +91,4 @@ func sample(seconds: float) -> void:
         point.y += sin(TAU*phase-tail*3)*16*tail*tail
         point += (left_gaze*_left_weights[i]+right_gaze*_right_weights[i])*gaze_max_pixels
         vertices[i] = point
-    mesh.polygon = vertices
+    return vertices

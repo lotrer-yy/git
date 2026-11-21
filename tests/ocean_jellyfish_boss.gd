@@ -46,9 +46,12 @@ func run():
         camera.force_update_scroll()
         boss._physics_process(.01)
     check(boss.global_position.y<initial.y-1000,"Boss swims upward into the moving view")
-    check(absf(boss.global_position.x-960)<.1,"Boss keeps its world lane")
+    check(absf(boss.global_position.x-960)<=111,"Boss sways within its own world lane")
     check(boss.state==boss.State.PRESENT,"Entrance settles into background presence")
     check(boss.artwork_scale>=.9,"Boss is large enough to extend behind the side walls")
+    var static_geometry: PackedVector2Array = boss.visual.mesh.polygon.duplicate()
+    var leftmost := INF
+    var rightmost := -INF
     var nearest := INF
     var farthest := -INF
     for step in 800:
@@ -56,14 +59,18 @@ func run():
         player.position += player.velocity*.01
         boss._physics_process(.01)
         var gap: float = boss.global_position.y-player.global_position.y
+        leftmost = minf(leftmost,boss.global_position.x)
+        rightmost = maxf(rightmost,boss.global_position.x)
         nearest = minf(nearest,gap)
         farthest = maxf(farthest,gap)
-    check(farthest-nearest>80,"Boss makes visible relative progress and falls back rather than remaining attached to the player")
-    var a: PackedVector2Array = boss.visual.mesh.polygon.duplicate()
+    check(farthest-nearest>160,"Boss makes visible relative progress and falls back rather than remaining attached to the player")
+    check(rightmost-leftmost>120,"Boss also makes noticeable independent lateral progress")
+    check(boss.visual.mesh.polygon==static_geometry,"Animation does not rebuild the CPU mesh every tick")
+    var a: PackedVector2Array = boss.visual.deformed_vertices(0)
     boss.visual.sample(.4)
-    var b: PackedVector2Array = boss.visual.mesh.polygon.duplicate()
+    var b: PackedVector2Array = boss.visual.deformed_vertices(.4)
     boss.visual.sample(1.1)
-    check(a!=b and b!=boss.visual.mesh.polygon,"Bell and tentacles deform continuously")
+    check(a!=b and b!=boss.visual.deformed_vertices(1.1),"Bell and tentacles deform continuously")
     var visual = boss.visual
     var eyes := Vector2(0,700-visual.ART.get_height()*.19)
     visual.update_gaze(visual.to_global(eyes+Vector2(-800,-500)),1)
@@ -76,12 +83,12 @@ func run():
     visual.left_gaze = Vector2.ZERO
     visual.right_gaze = Vector2.ZERO
     visual.sample(.4)
-    var neutral: PackedVector2Array = visual.mesh.polygon.duplicate()
+    var neutral: PackedVector2Array = visual.deformed_vertices(.4)
     for gaze in [Vector2.LEFT,Vector2.RIGHT,Vector2.UP,Vector2(.7,.7)]:
         visual.left_gaze = gaze
         visual.right_gaze = gaze
         visual.sample(.4)
-        var moved: PackedVector2Array = visual.mesh.polygon
+        var moved: PackedVector2Array = visual.deformed_vertices(.4)
         var eyes_moved := false
         for i in moved.size():
             if visual._eye_weights[i]>.9 and moved[i].distance_to(neutral[i])>20: eyes_moved = true

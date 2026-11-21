@@ -37,11 +37,13 @@ func _physics_process(delta: float) -> void:
         if row.age<charge_seconds:
             # 只在读条阶段跟踪脚下高度；形成的电网不会跟着镜头移动。
             row.node.position.y = fish_y+gap_below_player
+        row.node.visible = row.node.position.y-fish_y<650
         var center: Vector2 = target.get_node("Collision").global_position
+        var nearby: bool = absf(row.node.position.y-fish_y)<half_row_height+tentacle_thickness*.5+40
         for tendril in row.arms:
             tendril.sample(row.age)
             var teleport := target.get_node_or_null("Teleport")
-            if not _hit and (teleport==null or not teleport.is_invulnerable()) and tendril.touches(center,24):
+            if nearby and not _hit and (teleport==null or not teleport.is_invulnerable()) and tendril.touches(center,24):
                 _hit = true
                 player_hit.emit(Vector2(float(-_side),-.5))
         if row.node.position.y-fish_y>1900: remove.append(row)

@@ -6,7 +6,9 @@ enum State { DORMANT, RISING, PRESENT }
 @export var ascent_before_entrance: float = 900.0
 @export var artwork_scale: float = .95
 @export var head_offset_below_player: float = -80.0
-@export var distance_swing: float = 170.0
+@export var distance_swing: float = 300.0
+@export var lateral_sway_pixels: float = 110.0
+@export var lateral_sway_period: float = 6.0
 @export var cruise_rise_speed: float = 200.0
 @export var maximum_rise_speed: float = 1100.0
 @export var acceleration: float = 2200.0
@@ -51,6 +53,8 @@ func _physics_process(delta: float) -> void:
     desired_speed = clampf(desired_speed,-maximum_rise_speed,250)
     _vertical_speed = move_toward(_vertical_speed,desired_speed,acceleration*delta)
     global_position.y += _vertical_speed*delta
+    var desired_x := _center_x+sin(_clock*TAU/lateral_sway_period)*lateral_sway_pixels
+    global_position.x = move_toward(global_position.x,desired_x,90*delta)
     visual.update_gaze(target.global_position,delta)
     visual.sample(_clock)
 

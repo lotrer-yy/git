@@ -27,9 +27,25 @@ func run():
     shadow._physics_process(.01)
     var movement: Vector2 = shadow.global_position-before
     check(movement.y< -200 and movement.y> -280,"Depth parallax is partial movement, not a screen-fixed creature")
-    var prior: Vector2 = shadow._velocity
-    shadow.sprite.frame = 3
-    check(shadow._velocity.y<prior.y-200,"Release frame propels the jellyfish forward after charge")
+    check(shadow.size_multiplier==.55,"Background silhouette is reduced to roughly half its previous size")
+    var direction := Vector2(.4,-.916515).normalized()
+    shadow._clock = 0
+    shadow._physics_process(.001)
+    var rest: Vector2 = shadow._drift
+    shadow._physics_process(shadow.swim_cycle_seconds*.31)
+    check((shadow._drift-rest).dot(direction)<-8,"Shadow visibly pulls backward to charge like the octopus")
+    var charge: Vector2 = shadow._drift
+    shadow._physics_process(shadow.swim_cycle_seconds*.21)
+    check((shadow._drift-charge).dot(direction)>100,"Charge releases into a short forward dash")
+    var largest_step := 0.0
+    for i in 500:
+        var prior: Vector2 = shadow._drift
+        shadow._physics_process(1.0/120)
+        largest_step = maxf(largest_step,shadow._drift.distance_to(prior))
+    check(largest_step<4,"Continuous motion and cycle boundaries never jump")
+    shadow._sample_pose(.36)
+    var blend: float = shadow._material.get_shader_parameter("pose_blend")
+    check(blend>0 and blend<1,"Eight poses blend smoothly instead of hard eight-fps cuts")
     for frame in 8:
         shadow.sprite.frame = frame
         var pivot: Array = shadow._pivots[frame]

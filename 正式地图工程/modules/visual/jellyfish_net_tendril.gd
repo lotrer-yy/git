@@ -11,6 +11,7 @@ var finish := Vector2.ZERO
 var delay: float = 0.0
 var centerline := PackedVector2Array()
 var dangerous: bool = false
+var cancelled: bool = false
 var mesh: Polygon2D
 var sparks: Line2D
 var body: StaticBody2D
@@ -52,7 +53,14 @@ func _ready() -> void:
     mesh.polygons = faces
     sample(0)
 
+func cancel() -> void:
+    cancelled = true
+    dangerous = false
+    body.collision_layer = 0
+    hide()
+
 func sample(age: float) -> void:
+    if cancelled: return
     var t := age-delay
     visible = t>=0
     dangerous = t>=charge_seconds

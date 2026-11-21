@@ -41,9 +41,12 @@ func run():
     var net = stage.get_node("BossTentacleNet")
     net.set_physics_process(false)
     net.enabled = true
+    game.camera.global_position = fish.global_position
+    game.camera.offset = Vector2.ZERO
+    game.camera.zoom = Vector2.ONE*.7
     net._spawn_row()
     var row: Dictionary = net.rows[0]
-    row.age = 1
+    row.age = 2
     row.aim_frozen = true
     row.node.position.y = fish.position.y+2000
     for arm in row.arms:

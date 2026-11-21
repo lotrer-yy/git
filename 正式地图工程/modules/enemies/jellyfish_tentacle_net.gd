@@ -2,6 +2,7 @@ extends Node2D
 ## 从下方侧墙蓄力瞄准玩家，刺出后固定于原水域。
 signal row_started(height: float)
 signal player_hit(direction: Vector2)
+const WARNING = preload("res://modules/visual/tentacle_warning.gd")
 const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 @export var enabled: bool = false
 @export var wave_interval: float = 1.8
@@ -9,15 +10,15 @@ const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 @export var gap_below_player: float = 190.0
 @export var tentacle_thickness: float = 144.0
 @export var half_row_height: float = 60.0
-@export var charge_seconds: float = .6
+@export var charge_seconds: float = 1.35
 @export var strike_seconds: float = .18
-@export var aim_lock_seconds: float = .25
 @export var prediction_seconds: float = .05
 @export var maximum_rows: int = 6
 var rows: Array[Dictionary] = []
 var target: CharacterBody2D
 var boss: Node2D
 var edge_provider: Node2D
+var camera: Camera2D
 var _elapsed: float = 0.0
 var _last_row_y: float = INF
 var _side: int = -1
@@ -32,6 +33,7 @@ func configure(player: CharacterBody2D, jellyfish: Node2D, walls: Node2D) -> voi
     target = player
     var blink := target.get_node_or_null("Teleport")
     if blink!=null: blink.teleported.connect(_on_teleported)
+    camera = jellyfish.camera
     boss = jellyfish
     edge_provider = walls
 
@@ -48,9 +50,15 @@ func _physics_process(delta: float) -> void:
         var row_top: float = row.node.position.y
         var center: Vector2 = target.get_node("Collision").global_position
         for tendril in row.arms:
-            if not row.aim_frozen and row.age-tendril.delay<charge_seconds-aim_lock_seconds:
-                _aim_tendril(tendril)
+            var t: float = row.age-tendril.delay
+            if not tendril.cancelled and t>=.18 and t<=charge_seconds+delta:
+                var tip: Vector2 = tendril.to_global(tendril.start+(tendril.finish-tendril.start).normalized()*150)
+                # 蓄力阶段离开画面就取消，绝不从画外突然转成有伤害的穿刺。
+                if not _view_rect().grow(-20).has_point(tip): tendril.cancel()
             tendril.sample(row.age)
+            var warning: Node2D = tendril.get_node("Warning")
+            warning.sample(t-.18)
+            if tendril.cancelled: warning.hide()
             row_top = minf(row_top,row.node.position.y+minf(tendril.start.y,tendril.finish.y))
             var local_center: Vector2 = tendril.to_local(center)
             var nearby: bool = local_center.y>=minf(tendril.start.y,tendril.finish.y)-tentacle_thickness and local_center.y<=maxf(tendril.start.y,tendril.finish.y)+tentacle_thickness
@@ -67,10 +75,11 @@ func _spawn_row() -> void:
     _elapsed = 0
     var point := to_local(target.global_position)
     _last_row_y = point.y
-    var bounds: Vector2 = edge_provider._bounds_at(point.y+gap_below_player)
     var root := Node2D.new()
     add_child(root)
-    root.position.y = point.y+gap_below_player
+    var view := _view_rect()
+    root.position.y = clampf(point.y+gap_below_player,to_local(view.position).y+180,to_local(view.end).y-150)
+    var bounds: Vector2 = edge_provider._bounds_at(root.position.y)
     var arms: Array[Node2D] = []
     for i in 2:
         var side := _side if i==0 else -_side
@@ -83,22 +92,34 @@ func _spawn_row() -> void:
         tendril.finish = Vector2(bounds.y+80 if side<0 else bounds.x-80,half_row_height)
         root.add_child(tendril)
         _aim_tendril(tendril)
+        var exposed: Vector2 = tendril.start+(tendril.finish-tendril.start).normalized()*150
+        var warning := WARNING.new()
+        warning.name = "Warning"
+        warning.position = exposed+Vector2(0,-100)
+        tendril.add_child(warning)
+        if not view.grow(-20).has_point(tendril.to_global(exposed)):
+            tendril.cancel()
         tendril.sample(0)
         arms.append(tendril)
-    rows.append({"node":root,"arms":arms,"age":0.0,"aim_frozen":false,"dodge_grace":0.0})
+    rows.append({"node":root,"arms":arms,"age":0.0,"aim_frozen":true,"dodge_grace":0.0})
     _side = -_side
     if rows.size()>maximum_rows:
         var old: Dictionary = rows.pop_front()
         old.node.queue_free()
-    row_started.emit(point.y+gap_below_player)
+    row_started.emit(root.position.y)
 
 func _aim_tendril(tendril: Node2D) -> void:
-    # 锁定前只调整方向，不移动墙内根部；出手后不再追踪玩家。
+    # 只在生成时预判一次；蓄力、瞬移和镜头移动均不改变射线。
     var aim: Vector2 = tendril.to_local(target.get_node("Collision").global_position+target.velocity*prediction_seconds)
     var dx: float = aim.x-tendril.start.x
     if absf(dx)<80: dx = 80.0 if tendril.finish.x>tendril.start.x else -80.0
     var slope := clampf((aim.y-tendril.start.y)/dx,-1.5,1.5)
     tendril.finish.y = tendril.start.y+slope*(tendril.finish.x-tendril.start.x)
+
+func _view_rect() -> Rect2:
+    if not is_instance_valid(camera): return Rect2()
+    var size := camera.get_viewport_rect().size/camera.zoom
+    return Rect2(camera.global_position+camera.offset-size*.5,size)
 
 func _on_teleported(_from: Vector2, _destination: Vector2) -> void:
     # 瞬移骗过正在蓄力的整组触手，延迟的第二根也不能重新锁定落点。

@@ -29,6 +29,9 @@ func run():
     var net = stage.get_node("BossTentacleNet")
     net.set_physics_process(false)
     net.enabled = true
+    game.camera.global_position = fish.global_position
+    game.camera.offset = Vector2.ZERO
+    game.camera.zoom = Vector2.ONE*.7
     advance(net,2)
     check(net.rows.is_empty(),"Tentacle nets wait until the giant boss has appeared")
     boss.state = boss.State.PRESENT
@@ -44,9 +47,9 @@ func run():
     advance(net,.25)
     check(row.node.global_position==initial_root,"Windup keeps its root fixed inside the wall")
     var aimed = row.arms[0]
-    var aimed_center: Vector2 = aimed.to_local(fish.get_node("Collision").global_position)
+    var aimed_center: Vector2 = aimed.to_local(fish.get_node("Collision").global_position+Vector2(0,80))
     var nearest: Vector2 = Geometry2D.get_closest_point_to_segment(aimed_center,aimed.start,aimed.finish)
-    check(nearest.distance_to(aimed_center)<1,"Windup aims through the fish instead of underneath it")
+    check(nearest.distance_to(aimed_center)<1,"Direction keeps its initial predicted aim after the fish moves")
     var blink_aims := [row.arms[0].finish,row.arms[1].finish]
     var before_blink: Vector2 = fish.global_position
     fish.position.x += 120
@@ -60,7 +63,7 @@ func run():
     fish.position.x += 180
     advance(net,.10)
     check(aimed.finish==locked_finish,"Aim locks before the strike so the player can dodge")
-    advance(net,.9)
+    advance(net,1.2)
     check(row.arms[0].dangerous and row.arms[1].dangerous,"Both wall-to-wall strokes become live after their readable windup")
     check(row.arms[0].centerline[-1].distance_to(row.arms[0].finish)<.1,"The straight original stretches all the way into the opposite wall")
     var fixed: Vector2 = row.node.global_position
@@ -68,6 +71,7 @@ func run():
     fish.position.y -= 400
     advance(net,.01)
     check(row.node.global_position==fixed,"Finished net stays in its world water section when fish and camera move")
+    game.camera.global_position = fish.global_position
     advance(net,.4)
     check(net.rows.size()==2 and net.rows[1].node.position.y<row.node.position.y,"Further ascent progressively adds another row behind the fish")
     var arm = row.arms[0]

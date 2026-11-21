@@ -4,15 +4,15 @@ signal row_started(height: float)
 signal player_hit(direction: Vector2)
 const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 @export var enabled: bool = false
-@export var wave_interval: float = 1.5
+@export var wave_interval: float = 1.8
 @export var minimum_ascent: float = 180.0
 @export var gap_below_player: float = 190.0
 @export var tentacle_thickness: float = 144.0
 @export var half_row_height: float = 60.0
 @export var charge_seconds: float = .6
 @export var strike_seconds: float = .18
-@export var aim_lock_seconds: float = .12
-@export var prediction_seconds: float = .10
+@export var aim_lock_seconds: float = .25
+@export var prediction_seconds: float = .05
 @export var maximum_rows: int = 6
 var rows: Array[Dictionary] = []
 var target: CharacterBody2D
@@ -22,24 +22,32 @@ var _elapsed: float = 0.0
 var _last_row_y: float = INF
 var _side: int = -1
 var _hit: bool = false
+var _blink_grace: float = 0.0
 
 func configure(player: CharacterBody2D, jellyfish: Node2D, walls: Node2D) -> void:
+    if is_instance_valid(target):
+        var old_blink := target.get_node_or_null("Teleport")
+        if old_blink!=null and old_blink.teleported.is_connected(_on_teleported):
+            old_blink.teleported.disconnect(_on_teleported)
     target = player
+    var blink := target.get_node_or_null("Teleport")
+    if blink!=null: blink.teleported.connect(_on_teleported)
     boss = jellyfish
     edge_provider = walls
 
 func _physics_process(delta: float) -> void:
     if not enabled or not is_instance_valid(target): return
     _elapsed += delta
+    _blink_grace = maxf(0,_blink_grace-delta)
     var fish_y := to_local(target.global_position).y
-    if boss.state==boss.State.PRESENT and _elapsed>=wave_interval and (_last_row_y==INF or _last_row_y-fish_y>=minimum_ascent): _spawn_row()
+    if _blink_grace<=0 and boss.state==boss.State.PRESENT and _elapsed>=wave_interval and (_last_row_y==INF or _last_row_y-fish_y>=minimum_ascent): _spawn_row()
     var remove: Array[Dictionary] = []
     for row in rows:
         row.age += delta
         row.node.visible = row.node.position.y-fish_y<650
         var center: Vector2 = target.get_node("Collision").global_position
         for tendril in row.arms:
-            if row.age-tendril.delay<charge_seconds-aim_lock_seconds:
+            if not row.aim_frozen and row.age-tendril.delay<charge_seconds-aim_lock_seconds:
                 _aim_tendril(tendril)
             tendril.sample(row.age)
             var local_center: Vector2 = tendril.to_local(center)
@@ -72,9 +80,10 @@ func _spawn_row() -> void:
         tendril.start = Vector2(bounds.x-80 if side<0 else bounds.y+80,-half_row_height)
         tendril.finish = Vector2(bounds.y+80 if side<0 else bounds.x-80,half_row_height)
         root.add_child(tendril)
+        _aim_tendril(tendril)
         tendril.sample(0)
         arms.append(tendril)
-    rows.append({"node":root,"arms":arms,"age":0.0})
+    rows.append({"node":root,"arms":arms,"age":0.0,"aim_frozen":false})
     _side = -_side
     if rows.size()>maximum_rows:
         var old: Dictionary = rows.pop_front()
@@ -89,6 +98,11 @@ func _aim_tendril(tendril: Node2D) -> void:
     var slope := clampf((aim.y-tendril.start.y)/dx,-1.5,1.5)
     tendril.finish.y = tendril.start.y+slope*(tendril.finish.x-tendril.start.x)
 
+func _on_teleported(_from: Vector2, _destination: Vector2) -> void:
+    # 瞬移骗过正在蓄力的整组触手，延迟的第二根也不能重新锁定落点。
+    for row in rows: row.aim_frozen = true
+    _blink_grace = .65
+
 func reset() -> void:
     enabled = false
     for row in rows: row.node.queue_free()
@@ -97,3 +111,4 @@ func reset() -> void:
     _last_row_y = INF
     _side = -1
     _hit = false
+    _blink_grace = 0

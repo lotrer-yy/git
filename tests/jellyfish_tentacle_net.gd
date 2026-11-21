@@ -47,6 +47,13 @@ func run():
     var aimed_center: Vector2 = aimed.to_local(fish.get_node("Collision").global_position)
     var nearest: Vector2 = Geometry2D.get_closest_point_to_segment(aimed_center,aimed.start,aimed.finish)
     check(nearest.distance_to(aimed_center)<1,"Windup aims through the fish instead of underneath it")
+    var blink_aims := [row.arms[0].finish,row.arms[1].finish]
+    var before_blink: Vector2 = fish.global_position
+    fish.position.x += 120
+    fish.get_node("Teleport").teleported.emit(before_blink,fish.global_position)
+    advance(net,.05)
+    check(row.arms[0].finish==blink_aims[0] and row.arms[1].finish==blink_aims[1],"Blink breaks both current and delayed tendril aim instead of tracking its destination")
+    check(row.aim_frozen and net._blink_grace>0,"Blink also grants a brief pause before another aimed wave")
     var locked_finish: Vector2
     advance(net,.24)
     locked_finish = aimed.finish

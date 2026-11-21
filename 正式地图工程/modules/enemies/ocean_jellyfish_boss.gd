@@ -5,7 +5,7 @@ enum State { DORMANT, RISING, PRESENT }
 @export var enabled: bool = false
 @export var ascent_before_entrance: float = 900.0
 @export var artwork_scale: float = .95
-@export var head_offset_below_player: float = -80.0
+@export var head_offset_below_player: float = -220.0
 @export var distance_swing: float = 300.0
 @export var lateral_sway_pixels: float = 110.0
 @export var lateral_sway_period: float = 6.0
@@ -41,15 +41,14 @@ func _physics_process(delta: float) -> void:
         return
     _clock += delta
     var gap := global_position.y-target.global_position.y
-    # 独立的收伞推进/舒展滑行，不复制小鱼速度；只在远离遭遇区时缓慢纠偏。
+    # 独立收伞推进，持续按遭遇距离纠偏，避免长距离上游后逐渐掉出镜头。
     var desired_speed: float = -cruise_rise_speed-visual.thrust_at(_clock)*pulse_push
     if state == State.RISING:
         desired_speed = -maximum_rise_speed
         if gap<head_offset_below_player+distance_swing*.65 and _clock>1: state = State.PRESENT
-    elif gap>head_offset_below_player+distance_swing:
-        desired_speed = minf(desired_speed,-650-(gap-head_offset_below_player-distance_swing)*2.5)
-    elif gap<head_offset_below_player-distance_swing:
-        desired_speed = clampf((head_offset_below_player-distance_swing-gap)*2.5,40,250)
+    else:
+        var desired_gap := head_offset_below_player+sin(_clock*TAU/5.2)*distance_swing*.65
+        desired_speed -= clampf((gap-desired_gap)*2.5,-600,900)
     desired_speed = clampf(desired_speed,-maximum_rise_speed,250)
     _vertical_speed = move_toward(_vertical_speed,desired_speed,acceleration*delta)
     global_position.y += _vertical_speed*delta

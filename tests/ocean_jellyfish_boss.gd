@@ -100,6 +100,15 @@ func run():
             if (moved[face[1]]-moved[face[0]]).cross(moved[face[2]]-moved[face[0]])<=0: intact = false
         check(intact,"Eye tracking never folds or tears the textured mesh")
     check(boss.z_index>0 and boss.z_index<15,"Boss sits between background and creatures")
+    var final_gaps: Array[float] = []
+    for step in 4000:
+        player.velocity = Vector2(0,-420)
+        player.position += player.velocity*.01
+        if step%400==0: player.position.y -= 320
+        boss._physics_process(.01)
+        if step>3500: final_gaps.append(boss.global_position.y-player.global_position.y)
+    check(final_gaps.max()<350,"Long ascent with repeated upward blinks cannot leave the boss trailing below the view")
+    check(final_gaps.min()<0,"Boss still catches up alongside the player after a long climb")
     boss.reset()
     check(not boss.visible and not boss.enabled,"Retry clears entrance and motion")
     var display := Camera2D.new()

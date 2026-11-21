@@ -59,6 +59,28 @@ func run():
     tick(net,1.6)
     for candidate in net.rows[0].arms:
         check(candidate.cancelled and not candidate.dangerous,"A tentacle born outside the camera cannot ambush the fish")
+    net.reset()
+    net.enabled = true
+    game.camera.global_position = fish.global_position
+    net._spawn_row()
+    net._spawn_row()
+    check(net.rows[0].arms.size()==2 and net.rows[1].arms.size()==2,"Most waves keep the normal two-barrier difficulty")
+    net._spawn_row()
+    check(net.rows[2].arms.size()==3,"Only every third wave adds a high forward barrier")
+    var high = net.rows[2].arms[2]
+    var high_position: Vector2 = high.to_global(high.start)
+    check(absf(fish.global_position.y-high_position.y-1200)<.1,"Extra barrier is placed far above the player")
+    tick(net,2)
+    check(high.get_meta(&"awaiting_view") and not high.visible and not high.dangerous and high.body.collision_layer==0,"An offscreen high barrier cannot launch or block before the player sees it")
+    game.camera.global_position.y = high_position.y
+    tick(net,.01)
+    check(not high.get_meta(&"awaiting_view") and not high.dangerous,"Entering view starts a fresh warning rather than an already elapsed strike")
+    tick(net,.4)
+    check(high.get_node("Warning").visible and not high.dangerous,"The high barrier gives the full visible warning")
+    tick(net,.8)
+    check(high.dangerous and high.to_global(high.start)==high_position,"High barrier launches only after warning and keeps its world position")
+    net.reset()
+    check(net._wave_count==0,"Retry resets the occasional high-barrier cadence")
     var pulse = load("res://modules/visual/tentacle_warning.gd").new()
     root.add_child(pulse)
     var peaks: Array[float] = []

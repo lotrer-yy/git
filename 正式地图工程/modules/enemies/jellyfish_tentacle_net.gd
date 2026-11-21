@@ -15,6 +15,8 @@ const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 @export var charge_seconds: float = 1.15
 @export var strike_seconds: float = .18
 @export var maximum_rows: int = 6
+@export var high_barrier_every: int = 3
+@export var high_barrier_ahead: float = 1200.0
 var rows: Array[Dictionary] = []
 var target: CharacterBody2D
 var boss: Node2D
@@ -25,6 +27,7 @@ var _last_row_y: float = INF
 var _side: int = -1
 var _hit: bool = false
 var _blink_grace: float = 0.0
+var _wave_count: int = 0
 
 func configure(player: CharacterBody2D, jellyfish: Node2D, walls: Node2D) -> void:
     if is_instance_valid(target):
@@ -51,6 +54,16 @@ func _physics_process(delta: float) -> void:
         var row_top: float = row.node.position.y
         var center: Vector2 = target.get_node("Collision").global_position
         for tendril in row.arms:
+            row_top = minf(row_top,row.node.position.y+minf(tendril.start.y,tendril.finish.y))
+            if tendril.get_meta(&"awaiting_view",false):
+                var preview: Vector2 = tendril.to_global(tendril.start+(tendril.finish-tendril.start).normalized()*150)
+                if not _view_rect().grow(-60).has_point(preview):
+                    tendril.sample(-1)
+                    tendril.get_node("Warning").sample(-1)
+                    continue
+                # 高处障碍先固定在世界里，进入画面后才开始完整预警计时。
+                tendril.set_meta(&"awaiting_view",false)
+                tendril.delay = row.age
             var t: float = row.age-tendril.delay
             if not tendril.cancelled and not tendril.warning_confirmed and t>=.28:
                 var tip: Vector2 = tendril.to_global(tendril.start+(tendril.finish-tendril.start).normalized()*150)
@@ -63,7 +76,6 @@ func _physics_process(delta: float) -> void:
             var warning: Node2D = tendril.get_node("Warning")
             warning.sample(t-.18)
             if tendril.cancelled: warning.hide()
-            row_top = minf(row_top,row.node.position.y+minf(tendril.start.y,tendril.finish.y))
             var local_center: Vector2 = tendril.to_local(center)
             var nearby: bool = local_center.y>=minf(tendril.start.y,tendril.finish.y)-tentacle_thickness and local_center.y<=maxf(tendril.start.y,tendril.finish.y)+tentacle_thickness
             var teleport := target.get_node_or_null("Teleport")
@@ -83,31 +95,39 @@ func _spawn_row() -> void:
     add_child(root)
     var view := _view_rect()
     root.position.y = clampf(point.y-spawn_ahead_pixels,to_local(view.position).y+60,to_local(view.end).y-150)
+    _wave_count += 1
+    var extra_high: bool = high_barrier_every>0 and _wave_count%high_barrier_every==0
     var arms: Array[Node2D] = []
-    for i in 2:
-        var side := _side if i==0 else -_side
+    for i in (3 if extra_high else 2):
+        var side := _side if i%2==0 else -_side
         var tendril := TENDRIL.new()
         tendril.thickness = tentacle_thickness
-        tendril.curve_height = -45.0 if i==0 else -40.0
+        tendril.curve_height = -40.0 if i==1 else -45.0
         tendril.charge_seconds = charge_seconds
         tendril.strike_seconds = strike_seconds
         tendril.delay = float(i)*.18
         var lane_y: float = root.position.y if i==0 else clampf(point.y+retreat_offset_pixels,to_local(view.position).y+100,to_local(view.end).y-100)
+        if i==2: lane_y = point.y-high_barrier_ahead
         var bounds: Vector2 = edge_provider._bounds_at(lane_y)
         var local_y: float = lane_y-root.position.y
         tendril.start = Vector2(bounds.x-80 if side<0 else bounds.y+80,local_y)
         # 两条横向障碍一前一后、左右交错；末端留出可游过的缺口。
-        var gap: float = passage_width if i==0 else retreat_passage_width
+        var gap: float = retreat_passage_width if i==1 else passage_width
+        if i==2: gap += 40
         tendril.finish = Vector2(bounds.y-gap if side<0 else bounds.x+gap,local_y)
         root.add_child(tendril)
         var exposed: Vector2 = tendril.start+(tendril.finish-tendril.start).normalized()*150
         var warning := WARNING.new()
         warning.name = "Warning"
-        warning.position = exposed+Vector2(0,100 if i==0 else -100)
+        warning.position = exposed+Vector2(0,-100 if i==1 else 100)
         tendril.add_child(warning)
-        if not view.grow(-20).has_point(tendril.to_global(exposed)):
-            tendril.cancel()
-        tendril.sample(0)
+        if i==2:
+            tendril.set_meta(&"awaiting_view",true)
+            tendril.sample(-1)
+        else:
+            if not view.grow(-20).has_point(tendril.to_global(exposed)):
+                tendril.cancel()
+            tendril.sample(0)
         arms.append(tendril)
     rows.append({"node":root,"arms":arms,"age":0.0,"aim_frozen":true,"dodge_grace":0.0})
     _side = -_side
@@ -137,3 +157,4 @@ func reset() -> void:
     _side = -1
     _hit = false
     _blink_grace = 0
+    _wave_count = 0

@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/enemies/ocean_octopus_encounters.tscn" id="octopus"]
 [ext_resource type="PackedScene" path="res://scenes/effects/ocean_ink_overlay.tscn" id="ink_overlay"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/ocean_pink_sharks.tscn" id="pink_sharks"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/ocean_jellyfish_boss.tscn" id="jellyfish_boss"]
 
 [node name="FishStage" type="Node2D"]
 script = ExtResource("assembly")
@@ -57,3 +58,5 @@ script = ExtResource("shark_knockback")
 [node name="InkOverlay" parent="." instance=ExtResource("ink_overlay")]
 
 [node name="PinkSharks" parent="." instance=ExtResource("pink_sharks")]
+
+[node name="JellyfishBoss" parent="." instance=ExtResource("jellyfish_boss")]

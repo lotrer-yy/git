@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://modules/enemies/ocean_jellyfish_boss.gd" id="behavior"]
+[ext_resource type="Script" path="res://modules/visual/jellyfish_pulse_visual.gd" id="visual"]
+
+[node name="JellyfishBoss" type="Node2D"]
+z_index = 5
+script = ExtResource("behavior")
+
+[node name="Visual" type="Node2D" parent="."]
+script = ExtResource("visual")

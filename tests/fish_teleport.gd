@@ -61,6 +61,31 @@ func run():
     check(not blink.is_invulnerable(), "A blocked teleport grants no invulnerability")
     fish.global_position = origin
     blink.reset()
+    wall.global_position = origin+Vector2(800,0)
+    var tendril = load("res://modules/visual/jellyfish_net_tendril.gd").new()
+    tendril.start = Vector2(0,-300)
+    tendril.finish = Vector2(0,300)
+    game.add_child(tendril)
+    tendril.global_position = origin+Vector2(160,0)
+    tendril.sample(tendril.charge_seconds+tendril.strike_seconds+1)
+    await ticks()
+    check(fish.move_and_collide(Vector2(320,0),true)!=null,"Ordinary swimming still collides with a formed tentacle")
+    check(blink.try_teleport(Vector2.RIGHT),"Shift can blink through a boss tentacle")
+    check(not fish.get_collision_exceptions().has(tendril.body),"Preview sweep restores regular tentacle collision immediately")
+    await create_timer(.12).timeout
+    check(absf(fish.global_position.x-origin.x-320)<.2,"Blink crosses the actual tentacle collider for its full distance")
+    check(not fish.get_collision_exceptions().has(tendril.body),"Completed blink restores tentacle collision")
+    blink.reset()
+    fish.global_position = origin
+    wall.global_position = origin+Vector2(280,0)
+    await ticks()
+    check(blink.try_teleport(Vector2.RIGHT),"A wall beyond a passable tentacle still allows a partial blink")
+    await create_timer(.12).timeout
+    check(fish.global_position.x>origin.x+210 and fish.global_position.x<origin.x+250,"Blink passes the tentacle but stops before terrain on the same collision layer")
+    blink.reset()
+    fish.global_position = origin
+    tendril.queue_free()
+    wall.global_position = origin+Vector2(180,0)
     fish.get_node("Visual/Sprite").flip_h = false
     var key = InputEventKey.new()
     key.physical_keycode = KEY_SHIFT

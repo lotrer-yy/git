@@ -43,7 +43,7 @@ func try_teleport(direction: Vector2 = Vector2.ZERO) -> bool:
     if direction.is_zero_approx(): direction = reader.get_visual_direction()
     if direction.is_zero_approx(): direction = Vector2.RIGHT if sprite.flip_h else Vector2.LEFT
     direction = direction.normalized()
-    var hit := body.move_and_collide(direction*distance,true)
+    var hit := _blink_motion(direction*distance,true)
     var travel := hit.get_travel() if hit != null else direction*distance
     if travel.length()<minimum_distance: return false
     _busy = true
@@ -64,7 +64,7 @@ func _perform(direction: Vector2) -> void:
         return
     var start := body.global_position
     # 施放前重新扫掠：短准备期间移动的障碍物也不能被穿过。
-    body.move_and_collide(direction*distance)
+    _blink_motion(direction*distance,false)
     body.velocity = Vector2.ZERO
     body.reset_physics_interpolation()
     visual.visible = _visual_was_visible
@@ -74,6 +74,19 @@ func _perform(direction: Vector2) -> void:
     _burst(body.global_position,direction)
     stage.level.camera.blend_to_target(body,camera_blend_seconds)
     teleported.emit(start,body.global_position)
+
+func _blink_motion(motion: Vector2, test_only: bool) -> KinematicCollision2D:
+    # 地形与触手共用碰撞层，只临时忽略触手本体，不关闭整层地形碰撞。
+    var temporary: Array[PhysicsBody2D] = []
+    var existing := body.get_collision_exceptions()
+    for obstacle in get_tree().get_nodes_in_group(&"blink_passable_tentacles"):
+        if obstacle is PhysicsBody2D and not existing.has(obstacle):
+            body.add_collision_exception_with(obstacle)
+            temporary.append(obstacle)
+    var hit := body.move_and_collide(motion,test_only)
+    for obstacle in temporary:
+        if is_instance_valid(obstacle): body.remove_collision_exception_with(obstacle)
+    return hit
 
 func _burst(point: Vector2, direction: Vector2) -> void:
     _effects = _effects.filter(func(effect):return is_instance_valid(effect))

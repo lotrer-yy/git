@@ -27,6 +27,7 @@ func _ready() -> void:
     body.collision_layer = 0
     body.collision_mask = 0
     add_child(body)
+    body.add_to_group(&"blink_passable_tentacles")
     for i in SEGMENTS:
         var collision := CollisionShape2D.new()
         var capsule := CapsuleShape2D.new()

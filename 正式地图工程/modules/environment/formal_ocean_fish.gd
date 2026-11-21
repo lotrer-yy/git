@@ -1,5 +1,7 @@
 extends Node2D
 ## 仅装配旧鱼角色、附身和游泳程序；原海图与地形仍由正式场景提供。
+@export var octopus_zone_bottom: float = 36000.0
+@export var octopus_zone_top: float = 33000.0
 var active: bool = false
 var _spawn: Vector2
 @onready var level: Node2D = get_parent().get_parent()
@@ -35,7 +37,7 @@ func _physics_process(_delta: float) -> void:
     $BossTentacleNet.enabled = can_attack
     for lane in $PinkSharks.get_children(): lane.damage_enabled = can_attack
     if not (level.dead and level.death_reason in [&"shark",&"pink_shark"]):
-        $Octopus.enabled = can_attack
+        $Octopus.enabled = can_attack and y<=octopus_zone_bottom and y>=octopus_zone_top
         if not can_attack: $InkOverlay.reset()
 
 func _on_shark_hit(direction: Vector2) -> void:

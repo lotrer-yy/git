@@ -6,6 +6,7 @@ signal player_hit(direction: Vector2)
 
 enum State { WAITING, LOCKING, DASHING }
 @export var spawn_interval: float = 6.0
+@export var first_spawn_delay: float = 2.0
 @export var lock_seconds: float = 1.0
 @export var dash_speed: float = 2200.0
 @export var prediction_max_seconds: float = .4
@@ -33,6 +34,7 @@ var _side: int = 1
 var _screen_anchor := Vector2.ZERO
 var _anchors: Dictionary
 var _hit_reported: bool = false
+var _first_attack: bool = true
 @onready var visual: Node2D = $Visual
 @onready var sprite: AnimatedSprite2D = $Visual/Art
 
@@ -59,7 +61,7 @@ func _physics_process(delta: float) -> void:
     state_elapsed += delta
     match state:
         State.WAITING:
-            if cycle_elapsed >= spawn_interval: _begin_lock()
+            if cycle_elapsed >= (first_spawn_delay if _first_attack else spawn_interval): _begin_lock()
         State.LOCKING:
             _follow_lock_view()
             locked_point = _predicted_target(global_position)
@@ -79,6 +81,7 @@ func _view_rect() -> Rect2:
     return Rect2(camera.global_position+camera.offset-size*.5,size)
 
 func _begin_lock() -> void:
+    _first_attack = false
     state = State.LOCKING
     state_elapsed = 0.0
     cycle_elapsed = 0.0
@@ -208,6 +211,7 @@ func _finish_attack() -> void:
     if not enabled: cycle_elapsed = 0.0
 
 func reset() -> void:
+    _first_attack = true
     cycle_elapsed = 0.0
     state_elapsed = 0.0
     state = State.WAITING

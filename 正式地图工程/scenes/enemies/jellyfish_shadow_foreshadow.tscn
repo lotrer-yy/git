@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://modules/enemies/jellyfish_shadow_foreshadow.gd" id="behavior"]
+[ext_resource type="SpriteFrames" path="res://assets/art/ocean/jellyfish/shadow_swim_frames.tres" id="frames"]
+[ext_resource type="Shader" path="res://shaders/jellyfish_shadow_flat.gdshader" id="flat"]
+
+[sub_resource type="ShaderMaterial" id="material"]
+shader = ExtResource("flat")
+
+[node name="JellyfishShadow" type="Node2D"]
+z_index = 2
+script = ExtResource("behavior")
+
+[node name="Art" type="AnimatedSprite2D" parent="."]
+material = SubResource("material")
+sprite_frames = ExtResource("frames")
+animation = &"swim"

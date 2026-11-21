@@ -1,5 +1,5 @@
 extends Node2D
-## 只从玩家下方交叉封路；蓄力时选高度，刺出后固定于原水域。
+## 从下方侧墙蓄力瞄准玩家，刺出后固定于原水域。
 signal row_started(height: float)
 signal player_hit(direction: Vector2)
 const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
@@ -11,6 +11,8 @@ const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 @export var half_row_height: float = 60.0
 @export var charge_seconds: float = .6
 @export var strike_seconds: float = .18
+@export var aim_lock_seconds: float = .12
+@export var prediction_seconds: float = .10
 @export var maximum_rows: int = 6
 var rows: Array[Dictionary] = []
 var target: CharacterBody2D
@@ -34,14 +36,14 @@ func _physics_process(delta: float) -> void:
     var remove: Array[Dictionary] = []
     for row in rows:
         row.age += delta
-        if row.age<charge_seconds:
-            # 只在读条阶段跟踪脚下高度；形成的电网不会跟着镜头移动。
-            row.node.position.y = fish_y+gap_below_player
         row.node.visible = row.node.position.y-fish_y<650
         var center: Vector2 = target.get_node("Collision").global_position
-        var nearby: bool = absf(row.node.position.y-fish_y)<half_row_height+tentacle_thickness*.5+40
         for tendril in row.arms:
+            if row.age-tendril.delay<charge_seconds-aim_lock_seconds:
+                _aim_tendril(tendril)
             tendril.sample(row.age)
+            var local_center: Vector2 = tendril.to_local(center)
+            var nearby: bool = local_center.y>=minf(tendril.start.y,tendril.finish.y)-tentacle_thickness and local_center.y<=maxf(tendril.start.y,tendril.finish.y)+tentacle_thickness
             var teleport := target.get_node_or_null("Teleport")
             if nearby and not _hit and (teleport==null or not teleport.is_invulnerable()) and tendril.touches(center,24):
                 _hit = true
@@ -78,6 +80,14 @@ func _spawn_row() -> void:
         var old: Dictionary = rows.pop_front()
         old.node.queue_free()
     row_started.emit(point.y+gap_below_player)
+
+func _aim_tendril(tendril: Node2D) -> void:
+    # 锁定前只调整方向，不移动墙内根部；出手后不再追踪玩家。
+    var aim: Vector2 = tendril.to_local(target.get_node("Collision").global_position+target.velocity*prediction_seconds)
+    var dx: float = aim.x-tendril.start.x
+    if absf(dx)<80: dx = 80.0 if tendril.finish.x>tendril.start.x else -80.0
+    var slope := clampf((aim.y-tendril.start.y)/dx,-1.5,1.5)
+    tendril.finish.y = tendril.start.y+slope*(tendril.finish.x-tendril.start.x)
 
 func reset() -> void:
     enabled = false

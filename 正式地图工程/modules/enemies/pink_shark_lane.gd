@@ -1,7 +1,8 @@
 extends Node2D
-## 固定高度的鲨鱼队列：进入视野后从对应画面边缘起游，死亡不重置。
+## 固定高度的鲨鱼队列：玩家抵达前从对应画面边缘起游，死亡不重置。
 signal player_hit(direction: Vector2)
 @export var swim_speed: float = 450.0
+@export var approach_distance: float = 1400.0
 @export var following_gap: float = 340.0
 @export_enum("从左到右:1","从右到左:-1") var direction: int = 1
 @export var bob_amplitude: float = 14.0
@@ -37,7 +38,9 @@ func _physics_process(delta: float) -> void:
     if not started:
         if not damage_enabled or not is_instance_valid(camera): return
         var view := _view_rect()
-        if global_position.y<view.position.y+100 or global_position.y>view.end.y-100: return
+        if not is_instance_valid(target): return
+        var ahead := target.global_position.y-global_position.y
+        if ahead<0 or ahead>approach_distance: return
         # 入场边界取此刻镜头，第一只从完全出画的位置开始，不跳到画面中间。
         left_edge = view.position.x-global_position.x-140
         right_edge = view.end.x-global_position.x+140

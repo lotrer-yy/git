@@ -38,9 +38,21 @@ func run():
     check(row.arms[0].thickness==144 and row.arms[0]._shapes[0].shape.radius==72,"Boss tendril and physical collision are both four times thicker")
     check(row.node.position.y>fish.position.y,"The row starts below the fish, leaving the upward route open")
     check(not row.arms[0].dangerous and row.arms[0].body.collision_layer==0,"Visible windup does not create an invisible dangerous wall")
+    var initial_root: Vector2 = row.node.global_position
+    fish.get_node("Teleport")._invulnerability_remaining = 10
     fish.position.y -= 80
     advance(net,.25)
-    check(absf(row.node.position.y-fish.position.y-net.gap_below_player)<.1,"Windup chooses a safe height below the moving fish")
+    check(row.node.global_position==initial_root,"Windup keeps its root fixed inside the wall")
+    var aimed = row.arms[0]
+    var aimed_center: Vector2 = aimed.to_local(fish.get_node("Collision").global_position)
+    var nearest: Vector2 = Geometry2D.get_closest_point_to_segment(aimed_center,aimed.start,aimed.finish)
+    check(nearest.distance_to(aimed_center)<1,"Windup aims through the fish instead of underneath it")
+    var locked_finish: Vector2
+    advance(net,.24)
+    locked_finish = aimed.finish
+    fish.position.x += 180
+    advance(net,.10)
+    check(aimed.finish==locked_finish,"Aim locks before the strike so the player can dodge")
     advance(net,.9)
     check(row.arms[0].dangerous and row.arms[1].dangerous,"Both wall-to-wall strokes become live after their readable windup")
     check(row.arms[0].centerline[-1].distance_to(row.arms[0].finish)<.1,"The straight original stretches all the way into the opposite wall")
@@ -60,6 +72,12 @@ func run():
     await physics_frame
     var blocked = fish.move_and_collide(Vector2(0,260),true)
     check(blocked!=null,"A full fish-body downward sweep is blocked by the formed net")
+    var highest := INF
+    for existing in net.rows:
+        for tendril in existing.arms:
+            highest = minf(highest,tendril.to_global(tendril.start).y)
+            highest = minf(highest,tendril.to_global(tendril.finish).y)
+    fish.global_position = Vector2(960,highest-200)
     var upward = fish.move_and_collide(Vector2(0,-120),true)
     check(upward==null,"The escape route above the fish remains open")
     var teleport = fish.get_node("Teleport")

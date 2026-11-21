@@ -21,6 +21,14 @@ func run():
     standalone.position.y = 10000
     standalone._physics_process(1)
     check(not standalone.started and is_zero_approx(standalone.distance) and not standalone.lead.visible,"Offscreen lanes wait without moving or exposing sharks")
+    standalone.position.y = -1200
+    standalone._physics_process(0)
+    check(standalone.started,"An upstream lane starts 1200 pixels before the fish arrives, while still above the camera")
+    standalone._physics_process(1)
+    check(standalone.distance>400,"The school is already swimming before the player reaches its height")
+    standalone.reset()
+    standalone.running = true
+    standalone.damage_enabled = true
     standalone.position.y = 0
     standalone._physics_process(0)
     check(standalone.started and standalone.lead.visible and is_equal_approx(standalone.lead.position.x,standalone.left_edge),"First visibility starts the first shark outside the current left camera edge")

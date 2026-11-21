@@ -47,7 +47,7 @@ func run():
     check(appearances.size()==1,"Waiting at the same height does not spawn more enemies")
     advance(encounters,encounters.encounter_spacing/420+.15,420)
     check(appearances.size()==2,"Next world section creates exactly one more encounter")
-    check(absf(appearances[0].y-appearances[1].y-1800)<.1,"Reduced octopus density leaves 1800 pixels between encounters")
+    check(absf(appearances[0].y-appearances[1].y-2500)<.1,"Reduced octopus density leaves 2500 pixels between encounters")
     check((appearances[0].x-960)*(appearances[1].x-960)<0,"Consecutive visitors use alternating lanes")
     player.position.y -= 2800
     advance(encounters,.1,420)

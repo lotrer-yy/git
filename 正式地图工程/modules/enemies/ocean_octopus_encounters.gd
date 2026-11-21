@@ -3,7 +3,7 @@ extends Node2D
 signal ink_sprayed
 signal appeared(octopus: Node2D)
 @export var spawn_interval: float = 1.5
-@export var encounter_spacing: float = 1800.0
+@export var encounter_spacing: float = 2500.0
 @export var first_encounter_distance: float = 900.0
 @export var enabled: bool = false:
     set(value):

@@ -7,7 +7,7 @@ const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 @export var enabled: bool = false
 @export var wave_interval: float = 1.65
 @export var minimum_ascent: float = 180.0
-@export var spawn_ahead_pixels: float = 600.0
+@export var spawn_ahead_pixels: float = 800.0
 @export var retreat_offset_pixels: float = 140.0
 @export var passage_width: float = 280.0
 @export var retreat_passage_width: float = 360.0
@@ -82,13 +82,13 @@ func _spawn_row() -> void:
     var root := Node2D.new()
     add_child(root)
     var view := _view_rect()
-    root.position.y = clampf(point.y-spawn_ahead_pixels,to_local(view.position).y+100,to_local(view.end).y-150)
+    root.position.y = clampf(point.y-spawn_ahead_pixels,to_local(view.position).y+60,to_local(view.end).y-150)
     var arms: Array[Node2D] = []
     for i in 2:
         var side := _side if i==0 else -_side
         var tendril := TENDRIL.new()
         tendril.thickness = tentacle_thickness
-        tendril.curve_height = 55.0 if i==0 else -40.0
+        tendril.curve_height = -45.0 if i==0 else -40.0
         tendril.charge_seconds = charge_seconds
         tendril.strike_seconds = strike_seconds
         tendril.delay = float(i)*.18

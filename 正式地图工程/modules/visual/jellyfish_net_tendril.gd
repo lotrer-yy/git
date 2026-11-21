@@ -5,6 +5,7 @@ const SEGMENTS = 24
 @export var thickness: float = 144.0
 @export var charge_seconds: float = .6
 @export var strike_seconds: float = .18
+@export var cap_texture_pixels: float = 64.0
 var start := Vector2.ZERO
 var finish := Vector2.ZERO
 var delay: float = 0.0
@@ -72,15 +73,29 @@ func sample(age: float) -> void:
     reach = minf(reach,total)
     centerline.clear()
     var vertices := PackedVector2Array()
+    var uv := PackedVector2Array()
     var electricity := PackedVector2Array()
+    # 类似九宫格：圆头/黑边按粗度保留尺寸，只让中间长条伸缩。
+    var cap_length := minf(cap_texture_pixels*thickness/ART.get_height(),reach*.45)
+    var cap_ratio := cap_length/maxf(reach,.001)
     for i in SEGMENTS+1:
         var s := float(i)/SEGMENTS
         var point := start+axis*reach*s+normal*bend*sin(s*PI)
         centerline.append(point)
         vertices.append(point-normal*thickness*.5)
         vertices.append(point+normal*thickness*.5)
+        var source_x: float
+        if cap_ratio>0 and s<cap_ratio:
+            source_x = s/cap_ratio*cap_texture_pixels
+        elif cap_ratio>0 and s>1-cap_ratio:
+            source_x = ART.get_width()-cap_texture_pixels+(s-1+cap_ratio)/cap_ratio*cap_texture_pixels
+        else:
+            source_x = lerpf(cap_texture_pixels,ART.get_width()-cap_texture_pixels,(s-cap_ratio)/maxf(1-2*cap_ratio,.001))
+        uv.append(Vector2(source_x,0))
+        uv.append(Vector2(source_x,ART.get_height()))
         electricity.append(point+normal*sin(s*45-age*9)*3.5*sin(s*PI))
     mesh.polygon = vertices
+    mesh.uv = uv
     sparks.points = electricity
     sparks.modulate.a = .15 if not dangerous else smoothstep(charge_seconds,charge_seconds+.12,t)
     for i in SEGMENTS:

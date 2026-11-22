@@ -2,9 +2,12 @@ extends Node
 ## 侧墙触手只造成短暂眩晕；原鱼图仅在眼睛区域绘制螺旋。
 signal stunned
 signal recovered
-@export var stun_seconds: float=.55
-@export var dizzy_seconds: float=1.0
+@export var stun_seconds: float=.85
+@export var dizzy_seconds: float=.85
 @export var protection_seconds: float=1.8
+@export var knockback_speed: float=900.0
+@export var knockback_drag: float=3.6
+@export_range(0,1) var hit_shake: float=.8
 var stun_remaining: float=0
 var dizzy_remaining: float=0
 var protection_remaining: float=0
@@ -34,7 +37,7 @@ func is_protected() -> bool:
     return protection_remaining>0
 func apply(direction: Vector2=Vector2.RIGHT) -> bool:
     if not _can_play() or is_protected() or teleport.is_invulnerable(): return false
-    stun_remaining=stun_seconds
+    stun_remaining=maxf(stun_seconds,dizzy_seconds)
     dizzy_remaining=dizzy_seconds
     protection_remaining=protection_seconds
     _elapsed=0
@@ -46,7 +49,9 @@ func apply(direction: Vector2=Vector2.RIGHT) -> bool:
     reader.clear()
     motor.enabled=false
     teleport.enabled=false
-    body.velocity=Vector2(signf(direction.x)*130,60)
+    var away: Vector2=direction.normalized() if not direction.is_zero_approx() else Vector2.RIGHT
+    body.velocity=away*knockback_speed
+    stage.level.camera.add_trauma(hit_shake)
     art.material=_dizzy_material
     visual.play_selection_pulse()
     stunned.emit()
@@ -59,8 +64,10 @@ func _physics_process(delta: float) -> void:
     dizzy_remaining=maxf(0,dizzy_remaining-delta)
     if _locked:
         stun_remaining=maxf(0,stun_remaining-delta)
-        body.velocity=body.velocity.move_toward(Vector2(0,70),300*delta)
-        body.move_and_slide()
+        var decay: float=exp(-knockback_drag*delta)
+        body.velocity=body.velocity*decay+Vector2(0,90/maxf(knockback_drag,.01)*(1-decay))
+        var collision: KinematicCollision2D=body.move_and_collide(body.velocity*delta)
+        if collision!=null: body.velocity=body.velocity.slide(collision.get_normal())*.35
         if stun_remaining<=0:
             _restore_controls()
             recovered.emit()

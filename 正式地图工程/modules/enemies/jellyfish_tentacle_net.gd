@@ -83,7 +83,7 @@ func _physics_process(delta: float) -> void:
             var teleport := target.get_node_or_null("Teleport")
             if row.dodge_grace<=0 and nearby and not _hit and (stun==null or not stun.is_protected()) and (teleport==null or not teleport.is_invulnerable()) and tendril.touches(center,24):
                 _hit = true
-                player_hit.emit(Vector2(float(-_side),-.5))
+                player_hit.emit(Vector2(signf(tendril.finish.x-tendril.start.x),.15))
         if row_top-fish_y>1900: remove.append(row)
     for row in remove:
         row.node.queue_free()

@@ -75,7 +75,7 @@ func run():
     check(fish.get_node("Visual/Sprite").material!=null,"Hit displays the spiral eye over the original fish artwork")
     check(not fish.get_node("Input").enabled and not fish.get_node("Movement").enabled,"Fish briefly pauses swimming while dazed")
     trap.linger_seconds=10
-    await create_timer(.7).timeout
+    await create_timer(1.0).timeout
     check(not game.dead and fish.get_node("Input").enabled and fish.get_node("Teleport").enabled,"Swimming input and blink recover automatically")
     check(not stun.apply(Vector2.RIGHT),"Short recovery protection prevents consecutive tentacle stun")
     await create_timer(.5).timeout

@@ -31,11 +31,24 @@ func run():
     var stun=fish.get_node("Stun")
     stun.set_physics_process(false)
     var texture: Texture2D=fish.get_node("Visual/Sprite").texture
+    game.camera.set_follow_target(fish,true)
+    var maximum_shake: float=0
+    var start: Vector2=fish.global_position
+    var zoom: Vector2=game.camera.zoom
     check(stun.apply(Vector2.RIGHT),"Wall tentacle can apply nonlethal stun")
     check(not game.dead and not fish.get_node("Teleport").try_teleport(Vector2.RIGHT),"Stun is nonlethal and temporarily pauses blinking")
     check(fish.get_node("Visual/Sprite").texture==texture,"Stun keeps the exact original fish artwork")
     check(not stun.apply(Vector2.LEFT),"Repeated contact cannot stack stun")
-    for tick in 60: stun._physics_process(.01)
+    check(game.camera._trauma>0,"Stun adds a brief camera impulse")
+    for tick in 60:
+        stun._physics_process(.01)
+        game.camera._process(.01)
+        maximum_shake=maxf(maximum_shake,game.camera.offset.length())
+    check(stun.dizzy_remaining>0 and not fish.get_node("Teleport").try_teleport(Vector2.RIGHT),"Blink stays blocked while the dizzy eye is still visible")
+    for tick in 30: stun._physics_process(.01)
+    check(fish.global_position.x>start.x+170,"A hit sends the fish a noticeable distance through real collision movement")
+    check(game.camera.zoom==zoom,"Impact never changes camera zoom")
+    check(maximum_shake>.01 and game.camera._trauma==0,"Screen visibly shakes then its impact decays completely")
     check(fish.get_node("Movement").enabled and fish.get_node("Input").enabled and fish.get_node("Teleport").enabled,"Movement and blink restore after the short stun")
     check(stun.is_protected(),"Recovery retains brief protection from wall tentacles")
     for tick in 130: stun._physics_process(.01)

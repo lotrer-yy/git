@@ -61,7 +61,7 @@ func _physics_process(delta: float) -> void:
 		if _fish.is_on_floor():
 			state = State.STRANDED
 			elapsed = 0.0
-			_sprite.texture = stranded_texture
+			if stranded_texture != null: _sprite.texture = stranded_texture
 			_sprite.position = Vector2(0, -11.5)
 			_visual.rotation = 0.0
 			landed_on_shore.emit()
@@ -105,7 +105,7 @@ func release_soul() -> void:
 	if state == State.DEAD:
 		return
 	state = State.DEAD
-	_sprite.texture = dead_texture
+	if dead_texture != null: _sprite.texture = dead_texture
 	_visual.scale = Vector2.ONE
 	_visual.rotation = 0.0
 	_fish.velocity = Vector2.ZERO

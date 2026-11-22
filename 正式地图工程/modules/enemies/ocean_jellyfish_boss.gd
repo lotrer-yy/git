@@ -13,6 +13,9 @@ enum State { DORMANT, RISING, PRESENT }
 @export var maximum_rise_speed: float = 1100.0
 @export var acceleration: float = 2200.0
 @export var pulse_push: float = 850.0
+@export var surface_y: float = 29990.0
+@export var minimum_crown_depth: float = 1800.0
+@export var shallow_slowdown_distance: float = 1400.0
 var target: CharacterBody2D
 var camera: Camera2D
 var state: State = State.DORMANT
@@ -50,7 +53,12 @@ func _physics_process(delta: float) -> void:
         var desired_gap := head_offset_below_player+sin(_clock*TAU/5.2)*distance_swing*.65
         desired_speed -= clampf((gap-desired_gap)*2.5,-600,900)
     desired_speed = clampf(desired_speed,-maximum_rise_speed,250)
+    var shallow_limit: float = (get_parent().to_global(Vector2(0,surface_y+minimum_crown_depth)).y if get_parent() is Node2D else surface_y+minimum_crown_depth)+visual.ART.get_height()*.19*artwork_scale
+    var remaining_depth: float = maxf(0,global_position.y-shallow_limit)
+    if desired_speed<0:
+        desired_speed *= smoothstep(0,shallow_slowdown_distance,remaining_depth)
     _vertical_speed = move_toward(_vertical_speed,desired_speed,acceleration*delta)
+    _vertical_speed = maxf(_vertical_speed,-remaining_depth/maxf(delta,.001))
     global_position.y += _vertical_speed*delta
     var desired_x := _center_x+sin(_clock*TAU/lateral_sway_period)*lateral_sway_pixels
     global_position.x = move_toward(global_position.x,desired_x,90*delta)

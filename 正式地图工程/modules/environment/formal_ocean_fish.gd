@@ -18,6 +18,7 @@ func _ready() -> void:
     possession.possession_started.connect(_on_transfer_started)
     possession.possession_finished.connect(_on_transfer_finished)
     level.died.connect(_on_player_died)
+    $ShoreExit.died_on_shore.connect(func(): level.die(&"stranded"))
     $Shark.configure(fish,get_node("../../Camera"))
     $Shark.player_hit.connect(_on_shark_hit)
     $Octopus.configure(fish,get_node("../../Camera"))
@@ -31,10 +32,10 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
     var y: float = level.to_local(fish.global_position).y
-    var can_attack: bool = active and host.claimed and level.player == fish and not level.dead and not level.exit_in_progress and level.visible and y >= 29978.0 and y <= 39138.0
+    var can_attack: bool = $ShoreExit.state==$ShoreExit.State.SWIMMING and active and host.claimed and level.player == fish and not level.dead and not level.exit_in_progress and level.visible and y >= 29978.0 and y <= 39138.0
     $Shark.enabled = can_attack
     $JellyfishBoss.enabled = can_attack
-    $BossTentacleNet.enabled = can_attack
+    $BossTentacleNet.enabled = can_attack and y>=32000.0
     for lane in $PinkSharks.get_children(): lane.damage_enabled = can_attack
     if not (level.dead and level.death_reason in [&"shark",&"pink_shark"]):
         $Octopus.enabled = can_attack and y<=octopus_zone_bottom and y>=octopus_zone_top
@@ -91,6 +92,7 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
+    $ShoreExit.reset()
     $BossTentacleNet.reset()
     $JellyfishBoss.reset()
     for lane in $PinkSharks.get_children(): lane.reset()

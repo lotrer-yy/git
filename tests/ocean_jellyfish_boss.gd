@@ -107,8 +107,9 @@ func run():
         if step%400==0: player.position.y -= 320
         boss._physics_process(.01)
         if step>3500: final_gaps.append(boss.global_position.y-player.global_position.y)
-    check(final_gaps.max()<350,"Long ascent with repeated upward blinks cannot leave the boss trailing below the view")
-    check(final_gaps.min()<0,"Boss still catches up alongside the player after a long climb")
+    var shallow_crown: float = boss.global_position.y-boss.visual.ART.get_height()*.19*boss.artwork_scale
+    check(shallow_crown>=boss.surface_y+boss.minimum_crown_depth,"Boss crown stays in deep water")
+    check(final_gaps.min()>1000,"Fish leaves the boss behind near the surface")
     boss.reset()
     check(not boss.visible and not boss.enabled,"Retry clears entrance and motion")
     var display := Camera2D.new()

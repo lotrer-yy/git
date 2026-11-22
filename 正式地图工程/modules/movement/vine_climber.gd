@@ -1,6 +1,7 @@
 class_name VineClimber
 extends Node
 ## S 大范围抓取，W/S 攀爬，A/D 借力摆荡，空格带着惯性跳离。
+@export var release_on_grab_release: bool = false
 @export var grab_action: StringName = &""
 @export var allow_mantle: bool = true
 @export var hands_offset := Vector2(0,-60)
@@ -52,6 +53,9 @@ func _physics_process(delta: float) -> void:
 			_motor.reset()
 		return
 	if vine != null:
+		if release_on_grab_release and not _grab_held():
+			detach(false)
+			return
 		vine.climb_axis=float(_reader.down_held)-float(_reader.jump_held)
 		vine.pump_axis=_reader.move_axis
 		if Input.is_action_just_pressed(&"vine_release"):
@@ -104,7 +108,8 @@ func detach(jump: bool) -> void:
 	vine=null
 	_motor.enabled=true
 	_motor.reset()
-	_body.velocity=exit_velocity+Vector2(_reader.move_axis*120,-440 if jump else 0)
+	var launch := exit_velocity+(Vector2(_reader.move_axis*120,-440) if jump else Vector2.ZERO)
+	_motor.launch_with_momentum(launch)
 	jump_origin=_body.global_position
 	_cooldown=0.3
 func reset() -> void:

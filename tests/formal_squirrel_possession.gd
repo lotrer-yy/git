@@ -82,12 +82,14 @@ func run():
     host.reader.external_control = true
     host.reader.jump_held = true
     host.reader.move_axis = 1
+    Input.action_press(&"possess")
     var grip: float = climber.vine.grip_length
     climber._physics_process(.01)
     climber.vine._physics_process(.1)
     check(climber.vine.grip_length<grip and climber.vine.pump_axis==1,"W climbs while A/D input drives the real rope")
     check(not climber.allow_mantle,"The player cannot mantle onto decorative thick main vines")
     climber.detach(true)
+    Input.action_release(&"possess")
     check(climber.vine==null and host.motor.enabled,"Squirrel can jump off the rope and enter normal movement")
     for i in 240: controller.shot._process(.01)
     check(game.camera.zoom.is_equal_approx(Vector2.ONE*1.35),"Camera returns to the normal 1.35 zoom")

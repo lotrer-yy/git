@@ -27,6 +27,7 @@ signal facing_changed(direction: float)
 var body: CharacterBody2D
 var reader: Node
 var facing: float = 1.0
+var _carried_momentum: bool = false
 var _coyote_left: float = 0.0
 var _buffer_left: float = 0.0
 
@@ -41,13 +42,15 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not enabled:
 		return
-	var grounded_before := body.is_on_floor()
+	var grounded_before := body.is_on_floor() and not (_carried_momentum and body.velocity.y<0)
+	if grounded_before: _carried_momentum = false
 	_coyote_left = coyote_time if grounded_before else maxf(0.0, _coyote_left - delta)
 	_buffer_left = jump_buffer_time if reader.jump_pressed else maxf(0.0, _buffer_left - delta)
 	var axis: float = reader.move_axis
 	var response: float = braking if is_zero_approx(axis) else acceleration
 	if not grounded_before:
 		response *= air_control
+		if _carried_momentum and is_zero_approx(axis): response = 0
 	body.velocity.x = move_toward(body.velocity.x, axis * move_speed, response * delta)
 	if not is_zero_approx(axis) and signf(axis) != facing:
 		facing = signf(axis)
@@ -62,7 +65,7 @@ func _physics_process(delta: float) -> void:
 		_buffer_left = 0.0
 		did_jump = true
 		jumped.emit()
-	if not reader.jump_held and body.velocity.y < -jump_speed * jump_release_multiplier:
+	if not _carried_momentum and not reader.jump_held and body.velocity.y < -jump_speed * jump_release_multiplier:
 		body.velocity.y = -jump_speed * jump_release_multiplier
 	var impact_speed := maxf(body.velocity.y, 0.0)
 	body.move_and_slide()
@@ -70,7 +73,13 @@ func _physics_process(delta: float) -> void:
 		landed.emit(impact_speed)
 
 
+func launch_with_momentum(velocity: Vector2) -> void:
+	# 绳索抛出使用真实速度，不受普通跳跃的松键截断和无输入空中刹车影响。
+	_carried_momentum = true
+	body.velocity = velocity
+
 func reset() -> void:
+	_carried_momentum = false
 	body.velocity = Vector2.ZERO
 	_coyote_left = 0.0
 	_buffer_left = 0.0

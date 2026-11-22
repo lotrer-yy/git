@@ -1,0 +1,27 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/ai/formal_squirrel_swing.gd" id="controller"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/squirrel/formal/walking.png" id="walk"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/squirrel/formal/selected.png" id="selected"]
+[sub_resource type="AtlasTexture" id="Walk"]
+atlas = ExtResource("walk")
+region = Rect2(682,2678,208,167)
+filter_clip = true
+[sub_resource type="AtlasTexture" id="Selected"]
+atlas = ExtResource("selected")
+region = Rect2(667,2622,242,237)
+filter_clip = true
+[node name="Squirrel" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 0
+z_index = 10
+script = ExtResource("controller")
+vine_path = NodePath("../InteractiveVines/Vine16")
+[node name="GraspPivot" type="Node2D" parent="."]
+position = Vector2(-60,-90)
+[node name="Sprite" type="Sprite2D" parent="GraspPivot"]
+position = Vector2(94,8.5)
+texture = SubResource("Walk")
+[node name="SelectedSprite" type="Sprite2D" parent="GraspPivot"]
+visible = false
+position = Vector2(92,-26.5)
+texture = SubResource("Selected")

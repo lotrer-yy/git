@@ -7,6 +7,7 @@ func _ready() -> void:
     for vine in vines:
         vine.set_physics_process(false)
         vine.set_process(false)
+    $Squirrel.set_active(false)
 func configure(view: Camera2D, map_transform: Transform2D) -> void:
     camera = view
     global_transform = map_transform
@@ -23,9 +24,13 @@ func _update_nearby() -> void:
     for vine in vines:
         var top: float = vine.global_position.y
         var bottom: float = top+vine.length
-        var near: bool = vine.rider!=null or (top<center+half+900 and bottom>center-half-900)
+        var player_riding: bool = vine.rider!=null and not vine.rider.is_in_group("idle_vine_squirrels")
+        var near: bool = player_riding or (top<center+half+900 and bottom>center-half-900)
         vine.set_physics_process(near)
         vine.set_process(near)
+        if vine.rider!=null and vine.rider.is_in_group("idle_vine_squirrels"):
+            vine.rider.set_active(near)
 func reset() -> void:
     for vine in vines: vine.reset()
+    $Squirrel.reset()
     _update_nearby()

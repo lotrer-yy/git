@@ -1,0 +1,53 @@
+extends CharacterBody2D
+## 松鼠以摆动速度借力，实际推动物理绳；不直接动画平移藤蔓。
+@export var vine_path: NodePath
+@export var grip_fraction: float = .64
+@export var swing_width: float = 215.0
+@export var pumping_strength: float = .85
+var vine: SwingVine
+var active: bool = false
+var selected: bool = false
+var _direction: float = 1.0
+@onready var pose: Node2D = $GraspPivot
+func _ready() -> void:
+    process_physics_priority = -10
+    add_to_group("idle_vine_squirrels")
+    vine = get_node(vine_path) as SwingVine
+    reset()
+func reset() -> void:
+    if not is_instance_valid(vine): return
+    if vine.rider==self: vine.release()
+    _direction = 1.0
+    # 从一个小倾角开始，整条绳的各段都保持原长。
+    for i in range(1,vine.rope.points.size()):
+        var point: Vector2 = Vector2(0,vine.rope.segment_length*i).rotated(.28)
+        vine.rope.points[i] = point
+        vine.rope.previous[i] = point
+    vine.rider_offset = Vector2(60,90)
+    global_position = vine.to_global(vine.rope.sample(vine.length*grip_fraction))+vine.rider_offset
+    vine.catch(self,Vector2(260,0),global_position)
+    vine.grip_length = vine.length*grip_fraction
+    vine.pump_axis = 0
+    pose.rotation = 0
+    set_selected(false)
+func set_active(value: bool) -> void:
+    active = value
+    set_physics_process(value)
+    set_process(value)
+func set_selected(value: bool) -> void:
+    selected = value
+    $GraspPivot/Sprite.visible = not value
+    $GraspPivot/SelectedSprite.visible = value
+func _physics_process(_delta: float) -> void:
+    if not active or vine.rider!=self: return
+    var grip: Vector2 = vine.rope.sample(vine.grip_length)
+    var speed: float = velocity.x
+    if absf(speed)>8: _direction = signf(speed)
+    # 两侧逐渐收力，在经过最低点时借力；没有固定轨迹或瞬间换向。
+    var edge: float = smoothstep(swing_width*.75,swing_width,absf(grip.x))
+    vine.pump_axis = lerpf(_direction*pumping_strength,-signf(grip.x)*pumping_strength,edge)
+    vine.climb_axis = 0
+func _process(delta: float) -> void:
+    if vine.rider!=self: return
+    # 手的位置固定在绳上，身体根据摆幅倾斜。
+    pose.rotation = lerp_angle(pose.rotation,-vine.angle*.55,1-exp(-8*delta))

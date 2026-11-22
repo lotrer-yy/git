@@ -9,6 +9,8 @@
 [ext_resource type="Texture2D" path="res://assets/art/reference_map/09.png" id="canopy_upper"]
 [ext_resource type="Texture2D" path="res://assets/art/reference_map/10.png" id="canopy_lower"]
 
+[ext_resource type="PackedScene" path="res://scenes/actors/formal_squirrel.tscn" id="squirrel"]
+
 [sub_resource type="ShaderMaterial" id="CanopyOcclusion"]
 shader = ExtResource("canopy_mask")
 shader_parameter/canopy_upper = ExtResource("canopy_upper")
@@ -301,3 +303,5 @@ metadata/source_region = Rect2(462,8235,67,656)
 position = Vector2(-33.5,0)
 texture = SubResource("Vine15")
 centered = false
+
+[node name="Squirrel" parent="." instance=ExtResource("squirrel")]

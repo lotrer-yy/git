@@ -1,5 +1,5 @@
 {
-  "reference": "示例.png",
+  "reference": "绀轰緥.png",
   "main_origin": [
     0,
     20166
@@ -10,5 +10,5 @@
   ],
   "interactive_vines": 16,
   "decorative_trunks_collision": false,
-  "scope": "layout and grabbable vines only; no squirrel or jungle progression added"
+  "scope": "authored layout; squirrel pumps the lowest thin vine with the existing Verlet solver; jungle progression unchanged"
 }

@@ -31,7 +31,7 @@ func run():
     game.camera.global_position = Vector2(960,28500)
     layout._update_nearby()
     check(layout.vines[-1].is_physics_processing() and not layout.vines[0].is_physics_processing(),"Only ropes near the current camera run their solver")
-    var vine = layout.vines[-1]
+    var vine = layout.vines[-2]
     var grip: Vector2 = vine.to_global(vine.rope.sample(vine.length*.65))
     check(vine.can_grab(grip),"The thin authored vine is actually grabbable")
     var probe := CharacterBody2D.new()

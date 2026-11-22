@@ -1,5 +1,7 @@
 extends Node2D
 ## 海面前随机单次追尾缠绕：固定出手方向，瞬移避开或挣脱，不产生额外死亡。
+const SHOT = preload("res://modules/camera/surface_grab_camera.gd")
+const PROMPT = preload("res://modules/visual/struggle_shift_prompt.gd")
 const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 const WARNING = preload("res://modules/visual/tentacle_warning.gd")
 const CAUGHT_ART = preload("res://assets/art/characters/fish/abilities/entangled.png")
@@ -21,6 +23,9 @@ var _evade_point := Vector2.ZERO
 var struggle_presses: int = 0
 var _struggle_kick: float = 0
 var _capture_origin := Vector2.ZERO
+var _pull_speed: float = 0
+var shot: Node
+var prompt: CanvasLayer
 var _warning_arms: Array[Node2D] = []
 var _arm: Node2D
 var _caught_art: Sprite2D
@@ -36,6 +41,10 @@ var _previous_tip := Vector2.ZERO
 func _ready() -> void:
     z_index = 14
     blink.teleported.connect(_on_blink)
+    shot = SHOT.new()
+    add_child(shot)
+    prompt = PROMPT.new()
+    add_child(prompt)
 func _physics_process(delta: float) -> void:
     if not stage.active or stage.level.dead or stage.level.player!=fish: return
     _hold_surface_route()
@@ -67,7 +76,13 @@ func _physics_process(delta: float) -> void:
         if elapsed>=round_rest_seconds: _begin_warning()
     elif state==State.CAUGHT:
         _struggle_kick = move_toward(_struggle_kick,0,delta*5)
-        fish.global_position = _capture_origin+Vector2(0,28*smoothstep(0,.18,elapsed))
+        var remaining: float = maxf(0,380-(fish.global_position.y-_capture_origin.y))
+        var tug_speed: float = (65+30*sin(elapsed*TAU/1.15))*clampf(remaining/100,0,1)
+        _pull_speed = move_toward(_pull_speed,tug_speed,delta*420)
+        var capture_pull: float = 28*(smoothstep(0,.18,elapsed)-smoothstep(0,.18,maxf(0,elapsed-delta)))
+        var motion: float = minf(_pull_speed*delta+capture_pull,remaining)
+        fish.move_and_collide(Vector2(0,motion))
+        fish.velocity = Vector2(0,_pull_speed)
         var spring := sin(elapsed*25)*exp(-elapsed*9)
         var wriggle := sin(elapsed*35)*_struggle_kick
         _caught_art.scale = Vector2(1+spring*.30+wriggle*.12,1-spring*.24-wriggle*.10)
@@ -154,6 +169,10 @@ func _catch() -> void:
     struggle_presses = 0
     _struggle_kick = 0
     _capture_origin = fish.global_position
+    _pull_speed = 0
+    shot.begin(stage.level.camera)
+    prompt.show_prompt()
+    _arm.start = _arm.to_local(fish.global_position+Vector2(0,720))
     _restore_motor = motor.enabled
     _restore_visual = visual.visible
     motor.enabled = false
@@ -178,11 +197,16 @@ func try_struggle() -> bool:
     if state!=State.CAUGHT or stage.level.dead: return false
     struggle_presses += 1
     _struggle_kick = 1
+    _pull_speed = -160
+    prompt.pulse()
+    shot.pulse()
     if struggle_presses>=struggle_presses_required:
         _end_round()
         fish.velocity = Vector2(0,-180)
     return true
 func _finish() -> void:
+    if is_instance_valid(shot): shot.release(stage.level.dead)
+    if is_instance_valid(prompt): prompt.hide_prompt(stage.level.dead)
     if state==State.CAUGHT:
         motor.enabled = _restore_motor and not stage.level.dead
         visual.visible = _restore_visual
@@ -214,6 +238,8 @@ func _hold_surface_route() -> void:
         fish.velocity.y = maxf(fish.velocity.y,0)
 func reset() -> void:
     _finish()
+    if is_instance_valid(shot): shot.reset()
+    if is_instance_valid(prompt): prompt.hide_prompt(true)
     state = State.WAITING
     elapsed = 0
     rounds_completed = 0

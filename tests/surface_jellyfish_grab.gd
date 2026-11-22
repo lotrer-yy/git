@@ -69,7 +69,18 @@ func run():
     check(not motor.enabled and not fish.get_node("Visual").visible and grab._caught_art.visible,"Capture stops swimming and displays the supplied entangled artwork")
     grab._physics_process(.06)
     check(grab._caught_art.scale!=Vector2.ONE,"Capture has a visible squash and rebound")
-    grab._physics_process(1)
+    var caught_y: float = fish.global_position.y
+    for i in 80: grab._physics_process(.01)
+    check(fish.global_position.y>caught_y+25,"The tentacle keeps pulling the caught fish down instead of holding a static pose")
+    var original_zoom: Vector2 = grab.shot._zoom
+    grab.shot._process(.2)
+    grab.prompt._process(.2)
+    check(game.camera.zoom.x>original_zoom.x and game.camera.zoom.x<=original_zoom.x*1.06,"Grab camera adds only a restrained close-up")
+    check(game.camera.cinematic_offset.y>0,"Grab camera framing moves slightly downward with the tug")
+    check(grab.prompt.visible and grab.prompt.active and grab.prompt.sprite.position.y<grab.prompt.get_viewport().get_visible_rect().size.y*.2,"Supplied Shift prompt pops near the top of the screen")
+    var cue_position: Vector2 = grab.prompt.sprite.position
+    grab.prompt._process(.04)
+    check(grab.prompt.sprite.position!=cue_position,"The Shift cue bounces continuously")
     check(not game.dead and grab.state==grab.State.CAUGHT,"Capture leaves the player a chance to escape rather than killing immediately")
     game.get_node("CameraAttention").enabled = false
     game.camera.set_follow_target(fish,true)
@@ -93,7 +104,9 @@ func run():
     for i in 8: root.push_input(key,true)
     check(grab.struggle_presses==1,"Holding Shift and OS key repeats cannot count as repeated struggles")
     key.echo = false
-    grab._physics_process(.02)
+    var before_struggle_y: float = fish.global_position.y
+    grab._physics_process(.04)
+    check(fish.global_position.y<before_struggle_y,"A Shift tap physically wins ground upward against the pulling tentacle")
     check(grab._caught_art.rotation!=0,"Each struggle adds an immediate wriggling response")
     for i in range(grab.struggle_presses_required-1):
         key.pressed = false
@@ -103,6 +116,10 @@ func run():
     check(grab.state==grab.State.FINISHED and motor.enabled and fish.get_node("Visual").visible,"Six separate Shift taps free the fish and restore swimming")
     check(grab._caught_art==null and grab._arm==null,"Successful struggle removes the wrapped art and arm")
     check(not grab.blocks_exit() and grab.attacks_started==1,"Only one attack is required before the shore route opens")
+    grab.shot._process(.5)
+    grab.prompt._process(.25)
+    check(game.camera.zoom.is_equal_approx(original_zoom) and game.camera.cinematic_offset==grab.shot._offset,"Escape smoothly restores the exact original zoom and framing")
+    check(not grab.prompt.visible,"Escape dismisses the Shift prompt")
     grab.reset()
     blink.reset()
     fish.position.y = shore.surface_y+600

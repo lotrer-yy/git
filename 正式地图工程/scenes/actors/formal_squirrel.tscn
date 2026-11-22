@@ -47,6 +47,7 @@ external_control = true
 script = ExtResource("motor")
 enabled = false
 momentum_flight_speed = 0.8
+extra_air_jumps = 1
 [node name="Host" type="Node" parent="."]
 script = ExtResource("host")
 focus_offset = Vector2(0,-75)

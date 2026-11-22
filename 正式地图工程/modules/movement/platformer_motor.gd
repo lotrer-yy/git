@@ -16,6 +16,8 @@ signal facing_changed(direction: float)
 @export var braking: float = 4200.0
 @export_range(0.0, 1.0) var air_control: float = 0.8
 @export_group("Jump / 跳跃")
+@export_range(0,2) var extra_air_jumps: int = 0
+@export var air_jump_speed: float = 1210.0
 @export var jump_speed: float = 1210.0
 @export var gravity: float = 2200.0
 @export var max_fall_speed: float = 1600.0
@@ -28,6 +30,8 @@ signal facing_changed(direction: float)
 var body: CharacterBody2D
 var reader: Node
 var facing: float = 1.0
+var air_jumps_remaining: int = 0
+var _air_jump_armed: bool = true
 var _carried_momentum: bool = false
 var _coyote_left: float = 0.0
 var _buffer_left: float = 0.0
@@ -38,13 +42,17 @@ func _ready() -> void:
 	body = get_node(body_path) as CharacterBody2D
 	reader = get_node(input_path)
 	assert(body != null, "PlatformerMotor needs a CharacterBody2D")
+	air_jumps_remaining=extra_air_jumps
 
 
 func _physics_process(delta: float) -> void:
 	if not enabled:
 		return
 	var grounded_before := body.is_on_floor() and not (_carried_momentum and body.velocity.y<0)
-	if grounded_before: _carried_momentum = false
+	if grounded_before:
+		_carried_momentum = false
+		air_jumps_remaining=extra_air_jumps
+	if not reader.jump_held: _air_jump_armed=true
 	_coyote_left = coyote_time if grounded_before else maxf(0.0, _coyote_left - delta)
 	_buffer_left = jump_buffer_time if reader.jump_pressed else maxf(0.0, _buffer_left - delta)
 	var flight_scale: float = momentum_flight_speed if _carried_momentum else 1.0
@@ -66,21 +74,34 @@ func _physics_process(delta: float) -> void:
 		_coyote_left = 0.0
 		_buffer_left = 0.0
 		did_jump = true
+		_air_jump_armed=false
+		jumped.emit()
+	elif not grounded_before and reader.jump_pressed and _air_jump_armed and air_jumps_remaining>0:
+		air_jumps_remaining-=1
+		_air_jump_armed=false
+		body.velocity.y=minf(body.velocity.y,-air_jump_speed*flight_scale)
+		_buffer_left=0
+		_coyote_left=0
+		did_jump=true
 		jumped.emit()
 	if not _carried_momentum and not reader.jump_held and body.velocity.y < -jump_speed * jump_release_multiplier:
 		body.velocity.y = -jump_speed * jump_release_multiplier
 	var impact_speed := maxf(body.velocity.y, 0.0)
 	body.move_and_slide()
 	if not grounded_before and body.is_on_floor() and not did_jump:
+		air_jumps_remaining=extra_air_jumps
 		landed.emit(impact_speed)
 
 
 func launch_with_momentum(velocity: Vector2) -> void:
 	# 绳索抛出使用真实速度，不受普通跳跃的松键截断和无输入空中刹车影响。
 	_carried_momentum = true
+	_air_jump_armed=not reader.jump_held
 	body.velocity = velocity*momentum_flight_speed
 
 func reset() -> void:
+	air_jumps_remaining=extra_air_jumps
+	_air_jump_armed=not reader.jump_held
 	_carried_momentum = false
 	body.velocity = Vector2.ZERO
 	_coyote_left = 0.0

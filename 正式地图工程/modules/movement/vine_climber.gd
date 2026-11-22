@@ -119,6 +119,7 @@ func try_grab() -> bool:
 	_motor.enabled=false
 	return true
 func adopt_vine(value: SwingVine) -> void:
+	_motor.air_jumps_remaining=_motor.extra_air_jumps
 	vine=value
 	visited_vines[value.get_instance_id()]=true
 	_swing_assist.reset()

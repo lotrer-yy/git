@@ -17,6 +17,9 @@ func run():
     reader.external_control = true
     climber.detach(false)
     var target = layout.vines[-2]
+    var grab_point: Vector2 = target.to_global(target.rope.sample(target.length*.7))
+    check(target.can_grab(grab_point+Vector2(150,0)),"Expanded grab range accepts a 150-pixel near miss")
+    check(not target.can_grab(grab_point+Vector2(190,0)),"Expanded range still rejects distant vines")
     body.global_position = target.to_global(target.rope.sample(target.length*.7))-climber.hands_offset
     reader.down_held = true
     climber._physics_process(.4)

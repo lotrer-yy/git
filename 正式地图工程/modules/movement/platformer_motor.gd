@@ -50,7 +50,7 @@ func _physics_process(delta: float) -> void:
 	var response: float = braking if is_zero_approx(axis) else acceleration
 	if not grounded_before:
 		response *= air_control
-		if _carried_momentum and is_zero_approx(axis): response = 0
+		if _carried_momentum and (is_zero_approx(axis) or body.velocity.x*axis>move_speed): response = 0
 	body.velocity.x = move_toward(body.velocity.x, axis * move_speed, response * delta)
 	if not is_zero_approx(axis) and signf(axis) != facing:
 		facing = signf(axis)

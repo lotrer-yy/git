@@ -57,4 +57,5 @@ allow_mantle = false
 grab_action = &"possess"
 release_on_grab_release = true
 automatic_swing = true
+launch_multiplier = 1.75
 prefer_unvisited_vines = true

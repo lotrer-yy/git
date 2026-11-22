@@ -43,7 +43,7 @@ func run():
     Input.action_release(&"possess")
     climber._physics_process(.01)
     check(climber.vine==null and target.rider==null,"Releasing Shift actually detaches the squirrel")
-    check(body.velocity.is_equal_approx(Vector2(-710,-900)),"Release inherits rope velocity without an arbitrary upward or sideways kick")
+    check(body.velocity.is_equal_approx(Vector2(-1242.5,-1575)),"Release amplifies the physical swing by 75 percent without changing its direction")
     reader.move_axis = 0
     reader.jump_held = false
     var motor = body.get_node("Movement")
@@ -51,6 +51,10 @@ func run():
     motor._physics_process(1.0/120)
     check(is_equal_approx(body.velocity.x,before.x),"No-input air braking does not erase the inherited sideways momentum")
     check(body.velocity.y < -800 and body.velocity.y>before.y,"A released throw follows gravity without a W-release height cutoff")
+    reader.move_axis = signf(body.velocity.x)
+    var fast_horizontal: float = body.velocity.x
+    motor._physics_process(1.0/120)
+    check(is_equal_approx(body.velocity.x,fast_horizontal),"Holding the flight direction does not immediately brake boosted speed to walking speed")
     Input.action_press(&"possess")
     climber._physics_process(.1)
     check(climber.vine==null,"Immediately pressing Shift again respects the release cooldown")
@@ -78,7 +82,7 @@ func run():
         var inherited: Vector2 = body.velocity
         Input.action_release(&"possess")
         climber._physics_process(1.0/120)
-        check(climber.vine==null and body.velocity.is_equal_approx(inherited),"Actual swinging velocity is preserved exactly when Shift is released")
+        check(climber.vine==null and body.velocity.normalized().is_equal_approx(inherited.normalized()) and body.velocity.length()>inherited.length()*1.5,"Shift release boosts the actual swing speed while preserving its direction")
         check(body.velocity.x*direction>160,"Releasing during left/right swing throws the squirrel in that direction")
         motor.reset()
         check(not motor._carried_momentum,"Reset clears the rope launch state for normal ground jumps")

@@ -39,7 +39,7 @@ func run():
     var launch: Vector2 = body.velocity
     Input.action_release(&"possess")
     climber._physics_process(.01)
-    check(climber.vine==null and body.velocity.is_equal_approx(launch),"Letting go still throws the squirrel with its real swing momentum")
+    check(climber.vine==null and body.velocity.normalized().is_equal_approx(launch.normalized()) and body.velocity.length()>launch.length()*1.5,"Letting go boosts the real swing momentum without changing its direction")
     var old = layout.vines[-2]
     old.position = Vector2(5000,20000)
     var grip: Vector2 = old.to_global(old.rope.sample(old.length*.6))

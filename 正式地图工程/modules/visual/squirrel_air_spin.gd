@@ -1,8 +1,9 @@
 extends Node2D
-## 松藤后的水平转身只作用于原画，不改变身体碰撞、抛物线或二段跳。
-const ART=preload("res://assets/art/characters/squirrel/formal/air_spin.png")
-@export var slow_turns_per_second: float=1.5
-@export var fast_turns_per_second: float=2.6
+## 松藤后用作者团身原画连续后空翻，只作用于视觉，不改变身体碰撞、抛物线或二段跳。
+const ART=preload("res://assets/art/characters/squirrel/formal/backflip.png")
+@export var slow_turns_per_second: float=1.2
+@export var fast_turns_per_second: float=2.0
+var _turn_direction: float=1.0
 var active: bool=false
 var elapsed: float=0
 var turns_per_second: float=2
@@ -13,11 +14,11 @@ func _ready() -> void:
     process_priority=10
     var atlas:=AtlasTexture.new()
     atlas.atlas=ART
-    atlas.region=Rect2(414,2548,350,183)
+    atlas.region=Rect2(89,2291,212,146)
     atlas.filter_clip=true
     sprite=Sprite2D.new()
     sprite.texture=atlas
-    sprite.offset=Vector2(-17,-8.5)
+    sprite.offset=Vector2(-5,0)
     sprite.z_index=2
     var material:=ShaderMaterial.new()
     material.shader=preload("res://shaders/white_paper_cutout.gdshader")
@@ -29,6 +30,7 @@ func begin(launch_velocity: Vector2) -> void:
     if not body.get_node("Host").claimed: return
     active=true
     elapsed=0
+    _turn_direction=-1 if launch_velocity.x>=0 else 1
     turns_per_second=lerpf(slow_turns_per_second,fast_turns_per_second,clampf(launch_velocity.length()/1600,0,1))
     source.hide()
     body.get_node("Visual/SelectedSprite").hide()
@@ -46,14 +48,12 @@ func _process(delta: float) -> void:
     elapsed+=delta
     sample(elapsed)
 func sample(time: float) -> void:
-    var phase: float=time*TAU*turns_per_second
-    var facing: float=cos(phase)
-    var width: float=.18+.82*absf(facing)
-    var pop: float=1+.12*sin(minf(time/.22,1)*PI)
+    var phase: float=time*TAU*turns_per_second*_turn_direction
+    var pop: float=1+.08*sin(minf(time/.18,1)*PI)
     sprite.global_position=source.global_position
-    sprite.global_rotation=body.global_rotation
-    sprite.global_scale=body.global_scale*Vector2(width,(1+sin(phase*2)*.035))*pop
-    sprite.flip_h=source.flip_h != (facing<0)
+    sprite.global_rotation=body.global_rotation+phase
+    sprite.global_scale=body.global_scale*1.1*pop
+    sprite.flip_h=source.flip_h
 func stop(restore: bool=true) -> void:
     active=false
     elapsed=0

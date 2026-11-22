@@ -3,10 +3,10 @@ extends Node
 signal teleported(from: Vector2, destination: Vector2)
 const BURST = preload("res://assets/art/characters/fish/abilities/teleport.png")
 @export var distance: float = 320.0
-@export var cooldown_seconds: float = 0.8
+@export var cooldown_seconds: float = 0.6
 @export var anticipation_seconds: float = 0.04
 @export var minimum_distance: float = 12.0
-@export var camera_blend_seconds: float = 0.25
+@export var camera_blend_seconds: float = 0.16
 @export var arrival_invulnerability_seconds: float = 0.18
 var enabled: bool = false
 var cooldown_remaining: float = 0.0
@@ -98,7 +98,7 @@ func _burst(point: Vector2, direction: Vector2) -> void:
     effect.rotation = Vector2.LEFT.angle_to(direction)
     _effects.append(effect)
     var fade := effect.create_tween()
-    fade.tween_property(effect,"modulate:a",0.0,0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+    fade.tween_property(effect,"modulate:a",0.0,0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
     fade.tween_callback(effect.queue_free)
 
 func reset() -> void:

@@ -39,7 +39,8 @@ func run():
     check(fish.get_node("Visual").visible and cast_count==1, "Arrival restores fish exactly once")
     check(fish.velocity.is_zero_approx(), "Arrival clears previous velocity")
     check(not blink.try_teleport(Vector2.RIGHT), "Cooldown blocks immediate recast")
-    await create_timer(.8).timeout
+    await create_timer(.5).timeout
+    check(is_zero_approx(blink.cooldown_remaining), "Blink recovers within 0.6 seconds for a quicker follow-up")
     var wall = StaticBody2D.new()
     wall.collision_layer = 16
     wall.collision_mask = 0

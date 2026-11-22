@@ -12,6 +12,13 @@ func configure(view: Camera2D, map_transform: Transform2D) -> void:
     camera = view
     global_transform = map_transform
     _update_nearby()
+func align_floor_to_bank(bank: CollisionShape2D) -> void:
+    # 延伸原岸线，不用长地图常量覆盖编辑器中已调整的站立高度。
+    var top: Vector2 = bank.to_global(Vector2(0,-bank.shape.size.y*.5))
+    var floor_shape: CollisionShape2D = $JungleFloor/Collision
+    var center: Vector2 = floor_shape.global_position
+    center.y = top.y+floor_shape.shape.size.y*.5*floor_shape.global_scale.y
+    floor_shape.global_position = center
 func _process(delta: float) -> void:
     _elapsed += delta
     if _elapsed<.15: return

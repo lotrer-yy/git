@@ -22,11 +22,17 @@ func run():
     await physics_frame
     var floor = layout.get_node("JungleFloor")
     check(floor.global_position==game.global_position,"Jungle floor remains aligned to the original map independently of OceanLink offset")
+    var floor_shape = floor.get_node("Collision")
+    var bank = stage.get_node("OriginalShoreBank/Collision")
+    var bank_top: float = bank.to_global(Vector2(0,-bank.shape.size.y*.5)).y
+    check(is_equal_approx(floor_shape.to_global(Vector2(0,-floor_shape.shape.size.y*.5)).y,bank_top),"Extended floor preserves the editor-adjusted original bank standing height")
+    await physics_frame
     for x in [-1500,-600,-220,-1,0,32,960,1888,1920,2140,2520,3400]:
         body.global_position = Vector2(x,29100)
         var hit = body.move_and_collide(Vector2(0,3000))
-        check(hit!=null and hit.get_collider()==floor,"Continuous bottom catches fast falls even in both outside swing zones")
-        check(body.global_position.y<29421,"Squirrel cannot fall below the jungle shore")
+        check(hit!=null and hit.get_collider() in [floor,stage.get_node("OriginalShoreBank")],"Continuous bottom catches fast falls even in both outside swing zones")
+        body.move_and_collide(Vector2(0,10))
+        check(absf(body.global_position.y-bank_top)<1,"Squirrel cannot fall below the jungle shore")
     body.global_position = Vector2(-400,29000)
     check(body.move_and_collide(Vector2(-300,0),true)==null,"Bottom closure does not restore a hard side wall")
     var fish: CharacterBody2D = stage.fish

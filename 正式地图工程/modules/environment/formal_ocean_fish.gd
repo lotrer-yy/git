@@ -14,6 +14,7 @@ var _spawn: Vector2
 func _ready() -> void:
     _spawn = fish.position
     $JungleLayout.configure(get_node("../../Camera"),level.global_transform)
+    $JungleLayout.align_floor_to_bank($OriginalShoreBank/Collision)
     # 海洋宿主只供海洋控制器选择，地狱幽灵不会跨阶段选择它。
     host.remove_from_group("possessable_hosts")
     host.add_to_group("formal_ocean_fish_hosts")

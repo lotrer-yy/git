@@ -17,6 +17,19 @@
 
 [ext_resource type="Script" path="res://modules/movement/formal_fish_shore_exit.gd" id="shore_exit"]
 
+[ext_resource type="Texture2D" path="res://assets/art/characters/fish/shore/stranded.png" id="stranded_art"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/fish/shore/dead.png" id="dead_art"]
+
+[sub_resource type="AtlasTexture" id="StrandedFish"]
+atlas = ExtResource("stranded_art")
+region = Rect2(1087,1968,130,85)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="DeadFish"]
+atlas = ExtResource("dead_art")
+region = Rect2(1087,1968,130,85)
+filter_clip = true
+
 [sub_resource type="RectangleShape2D" id="OriginalBank"]
 size = Vector2(1920,32)
 
@@ -75,6 +88,9 @@ script = ExtResource("boss_net")
 script = ExtResource("shore_exit")
 surface_y = 29990.0
 leap_speed = 1450.0
+stranded_texture = SubResource("StrandedFish")
+dead_texture = SubResource("DeadFish")
+death_hold_duration = 1.1
 
 [node name="OriginalShoreBank" type="StaticBody2D" parent="."]
 collision_layer = 16

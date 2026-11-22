@@ -23,7 +23,6 @@
 [ext_resource type="Texture2D" uid="uid://bas2x65pu77fd" path="res://assets/art/hell/new/platform_ball_group.png" id="group_flat"]
 [ext_resource type="Shader" uid="uid://lxj1kitnjs28" path="res://shaders/hell_platform_group.gdshader" id="group_shader"]
 [ext_resource type="Script" uid="uid://4dklqv8fa1mi" path="res://modules/environment/formal_hell.gd" id="hell"]
-[ext_resource type="Script" path="res://modules/environment/formal_segment_start.gd" id="segment_start"]
 [ext_resource type="PackedScene" path="res://scenes/map/hell_background.tscn" id="hell_background"]
 [ext_resource type="Texture2D" uid="uid://cohyxxiqj4ois" path="res://assets/art/hell/layers/ground.png" id="layer_ground"]
 [ext_resource type="Texture2D" uid="uid://cv43kubgw5syg" path="res://assets/art/hell/layers/lava.png" id="layer_lava"]
@@ -33,7 +32,10 @@
 [ext_resource type="Texture2D" uid="uid://bn5j2a4ik8j41" path="res://assets/art/hell/new/spike.png" id="layer_spike"]
 [ext_resource type="Script" uid="uid://djsfg1lsymtus" path="res://modules/audio/map_bgm.gd" id="music"]
 [ext_resource type="PackedScene" path="res://scenes/levels/formal_hell_ocean_link.tscn" id="ocean_link"]
+[ext_resource type="Texture2D" uid="uid://b80b35hc3hkhh" path="res://assets/art/ocean/formal/side_walls.png" id="ocean_side_walls"]
 [ext_resource type="Script" uid="uid://ulfy3x8n8fuj" path="res://modules/possession/possession_controller.gd" id="possession"]
+[ext_resource type="PackedScene" path="res://scenes/levels/rising_hell_lava.tscn" id="rising_lava"]
+[ext_resource type="Script" uid="uid://b4wntyr6xkucu" path="res://modules/environment/formal_segment_start.gd" id="segment_start"]
 [ext_resource type="Script" uid="uid://jg8lqwgywtbb" path="res://modules/camera/possession_camera.gd" id="shot"]
 [ext_resource type="Texture2D" uid="uid://cfrj58f6fxq7y" path="res://assets/art/hell/new/idle.png" id="sleep_art"]
 [ext_resource type="Texture2D" uid="uid://cttpwvxf0076l" path="res://assets/art/hell/new/spiked_platform.png" id="spiked_platform"]
@@ -60,9 +62,6 @@
 [ext_resource type="Texture2D" uid="uid://rbkw22ndvw6o" path="res://assets/art/hell/layers/wall_right/24.png" id="wall_right_24"]
 [ext_resource type="Texture2D" uid="uid://druls3abs7vib" path="res://assets/art/hell/layers/wall_right/25.png" id="wall_right_25"]
 [ext_resource type="Texture2D" uid="uid://bgme0ckr31w40" path="res://assets/art/hell/new/zzz.png" id="zzz_art"]
-
-[ext_resource type="Texture2D" path="res://assets/art/ocean/formal/side_walls.png" id="ocean_side_walls"]
-[ext_resource type="PackedScene" path="res://scenes/levels/rising_hell_lava.tscn" id="rising_lava"]
 
 [sub_resource type="ShaderMaterial" id="targetmaterial1"]
 shader = ExtResource("target_shader")
@@ -362,7 +361,7 @@ position = Vector2(0, 19.296875)
 scale = Vector2(1, 1.0634766)
 polygon = PackedVector2Array(15, -650.03516, 233, -647.21094, 258, -630.28516, 231, -560.7031, 179, -536.2539, 125, -522.15234, 75, -534.375, 27, -561.64453, 8, -611.48047)
 
-[node name="UpperArt" type="Sprite2D" parent="Platforms/Static04"]
+[node name="UpperArt" type="Sprite2D" parent="Platforms/Static04" unique_id=1785828801]
 position = Vector2(132, -604)
 texture = ExtResource("53_o7s3p")
 
@@ -1069,12 +1068,12 @@ polygon = PackedVector2Array(-211.68488, -86.554955, -216.97632, -79.181984, -21
 
 [node name="Hazards" type="Node2D" parent="." unique_id=1281931140]
 
-[node name="SideSpike06" type="Area2D" parent="Hazards"]
+[node name="SideSpike06" type="Area2D" parent="Hazards" unique_id=427982447]
 position = Vector2(960, 51013)
 collision_layer = 0
 collision_mask = 6
 
-[node name="Collision" type="CollisionPolygon2D" parent="Hazards/SideSpike06"]
+[node name="Collision" type="CollisionPolygon2D" parent="Hazards/SideSpike06" unique_id=1487642098]
 position = Vector2(-2, -19)
 polygon = PackedVector2Array(-311, -203, -249, -175, -249, -144, -280, -125, -318, -105, -314, -169)
 
@@ -1327,7 +1326,7 @@ texture = ExtResource("support_horizontal")
 
 [node name="WorldLayers" type="Node2D" parent="." unique_id=695204269]
 
-[node name="OceanWalls" type="Sprite2D" parent="WorldLayers"]
+[node name="OceanWalls" type="Sprite2D" parent="WorldLayers" unique_id=1550099428]
 z_index = 17
 position = Vector2(0, 29847)
 texture = ExtResource("ocean_side_walls")
@@ -1447,10 +1446,11 @@ script = ExtResource("death_flow")
 script = ExtResource("camera_attention")
 
 [node name="OceanLink" parent="." unique_id=324476620 instance=ExtResource("ocean_link")]
+position = Vector2(11, 188)
 
-[node name="SegmentStart" type="Node" parent="."]
+[node name="SegmentStart" type="Node" parent="." unique_id=1585576383]
 script = ExtResource("segment_start")
 
-[node name="RisingLava" parent="." instance=ExtResource("rising_lava")]
+[node name="RisingLava" parent="." unique_id=2111210648 instance=ExtResource("rising_lava")]
 
 [node name="FlyingEnemies" parent="." unique_id=382193664 instance=ExtResource("flying_enemies")]

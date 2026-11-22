@@ -1,6 +1,6 @@
-[gd_resource type="SpriteFrames" format=3]
+[gd_resource type="SpriteFrames" format=3 uid="uid://88omeqsh0lpb"]
 
-[ext_resource type="Texture2D" path="res://assets/art/ocean/pink_shark/mouth_sheet.png" id="sheet"]
+[ext_resource type="Texture2D" uid="uid://dwq0p0v1f07dp" path="res://assets/art/ocean/pink_shark/mouth_sheet.png" id="sheet"]
 
 [sub_resource type="AtlasTexture" id="frame0"]
 atlas = ExtResource("sheet")
@@ -33,4 +33,27 @@ region = Rect2(1024, 512, 512, 512)
 filter_clip = true
 
 [resource]
-animations = [{"frames": [{"duration": 1.0, "texture": SubResource("frame0")}, {"duration": 1.0, "texture": SubResource("frame1")}, {"duration": 1.0, "texture": SubResource("frame2")}, {"duration": 1.0, "texture": SubResource("frame3")}, {"duration": 1.0, "texture": SubResource("frame4")}, {"duration": 1.0, "texture": SubResource("frame5")}], "loop": true, "name": &"mouth", "speed": 6.0}]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("frame0")
+}, {
+"duration": 1.0,
+"texture": SubResource("frame1")
+}, {
+"duration": 1.0,
+"texture": SubResource("frame2")
+}, {
+"duration": 1.0,
+"texture": SubResource("frame3")
+}, {
+"duration": 1.0,
+"texture": SubResource("frame4")
+}, {
+"duration": 1.0,
+"texture": SubResource("frame5")
+}],
+"loop": 1,
+"name": &"mouth",
+"speed": 6.0
+}]

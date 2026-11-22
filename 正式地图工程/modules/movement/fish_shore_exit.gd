@@ -10,6 +10,8 @@ enum State { SWIMMING, AIRBORNE, STRANDED, DEAD }
 @export var air_gravity: float = 1500.0
 @export var air_control: float = 260.0
 @export var stranding_duration: float = 6.0
+@export var stranded_hop_speed: float = 180.0
+@export var hop_buffer_seconds: float = .12
 @export var death_hold_duration: float = 0.8
 @export var death_fade_duration: float = 0.7
 @export var stranded_texture: Texture2D
@@ -26,6 +28,7 @@ var _normal_texture: Texture2D
 var _normal_sprite_position: Vector2
 var _up_was_held: bool = false
 var _death_tween: Tween
+var _hop_buffer: float = 0.0
 
 func _ready() -> void:
 	process_physics_priority = -12
@@ -52,6 +55,7 @@ func _physics_process(delta: float) -> void:
 			return
 	var just_up := _reader.up_held and not _up_was_held
 	_up_was_held = _reader.up_held
+	_hop_buffer = hop_buffer_seconds if just_up else maxf(0,_hop_buffer-delta)
 	if state == State.AIRBORNE:
 		_fish.velocity.x += _reader.move_axis * air_control * delta
 		_fish.velocity.x = clampf(_fish.velocity.x, -_motor.max_horizontal_speed, _motor.max_horizontal_speed)
@@ -75,8 +79,9 @@ func _physics_process(delta: float) -> void:
 		elapsed += delta
 		_fish.velocity.x = move_toward(_fish.velocity.x, _reader.move_axis * 55, 500 * delta)
 		_fish.velocity.y += air_gravity * delta
-		if just_up and _fish.is_on_floor():
-			_fish.velocity.y = -180.0
+		if _hop_buffer>0 and _fish.is_on_floor():
+			_fish.velocity.y = -stranded_hop_speed
+			_hop_buffer = 0.0
 		_fish.move_and_slide()
 		var beat := maxf(0.0, sin(elapsed * 9.0)) * exp(-fmod(elapsed, 0.7) * 5.0)
 		_visual.scale = Vector2(1.0 + beat * 0.10, 1.0 - beat * 0.12)
@@ -95,6 +100,7 @@ func reset() -> void:
 	state = State.SWIMMING
 	elapsed = 0.0
 	_up_was_held = false
+	_hop_buffer = 0.0
 	_fish.motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	_sprite.texture = _normal_texture
 	_sprite.position = _normal_sprite_position

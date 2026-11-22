@@ -50,10 +50,37 @@ func run():
     var visual = fish.get_node("Visual")
     check(sprite.texture==shore.stranded_texture,"Landing swaps to the supplied struggling artwork")
     check(shore.stranded_texture.region==shore.dead_texture.region,"Stranded and cross-eye art use identical framing")
+    check(shore.stranding_duration==12,"Stranded fish survives twice the original six-second interval")
     var landed_point: Vector2 = fish.global_position
+    reader.up_held = false
+    shore._physics_process(1.0/Engine.physics_ticks_per_second)
+    reader.up_held = true
+    shore._physics_process(1.0/Engine.physics_ticks_per_second)
+    check(fish.velocity.y<-200,"A fresh W press makes the actual grounded fish hop")
+    var hop_peak: float = fish.global_position.y
+    for i in 70:
+        await physics_frame
+        shore._physics_process(1.0/Engine.physics_ticks_per_second)
+        hop_peak = minf(hop_peak,fish.global_position.y)
+    var hop_height: float = landed_point.y-hop_peak
+    print("HOP_HEIGHT=",hop_height," END_DELTA=",fish.global_position.y-landed_point.y," FLOOR=",fish.is_on_floor()," VELOCITY=",fish.velocity)
+    check(hop_height>15 and hop_height<35,"W performs a short ground hop, not another full water leap")
+    check(fish.is_on_floor() and absf(fish.global_position.y-landed_point.y)<1,"Holding W does not repeat hops after landing")
+    reader.up_held = false
+    shore._physics_process(.01)
+    reader.up_held = true
+    shore._physics_process(.01)
+    check(fish.velocity.y<-200,"Releasing and pressing W allows another small hop")
+    reader.up_held = false
+    for i in 70:
+        await physics_frame
+        shore._physics_process(1.0/Engine.physics_ticks_per_second)
+    shore.elapsed = 6.1
+    shore._physics_process(.01)
+    check(not game.dead and shore.state==shore.State.STRANDED,"Fish is still alive past the previous death time")
     var poses: Array[Vector2] = []
     var colors: Array[float] = []
-    for seconds in [.12,.3,2.5,5.5]:
+    for seconds in [.12,.3,5.5,11.5]:
         shore.elapsed = seconds-.01
         shore._physics_process(.01)
         poses.append(visual.position)

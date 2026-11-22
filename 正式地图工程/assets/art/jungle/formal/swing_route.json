@@ -1,0 +1,64 @@
+{
+  "start": "Vine09",
+  "goal": "Vine01",
+  "route": [
+    "Vine09",
+    "Vine08",
+    "Vine07",
+    "Vine06",
+    "Vine05",
+    "Vine04",
+    "Vine03",
+    "Vine02",
+    "Vine01"
+  ],
+  "beats": [
+    {
+      "vines": [
+        "Vine09",
+        "Vine08"
+      ],
+      "purpose": "练习按住蓄势与松手接藤",
+      "intensity": 0.2
+    },
+    {
+      "vines": [
+        "Vine07",
+        "Vine06"
+      ],
+      "purpose": "左右换边，为未来蛇头锁定旧挂点后闪避预留空间",
+      "intensity": 0.55
+    },
+    {
+      "vines": [
+        "Vine05"
+      ],
+      "purpose": "较长藤蔓缓冲，可爬高并调整松手时机",
+      "intensity": 0.3
+    },
+    {
+      "vines": [
+        "Vine04",
+        "Vine03"
+      ],
+      "purpose": "最长一次换边，二段跳可补救，预留连续扑咬节拍",
+      "intensity": 0.7
+    },
+    {
+      "vines": [
+        "Vine02"
+      ],
+      "purpose": "树冠前较长藤蔓，短暂整理路线",
+      "intensity": 0.3
+    },
+    {
+      "vines": [
+        "Vine01"
+      ],
+      "purpose": "最后一次换边到树冠下方",
+      "intensity": 0.75
+    }
+  ],
+  "snake_implemented": false,
+  "notes": "只调整细藤蔓挂点与绳长，主藤蔓及背景原图不变；新版原始位置仍保留在 source_regions；该路径抵达树冠下方，不增加通关转场。"
+}

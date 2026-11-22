@@ -22,10 +22,12 @@ func run():
     check(not contains_physics(layout.get_node("DecorativeTrunks")),"Large main vines never contain standing collision or interaction bodies")
     check(layout.get_node("DecorativeTrunks/MainVines").position==Vector2(0,20143),"Main vine sheet matches the author's reference position")
     check(not layout.get_node("DecorativeTrunks/MainVines").is_in_group("swing_vines"),"Main vine artwork cannot be grabbed as a rope")
+    var layout_data = JSON.parse_string(FileAccess.get_file_as_string("res://assets/art/jungle/formal/layout_notes.json"))
     for vine in layout.vines:
         check(vine is SwingVine and vine.is_in_group("swing_vines"),"Only the hanging vine nodes expose the real grab interface")
         var region: Rect2 = vine.get_meta("source_region")
-        check(vine.position.is_equal_approx(Vector2(300+region.position.x+region.size.x*.5,20612+region.position.y)),"Each rope keeps the authored position from the reference sheet")
+        var design: Dictionary = layout_data.designed_vines[layout.vines.find(vine)]
+        check(vine.position==Vector2(design.anchor[0],design.anchor[1]) and vine.length==design.length,"Each rope matches the designed reachable swing route")
         check(is_equal_approx(vine.rope.segment_length*vine.rope.segments,vine.length),"Visual rope and interactive length stay aligned")
         check(not vine.is_physics_processing(),"Distant jungle ropes sleep during the hell opening")
     game.camera.global_position = Vector2(960,28500)

@@ -66,5 +66,81 @@
       68,
       656
     ]
+  ],
+  "layout_mode": "designed_swing_route",
+  "reference_layout_preserved_in_source_regions": true,
+  "designed_vines": [
+    {
+      "node": "Vine01",
+      "anchor": [
+        460,
+        20682
+      ],
+      "length": 900
+    },
+    {
+      "node": "Vine02",
+      "anchor": [
+        1420,
+        21728
+      ],
+      "length": 1000
+    },
+    {
+      "node": "Vine03",
+      "anchor": [
+        460,
+        22752
+      ],
+      "length": 1180
+    },
+    {
+      "node": "Vine04",
+      "anchor": [
+        1480,
+        24095
+      ],
+      "length": 1150
+    },
+    {
+      "node": "Vine05",
+      "anchor": [
+        420,
+        25325
+      ],
+      "length": 1100
+    },
+    {
+      "node": "Vine06",
+      "anchor": [
+        1430,
+        26478
+      ],
+      "length": 1120
+    },
+    {
+      "node": "Vine07",
+      "anchor": [
+        470,
+        27732
+      ],
+      "length": 980
+    },
+    {
+      "node": "Vine08",
+      "anchor": [
+        1370,
+        28767
+      ],
+      "length": 540
+    },
+    {
+      "node": "Vine09",
+      "anchor": [
+        790,
+        28957
+      ],
+      "length": 500
+    }
   ]
 }

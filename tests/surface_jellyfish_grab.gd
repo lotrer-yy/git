@@ -82,17 +82,34 @@ func run():
         await process_frame
         await process_frame
         root.get_texture().get_image().save_png("C:/Users/14930/Documents/Codex/2026-11-18/m/work/surface-grab.png")
-    check(blink.try_teleport(Vector2.UP),"Shift remains available while entangled")
-    await create_timer(.12).timeout
-    check(grab.state==grab.State.COOLDOWN and grab.rounds_completed==1 and motor.enabled and fish.get_node("Visual").visible,"Actual blink frees the fish and restores ordinary swimming")
-    check(grab._caught_art==null and grab._arm==null,"Escape removes both the wrapper art and the reaching arm")
+    check(not blink.try_teleport(Vector2.UP),"A caught fish cannot escape with one ordinary teleport")
+    var key := InputEventKey.new()
+    key.physical_keycode = KEY_SHIFT
+    key.location = KEY_LOCATION_LEFT
+    key.pressed = true
+    root.push_input(key,true)
+    check(grab.struggle_presses==1 and grab.state==grab.State.CAUGHT,"One Shift press causes struggle without releasing the fish")
+    key.echo = true
+    for i in 8: root.push_input(key,true)
+    check(grab.struggle_presses==1,"Holding Shift and OS key repeats cannot count as repeated struggles")
+    key.echo = false
+    grab._physics_process(.02)
+    check(grab._caught_art.rotation!=0,"Each struggle adds an immediate wriggling response")
+    for i in range(grab.struggle_presses_required-1):
+        key.pressed = false
+        root.push_input(key,true)
+        key.pressed = true
+        root.push_input(key,true)
+    check(grab.state==grab.State.FINISHED and motor.enabled and fish.get_node("Visual").visible,"Six separate Shift taps free the fish and restore swimming")
+    check(grab._caught_art==null and grab._arm==null,"Successful struggle removes the wrapped art and arm")
+    check(not grab.blocks_exit() and grab.attacks_started==1,"Only one attack is required before the shore route opens")
     grab.reset()
     blink.reset()
     fish.position.y = shore.surface_y+600
     fish.velocity = Vector2(0,-420)
     grab._on_blink(Vector2.ZERO,fish.global_position)
     grab._physics_process(.01)
-    check(grab.state==grab.State.WARNING and grab._warning_arms.size()==4,"A pre-emptive blink cannot skip the complete four-wave sequence")
+    check(grab.state==grab.State.WARNING and grab._warning_arms.size()==4,"The single encounter still starts with a visible warning")
     grab.reset()
     fish.position.y = shore.surface_y+600
     grab._physics_process(.01)

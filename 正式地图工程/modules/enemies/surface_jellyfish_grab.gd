@@ -1,5 +1,5 @@
 extends Node2D
-## 海面前四轮追尾缠绕：固定出手方向，瞬移避开或挣脱，不产生额外死亡。
+## 海面前随机单次追尾缠绕：固定出手方向，瞬移避开或挣脱，不产生额外死亡。
 const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 const WARNING = preload("res://modules/visual/tentacle_warning.gd")
 const CAUGHT_ART = preload("res://assets/art/characters/fish/abilities/entangled.png")
@@ -7,7 +7,8 @@ enum State { WAITING, WARNING, REACHING, CAUGHT, COOLDOWN, FINISHED }
 @export var trigger_depth: float = 1100.0
 @export var warning_seconds: float = 1.4
 @export var warning_rise_speed: float = 360.0
-@export var total_rounds: int = 4
+@export var total_rounds: int = 1
+@export var struggle_presses_required: int = 6
 @export var round_rest_seconds: float = .7
 @export var anticipation_seconds: float = 0.0
 @export var reach_seconds: float = .38
@@ -17,7 +18,9 @@ var rounds_completed: int = 0
 var attacks_started: int = 0
 var _evaded: bool = false
 var _evade_point := Vector2.ZERO
-var _last_mesh_time: float = -1
+var struggle_presses: int = 0
+var _struggle_kick: float = 0
+var _capture_origin := Vector2.ZERO
 var _warning_arms: Array[Node2D] = []
 var _arm: Node2D
 var _caught_art: Sprite2D
@@ -63,19 +66,28 @@ func _physics_process(delta: float) -> void:
     elif state==State.COOLDOWN:
         if elapsed>=round_rest_seconds: _begin_warning()
     elif state==State.CAUGHT:
-        var spring := sin(elapsed*22)*exp(-elapsed*8)
-        _caught_art.scale = Vector2(1+spring*.28,1-spring*.20)
-        _caught_art.rotation = spring*.10
+        _struggle_kick = move_toward(_struggle_kick,0,delta*5)
+        fish.global_position = _capture_origin+Vector2(0,28*smoothstep(0,.18,elapsed))
+        var spring := sin(elapsed*25)*exp(-elapsed*9)
+        var wriggle := sin(elapsed*35)*_struggle_kick
+        _caught_art.scale = Vector2(1+spring*.30+wriggle*.12,1-spring*.24-wriggle*.10)
+        _caught_art.rotation = spring*.13+wriggle*.14
+        # 触手末端贴住包裹小鱼的原图，形成拉住并收紧的连接。
+        _arm.finish = _arm.to_local(fish.get_node("Collision").global_position+Vector2(0,38))
+        _arm.geometry_locked = false
+        _arm.sample(_arm.charge_seconds+_arm.strike_seconds+1)
+        _arm.body.collision_layer = 0
+        _arm.dangerous = false
 func _begin_warning() -> void:
     state = State.WARNING
     elapsed = 0
     _evaded = false
-    _last_mesh_time = -1
     var camera: Camera2D = stage.level.camera
     var size := camera.get_viewport_rect().size/camera.zoom
     var view := Rect2(camera.global_position+camera.offset-size*.5,size)
     for i in 4:
         var arm := TENDRIL.new()
+        arm.visual_only = true
         arm.thickness = 118
         arm.wave_amplitude = 85
         arm.wave_phase = float(i)*1.2
@@ -101,27 +113,24 @@ func _sample_warning(delta: float) -> void:
         # 按自身速度向上游动，不复制相机位置；微微摆动并带蓄力回弹。
         arm.position.y -= warning_rise_speed*delta
         arm.rotation = sin(elapsed*4.8+i*1.4)*.07
-        if elapsed-_last_mesh_time>=1.0/24:
-            arm.wave_phase = elapsed*3.8+i*1.2
-            arm.geometry_locked = false
-            arm.sample(maxf(0,elapsed-float(i)*.07))
+        arm.wave_phase = elapsed*3.8+i*1.2
+        arm.geometry_locked = false
+        arm.sample(maxf(0,elapsed-float(i)*.07))
         arm.body.collision_layer = 0
         arm.dangerous = false
         arm.get_node("Warning").sample(elapsed-.20-float(i)*.07)
-    if elapsed-_last_mesh_time>=1.0/24: _last_mesh_time = elapsed
 func _begin_reach() -> void:
     var center: Vector2 = fish.get_node("Collision").global_position
     var predicted: Vector2 = _evade_point if _evaded else center+(fish.velocity*reach_seconds).limit_length(240)
     var camera: Camera2D = stage.level.camera
     var size := camera.get_viewport_rect().size/camera.zoom
     var view := Rect2(camera.global_position+camera.offset-size*.5,size).grow(-60)
-    var nearest := INF
+    var candidates: Array[Node2D] = []
     _arm = null
     for candidate in _warning_arms:
         var tip: Vector2 = candidate.to_global(candidate.centerline[-1])
-        if view.has_point(tip) and tip.distance_to(center)<nearest:
-            nearest = tip.distance_to(center)
-            _arm = candidate
+        if view.has_point(tip): candidates.append(candidate)
+    if not candidates.is_empty(): _arm = candidates.pick_random()
     if _arm==null:
         _clear_arms()
         _begin_warning()
@@ -142,6 +151,9 @@ func _begin_reach() -> void:
 func _catch() -> void:
     state = State.CAUGHT
     elapsed = 0
+    struggle_presses = 0
+    _struggle_kick = 0
+    _capture_origin = fish.global_position
     _restore_motor = motor.enabled
     _restore_visual = visual.visible
     motor.enabled = false
@@ -157,8 +169,19 @@ func _on_blink(_from: Vector2, _destination: Vector2) -> void:
     if state in [State.WARNING,State.REACHING]:
         _evaded = true
         _evade_point = _from
-    elif state==State.CAUGHT:
+func _input(event: InputEvent) -> void:
+    if state!=State.CAUGHT or stage.level.dead: return
+    if not event.is_action_pressed(&"possess") or event.is_echo(): return
+    if event is InputEventKey and event.location==KEY_LOCATION_RIGHT: return
+    if try_struggle(): get_viewport().set_input_as_handled()
+func try_struggle() -> bool:
+    if state!=State.CAUGHT or stage.level.dead: return false
+    struggle_presses += 1
+    _struggle_kick = 1
+    if struggle_presses>=struggle_presses_required:
         _end_round()
+        fish.velocity = Vector2(0,-180)
+    return true
 func _finish() -> void:
     if state==State.CAUGHT:
         motor.enabled = _restore_motor and not stage.level.dead
@@ -195,4 +218,6 @@ func reset() -> void:
     elapsed = 0
     rounds_completed = 0
     attacks_started = 0
+    struggle_presses = 0
+    _struggle_kick = 0
     _evaded = false

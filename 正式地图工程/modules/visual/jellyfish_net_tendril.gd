@@ -9,6 +9,7 @@ const SEGMENTS = 24
 @export var curve_height: float = 0.0
 @export var initial_reach: float = 160.0
 @export var wave_amplitude: float = 0.0
+@export var visual_only: bool = false
 var wave_phase: float = 0.0
 var _segments: int = SEGMENTS
 var start := Vector2.ZERO
@@ -33,7 +34,7 @@ func _ready() -> void:
     body.collision_mask = 0
     add_child(body)
     body.add_to_group(&"blink_passable_tentacles")
-    for i in _segments:
+    for i in (0 if visual_only else _segments):
         var collision := CollisionShape2D.new()
         var capsule := CapsuleShape2D.new()
         capsule.radius = thickness*.5
@@ -95,10 +96,10 @@ func sample(age: float) -> void:
         var curve := curve_height*clampf(reach/maxf(total,1),0,1)
         var arc := sin(s*PI)+.18*sin(s*TAU)
         var point := start+axis*reach*s+normal*bend*sin(s*PI)+Vector2(0,curve*arc)
-        var wave: float = wave_amplitude*clampf(reach/maxf(total,1),0,1)
-        point += normal*wave*sin(s*TAU+wave_phase)*sin(s*PI)
+        var wave: float = minf(wave_amplitude,total*.13)*clampf(reach/maxf(total,1),0,1)
+        point += normal*wave*sin(s*PI+wave_phase)*sin(s*PI)
         var tangent := axis*reach+normal*bend*PI*cos(s*PI)+Vector2(0,curve*(PI*cos(s*PI)+.18*TAU*cos(s*TAU)))
-        tangent += normal*wave*(TAU*cos(s*TAU+wave_phase)*sin(s*PI)+PI*sin(s*TAU+wave_phase)*cos(s*PI))
+        tangent += normal*wave*(PI*cos(s*PI+wave_phase)*sin(s*PI)+PI*sin(s*PI+wave_phase)*cos(s*PI))
         var section_normal := tangent.normalized().orthogonal() if tangent.length_squared()>.001 else normal
         centerline.append(point)
         vertices.append(point-section_normal*thickness*.5)
@@ -114,7 +115,7 @@ func sample(age: float) -> void:
         uv.append(Vector2(source_x,ART.get_height()))
     mesh.polygon = vertices
     mesh.uv = uv
-    for i in _segments:
+    for i in _shapes.size():
         var a := centerline[i]
         var b := centerline[i+1]
         _shapes[i].position = (a+b)*.5

@@ -30,7 +30,7 @@ func begin(launch_velocity: Vector2) -> void:
     if not body.get_node("Host").claimed: return
     active=true
     elapsed=0
-    _turn_direction=-1 if launch_velocity.x>=0 else 1
+    _turn_direction=1.0
     turns_per_second=lerpf(slow_turns_per_second,fast_turns_per_second,clampf(launch_velocity.length()/1600,0,1))
     source.hide()
     body.get_node("Visual/SelectedSprite").hide()

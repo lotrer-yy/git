@@ -43,7 +43,7 @@ func run():
     Input.action_release(&"possess")
     climber._physics_process(.01)
     check(climber.vine==null and target.rider==null,"Releasing Shift actually detaches the squirrel")
-    check(body.velocity.is_equal_approx(Vector2(-1242.5,-2598.75)),"Release keeps sideways momentum while strongly boosting upward height")
+    check(body.velocity.is_equal_approx(Vector2(-1242.5,-sqrt(2*2200*450))),"Release keeps sideways momentum while strongly boosting upward height")
     reader.move_axis = 0
     reader.jump_held = false
     var motor = body.get_node("Movement")

@@ -58,6 +58,7 @@ grab_action = &"possess"
 release_on_grab_release = true
 automatic_swing = true
 launch_multiplier = 1.75
+max_launch_height = 450.0
 launch_upward_multiplier = 1.65
 launch_lift_ratio = 0.85
 max_launch_speed = 3000.0

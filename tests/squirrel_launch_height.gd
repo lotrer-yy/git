@@ -31,7 +31,7 @@ func run():
         peak = minf(peak,body.global_position.y)
     var rise: float = start.y-peak
     print("SQUIRREL_THROW_RISE=",rise)
-    check(rise>700,"A typical upward swing release gains over 700 pixels in actual flight")
+    check(rise>425 and rise<=455,"A typical upward swing release rises approximately 450 pixels in actual flight")
     check(body.global_position.x>start.x+1500,"Extra lift retains useful sideways travel")
     # Passing the lowest point now adds upward lift instead of a nearly flat exit.
     var rope = layout.vines[-1]

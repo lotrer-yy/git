@@ -19,6 +19,7 @@ var counters: int = 0
 var pivot: Node2D
 var snake: Node2D
 var impact: Node2D
+var _facing: float = 1
 var _velocity := Vector2.ZERO
 var _attack_clock: float = 0
 var _lock_rotation: float = 0
@@ -35,9 +36,10 @@ func _ready() -> void:
     pivot.scale=Vector2.ONE*1.8
     add_child(pivot)
     snake=BITE.instantiate()
-    snake.position=Vector2(-30,320)
+    snake.position=Vector2.ZERO
     pivot.add_child(snake)
     snake.set_process(false)
+    snake.enable_neck_extension()
     impact=Node2D.new()
     impact.set_script(IMPACT)
     impact.z_index=4
@@ -61,13 +63,14 @@ func is_targetable() -> bool:
 func target_position() -> Vector2:
     const CENTERS = [Vector2(215,112),Vector2(225,190),Vector2(240,140),Vector2(250,110),Vector2(330,185),Vector2(330,170),Vector2(220,180),Vector2(205,120)]
     var frame: int = snake.frames.find(snake.layers[0].texture)
-    return snake.layers[0].to_global(CENTERS[maxi(0,frame)])
+    return snake.layers[0].to_global(snake.deformed_point(maxi(0,frame),CENTERS[maxi(0,frame)]))
 func _physics_process(delta: float) -> void:
     if not can_play():
         if state!=State.WAITING: reset()
         return
     elapsed+=delta
     lifetime+=delta
+    if state!=State.WAITING: _keep_base_below_frame()
     if state==State.WAITING:
         _ground_hidden_seconds=_ground_hidden_seconds+delta if ground_hidden() else 0.0
         if _ground_hidden_seconds>=.4: _begin_entrance()
@@ -79,6 +82,7 @@ func _physics_process(delta: float) -> void:
     if state in [State.ENTERING,State.PURSUING]:
         _chase(delta)
         _look_at_player(delta)
+        snake.neck_extension=0
         snake.sample(-1)
         _attack_clock+=delta
         if state==State.ENTERING and elapsed>1.2:
@@ -87,7 +91,6 @@ func _physics_process(delta: float) -> void:
         elif state==State.PURSUING and _attack_clock>=attack_rest and _on_screen():
             _begin_windup()
     elif state==State.WINDUP:
-        pivot.global_position.y-=delta*45
         # 先跟随瞄准，最后300毫秒锁死，扑出后不随相机或玩家修正。
         if elapsed<warning_seconds-.3:
             _look_at_player(delta)
@@ -101,10 +104,18 @@ func _physics_process(delta: float) -> void:
             _previous_mouth=_mouth_position()
     elif state==State.LUNGING:
         var u: float = clampf(elapsed/lunge_seconds,0,1)
-        pivot.global_position=_strike_start.lerp(_aim,u*u*(3-2*u))
+        # 根部只在画面以下横移，咬向锁定目标靠脖子伸长。
         pivot.rotation=_lock_rotation
-        pivot.scale=Vector2.ONE*1.8
+        pivot.scale=Vector2(_facing*1.8,1.8)
+        snake.neck_extension=0
         snake.sample(.44+.245*u)
+        var rest_mouth: Vector2 = _mouth_position()
+        var extension: float = clampf((rest_mouth.y-_aim.y)/maxf(1.8*snake.scale.y*cos(pivot.rotation),.5),0,440)
+        snake.neck_extension=extension*smoothstep(0,1,u)
+        snake.sample(.44+.245*u)
+        var offset: Vector2 = _mouth_position()-pivot.global_position
+        pivot.global_position.x=lerpf(_strike_start.x,_aim.x-offset.x,smoothstep(0,1,u))
+        _keep_base_below_frame()
         var mouth: Vector2 = _mouth_position()
         var center: Vector2 = body.global_position+Vector2(0,-50)
         var nearest: Vector2 = Geometry2D.get_closest_point_to_segment(center,_previous_mouth,mouth)
@@ -115,6 +126,7 @@ func _physics_process(delta: float) -> void:
             state=State.RECOVERING
             elapsed=0
     elif state==State.RECOVERING:
+        snake.neck_extension=move_toward(snake.neck_extension,0,delta*800)
         snake.sample(.685+elapsed)
         pivot.global_position+=Vector2(0,200)*delta
         _look_at_player(delta*.5)
@@ -123,6 +135,7 @@ func _physics_process(delta: float) -> void:
             elapsed=0
             _attack_clock=0
     elif state==State.STAGGERED:
+        snake.neck_extension=move_toward(snake.neck_extension,0,delta*900)
         _velocity=_velocity.move_toward(Vector2(0,110),delta*300)
         pivot.global_position+=_velocity*delta
         pivot.rotation=lerp_angle(pivot.rotation,0,1-exp(-delta*3))
@@ -134,7 +147,11 @@ func _physics_process(delta: float) -> void:
             _attack_clock=0
 func _begin_entrance() -> void:
     var view: Rect2 = view_rect()
-    pivot.global_position=Vector2(clampf(body.global_position.x+140,180,1740),view.end.y+230)
+    _facing=1 if body.global_position.x<960 else -1
+    pivot.scale=Vector2(_facing*1.8,1.8)
+    pivot.rotation=0
+    snake.neck_extension=0
+    pivot.global_position=Vector2(clampf(body.global_position.x-_facing*280,80,1840),view.end.y+920)
     _velocity=Vector2.ZERO
     state=State.ENTERING
     elapsed=0
@@ -143,23 +160,27 @@ func _begin_entrance() -> void:
     pivot.show()
     _look_at_player(1)
 func _chase(delta: float) -> void:
-    var desired:=Vector2(clampf(body.global_position.x+sin(lifetime*.8)*250,160,1760),body.global_position.y+210+sin(lifetime*1.35)*65)
+    var desired:=Vector2(clampf(body.global_position.x-_facing*260+sin(lifetime*.8)*180,80,1840),body.global_position.y+800+sin(lifetime*1.35)*65)
     var goal_velocity: Vector2 = ((desired-pivot.global_position)*2.8).limit_length(chase_speed)
     _velocity=_velocity.move_toward(goal_velocity,delta*950)
     pivot.global_position+=_velocity*delta
+    _keep_base_below_frame()
+func _keep_base_below_frame() -> void:
+    pivot.global_position.y=maxf(pivot.global_position.y,view_rect().end.y+300)
 func _look_at_player(delta: float) -> void:
-    var direction: Vector2 = body.global_position+Vector2(0,-50)-pivot.global_position
-    var angle: float = direction.angle()
-    pivot.scale=Vector2.ONE*1.8
+    var direction: Vector2 = body.global_position+Vector2(0,-50)-target_position()
+    var angle: float = clampf(wrapf(direction.angle()-(PI if _facing<0 else 0),-PI,PI),-.14,.14)
+    pivot.scale=Vector2(_facing*1.8,1.8)
     pivot.rotation=lerp_angle(pivot.rotation,wrapf(angle,-PI,PI),1-exp(-delta*4))
 func _mouth_position() -> Vector2:
-    return pivot.to_global(Vector2(250,100))
+    const POINTS = [Vector2(302,149),Vector2(337,215),Vector2(300,218),Vector2(310,244),Vector2(380,220),Vector2(420,190),Vector2(350,200),Vector2(303,150)]
+    var frame: int = maxi(0,snake.frames.find(snake.layers[0].texture))
+    return snake.layers[0].to_global(snake.deformed_point(frame,POINTS[frame]))
 func _on_screen() -> bool:
     return view_rect().grow(80).has_point(target_position())
 func _predicted_aim() -> Vector2:
     var predicted: Vector2 = body.global_position+Vector2(0,-50)+(body.velocity*.18).limit_length(150)
-    var offset: Vector2 = pivot.global_transform.basis_xform(Vector2(250,100))
-    return predicted-offset
+    return predicted
 func _begin_windup() -> void:
     attacks_started+=1
     state=State.WINDUP
@@ -196,6 +217,7 @@ func reset() -> void:
     _attack_clock=0
     _ground_hidden_seconds=0
     _velocity=Vector2.ZERO
+    if is_instance_valid(snake): snake.neck_extension=0
     if is_instance_valid(pivot):
         pivot.hide()
         pivot.modulate=Color.WHITE

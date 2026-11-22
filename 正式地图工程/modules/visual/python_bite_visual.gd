@@ -3,10 +3,13 @@ extends Node2D
 signal bite_started
 signal bite_finished
 const SHEET = preload("res://assets/art/jungle/python/bite-sheet-v2.png")
+const NECK = preload("res://modules/visual/python_neck_ribbon.gd")
 const TONGUE = preload("res://modules/visual/python_tongue.gd")
 const POSES = [0,1,2,3,4,5,6,7,0]
 const DURATIONS = [.08,.17,.12,.14,.065,.11,.14,.16,.15]
 @export var playback_speed: float = 1.0
+var neck_extension: float = 0
+var neck_ribbons: Array[Node2D] = []
 var playing: bool = false
 var elapsed: float = 0
 var total_duration: float = 0
@@ -37,6 +40,16 @@ func _ready() -> void:
         layers.append(layer)
     for duration in DURATIONS: total_duration+=duration
     sample(-1)
+func enable_neck_extension() -> void:
+    if not neck_ribbons.is_empty(): return
+    for layer in layers:
+        var ribbon:=Node2D.new()
+        ribbon.set_script(NECK)
+        layer.add_child(ribbon)
+        neck_ribbons.append(ribbon)
+        layer.self_modulate=Color(1,1,1,0)
+func deformed_point(frame: int,point: Vector2) -> Vector2:
+    return point-Vector2(0,neck_extension*(1-smoothstep(310,bases[frame].y,point.y)))
 func play_bite() -> void:
     _initial_tongue=layers[0].get_node("Tongue").amount
     _returning=false
@@ -70,6 +83,9 @@ func sample(time: float) -> void:
         layers[layer_index].texture=frames[frame]
         layers[layer_index].position=-bases[frame]
         layers[layer_index].get_node("Tongue").configure(frame,time,total_duration,_initial_tongue)
+        if not neck_ribbons.is_empty():
+            neck_ribbons[layer_index].update_pose(frames[frame],bases[frame],neck_extension)
+            layers[layer_index].get_node("Tongue").position=Vector2(0,-neck_extension)
         layers[layer_index].modulate.a=(1-blend) if layer_index==0 else blend
     var charge: float = smoothstep(.08,.44,time)*(1-smoothstep(.46,.535,time))
     var strike: float = smoothstep(.49,.55,time)*(1-smoothstep(.63,.82,time))

@@ -51,6 +51,17 @@ func run():
     check(enemy.attacks_started>0,"An exposed pursuing snake actually starts a normal lunge without QTE")
     check(enemy.get_node_or_null("Sequence")==null,"No sequence prompt or slow-motion controller is instantiated")
     check(reader.enabled and not reader.external_control and Engine.time_scale==1,"Pursuit never starts bullet time or steals input")
+    # 回归：攻击的是向上伸出的头，颈根始终在镜头下面。
+    enemy._begin_windup()
+    for tick in 101: enemy._physics_process(.01)
+    var base_y: float = enemy.pivot.global_position.y
+    var mouth_before: Vector2 = enemy._mouth_position()
+    for tick in 28:
+        enemy._physics_process(.01)
+        check(enemy.pivot.global_position.y>=enemy.view_rect().end.y+299,"Neck base stays below frame throughout a bite")
+        check(absf(enemy.pivot.rotation)<=.141,"Snake never rotates its whole body toward the squirrel")
+    check(enemy.pivot.global_position.y>=base_y-.1 and enemy.pivot.global_position.y<base_y+5,"Lunge extends the neck without flying its root upward")
+    check(enemy.snake.neck_extension>80 and enemy._mouth_position().y<mouth_before.y-80,"Bite reaches upward by extending the neck")
     var cone = layout.get_node("Pinecones/Pinecone08")
     cone.global_position=body.global_position+Vector2(0,-50)
     cone._origin=cone.position

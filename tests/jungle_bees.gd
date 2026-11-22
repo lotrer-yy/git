@@ -73,7 +73,7 @@ func run():
     var shot_velocity: Vector2=needle.velocity
     body.global_position.x+=100
     needle._physics_process(.01)
-    check(is_equal_approx(needle.velocity.x,shot_velocity.x),"Stinger follows its launch arc without homing")
+    check(absf(wrapf(needle.velocity.angle()-shot_velocity.angle(),-PI,PI))<.05,"Stinger guidance changes heading smoothly within a limited turn rate")
     needle.global_position=body.global_position+Vector2(-60,-50)
     needle.velocity=Vector2(680,0)
     needle._physics_process(.02)

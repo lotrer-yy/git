@@ -1,5 +1,7 @@
 extends "res://modules/enemies/enemy_fork.gd"
-## 复用小恶魔投射物的抛物线发射，命中改为推开松鼠。
+## 小恶魔弹道发射加短时有限追踪，命中触发松鼠晕倒失败。
+@export var tracking_seconds: float = .65
+@export var turn_rate: float = 1.25
 const ART = preload("res://assets/art/jungle/formal/bee_stinger.png")
 func _ready() -> void:
     add_to_group("bee_stingers")
@@ -16,10 +18,15 @@ func _physics_process(delta: float) -> void:
     if _age>lifetime:
         queue_free()
         return
+    var center: Vector2 = encounter.body.global_position+Vector2(0,-50)
+    if _age<=tracking_seconds and encounter.is_on_screen(global_position):
+        var toward: Vector2 = center-global_position
+        if velocity.dot(toward)>0:
+            var turn: float = clampf(wrapf(toward.angle()-velocity.angle(),-PI,PI),-turn_rate*delta,turn_rate*delta)
+            velocity=velocity.rotated(turn)
     var previous: Vector2 = global_position
     var next: Vector2 = previous+velocity*delta+Vector2(0,gravity*delta*delta*.5)
     velocity.y+=gravity*delta
-    var center: Vector2 = encounter.body.global_position+Vector2(0,-50)
     var closest: Vector2 = Geometry2D.get_closest_point_to_segment(center,previous,next)
     var hits_player: bool = closest.distance_to(center)<55 and encounter.is_on_screen(closest)
     var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(PhysicsRayQueryParameters2D.create(previous,next,32))

@@ -1,5 +1,5 @@
 extends CharacterBody2D
-## 复用地狱小恶魔飞行模块；只用作者蜜蜂原图，蓄力后锁定方向冲刺蜇击。
+## 复用地狱小恶魔飞行模块；只用作者蜜蜂原图，蓄力瞄准后短暂有限追踪冲刺蜇击。
 signal stung
 const FLIGHT = preload("res://modules/enemies/flying_motion.gd")
 const ART2 = preload("res://assets/art/jungle/formal/bee2.png")
@@ -9,6 +9,8 @@ const ART = preload("res://assets/art/jungle/formal/bee.png")
 enum Mode { EMERGING, FLYING, WINDUP, DARTING, RECOVERING }
 @export var attack_interval: float = 3.5
 @export var warning_seconds: float = .55
+@export var dart_tracking_seconds: float = .22
+@export var dart_turn_rate: float = 1.8
 var encounter: Node
 var mode: Mode = Mode.EMERGING
 var elapsed: float = 0
@@ -65,6 +67,9 @@ func _physics_process(delta: float) -> void:
             _aim=target
             _set_mode(Mode.WINDUP)
     elif mode==Mode.WINDUP:
+        if elapsed<warning_seconds-.12:
+            var predicted: Vector2 = target+(encounter.body.velocity*.12).limit_length(100)
+            _aim=_aim.lerp(predicted,1-exp(-delta*10))
         velocity=velocity.move_toward(Vector2.ZERO,delta*1100)
         move_and_slide()
         if not encounter.is_on_screen(global_position):
@@ -80,6 +85,11 @@ func _physics_process(delta: float) -> void:
                 _set_mode(Mode.DARTING)
     elif mode==Mode.DARTING:
         var before: Vector2 = global_position
+        if elapsed<=dart_tracking_seconds and encounter.is_on_screen(global_position):
+            var toward: Vector2 = target-global_position
+            if _dart_velocity.dot(toward)>0:
+                var turn: float = clampf(wrapf(toward.angle()-_dart_velocity.angle(),-PI,PI),-dart_turn_rate*delta,dart_turn_rate*delta)
+                _dart_velocity=_dart_velocity.rotated(turn)
         velocity=_dart_velocity
         move_and_slide()
         var closest: Vector2 = Geometry2D.get_closest_point_to_segment(target,before,global_position)

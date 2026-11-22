@@ -50,8 +50,8 @@ func run():
         check(returned and max_jump<30,"Flight slides back continuously without snapping or rebounding off a wall")
     var rope = layout.vines[-1]
     rope.reset()
-    rope.global_position = Vector2(100,24600)
-    body.global_position = Vector2(-120,25000)
+    rope.global_position = Vector2(assist.left_edge+20,24600)
+    body.global_position = Vector2(assist.left_edge-200,25000)
     rope.rider_offset = Vector2(60,90)
     rope.catch(body,Vector2(-600,0),body.global_position)
     rope.grip_length = 400

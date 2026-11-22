@@ -22,10 +22,17 @@ func release_soul() -> void:
     _motor.enabled = false
     _reader.enabled = false
     _reader.clear()
+    # 附身离开与正常死亡都保留短暂叉眼，再淡出；冻结关卡时也继续。
+    _death_tween = create_tween().set_process_mode(Tween.TWEEN_PROCESS_IDLE)
+    _death_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_ignore_time_scale(true)
+    _death_tween.tween_interval(death_hold_duration)
+    _death_tween.tween_property(_visual,"modulate:a",0.0,death_fade_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+    _death_tween.tween_callback(_fish.hide)
     died_on_shore.emit()
 func play_death() -> void:
-    # 冻结关卡后仍展示叉眼尸体，再交给已有死亡界面。
-    await get_tree().create_timer(death_hold_duration,true,false,true).timeout
+    # 等尸体完成淡出，再交给死亡界面。
+    if _death_tween!=null and _death_tween.is_running():
+        await _death_tween.finished
 func reset() -> void:
     super.reset()
     if struggle.visual!=null: struggle.reset()

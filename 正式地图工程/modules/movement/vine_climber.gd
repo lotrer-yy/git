@@ -1,6 +1,7 @@
 class_name VineClimber
 extends Node
 ## S 大范围抓取，W/S 攀爬，A/D 借力摆荡，空格带着惯性跳离。
+@export var grab_action: StringName = &""
 @export var allow_mantle: bool = true
 @export var hands_offset := Vector2(0,-60)
 @export var grip_body_offset := Vector2(78,60)
@@ -29,9 +30,15 @@ func _ready() -> void:
 		var key := InputEventKey.new()
 		key.physical_keycode=KEY_SPACE
 		InputMap.action_add_event(&"vine_release",key)
+	if grab_action!=&"" and not InputMap.has_action(grab_action):
+		InputMap.add_action(grab_action)
+		var grab_key := InputEventKey.new()
+		grab_key.physical_keycode = KEY_SHIFT
+		grab_key.location = KEY_LOCATION_LEFT
+		InputMap.action_add_event(grab_action,grab_key)
 func _physics_process(delta: float) -> void:
 	_cooldown=maxf(0,_cooldown-delta)
-	if not _reader.down_held:
+	if not _grab_held():
 		_wait_for_grab_release=false
 	if not _host.claimed:
 		return
@@ -62,8 +69,11 @@ func _physics_process(delta: float) -> void:
 			_mantle_start=_body.global_position
 			_mantle_end=anchor+Vector2(side*105,-155)*_body.global_scale
 		return
-	if _reader.down_held and _cooldown<=0 and not _wait_for_grab_release:
+	if _grab_held() and _cooldown<=0 and not _wait_for_grab_release:
 		try_grab()
+func _grab_held() -> bool:
+	return _reader.down_held if grab_action==&"" else Input.is_action_pressed(grab_action)
+
 func try_grab() -> bool:
 	if not _host.claimed:
 		return false

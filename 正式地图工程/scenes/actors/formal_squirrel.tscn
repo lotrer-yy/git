@@ -54,3 +54,4 @@ script = ExtResource("climber")
 hands_offset = Vector2(-60,-90)
 grip_body_offset = Vector2(60,90)
 allow_mantle = false
+grab_action = &"possess"

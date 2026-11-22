@@ -116,7 +116,10 @@ func run():
         await process_frame
         await process_frame
         root.get_texture().get_image().save_png("C:/Users/14930/Documents/Codex/2026-11-18/m/work/fish-stranded-death.png")
-    await create_timer(1.2,true,false,true).timeout
+    if shore._death_tween.is_running():
+        await shore._death_tween.finished
+    await process_frame
+    check(not fish.visible and visual.modulate.a==0,"Dead fish naturally fades away even while the level is frozen")
     check(flow.overlay.visible,"Existing death overlay appears after the cross-eye hold")
     stage.reset()
     check(sprite.texture!=shore.dead_texture and visual.modulate==Color.WHITE,"Retry restores swimming art and clears red suffocation tint")

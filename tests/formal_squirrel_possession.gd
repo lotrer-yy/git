@@ -68,6 +68,11 @@ func run():
     check(controller.state==controller.State.TRANSFERRING,"Actual left Shift begins possession")
     check(not game.dead and shore.state==shore.State.DEAD,"Leaving the fish does not trigger the stranded death screen")
     check(game.player==game.soul and squirrel.transferring,"Soul and host enter the existing transfer animation")
+    check(shore._death_tween!=null and shore._death_tween.is_running(),"Leaving the fish starts its natural fade")
+    shore._death_tween.custom_step(shore.death_hold_duration+.2)
+    check(fish.visible and shore._visual.modulate.a>0 and shore._visual.modulate.a<1,"The old fish fades gradually rather than popping away")
+    shore._death_tween.custom_step(shore.death_fade_duration+1)
+    check(not fish.visible,"The abandoned fish disappears after fading")
     await controller.possession_finished
     check(controller.state==controller.State.POSSESSED and host.claimed,"Transfer finishes with a claimed squirrel")
     check(game.player==squirrel and game.camera.target==squirrel,"Player ownership and shared camera both move to the squirrel")

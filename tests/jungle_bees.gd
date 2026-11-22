@@ -59,6 +59,33 @@ func run():
     for tick in 10:
         if bee.mode==bee.Mode.DARTING: bee._physics_process(.01)
     check(bee._hit and not game.dead,"A sting knocks back but does not kill the squirrel")
+    var ranged_hives: int=0
+    for nest in layout.get_node("Beehives").get_children():
+        ranged_hives+=nest.bee_variant
+    check(ranged_hives==3,"Seven hives are evenly split: four dash bees and three ranged bees")
+    var nest2=layout.get_node("Beehives/Beehive06")
+    encounter._spawn(nest2)
+    var bee2=encounter.enemies().back()
+    bee2.set_physics_process(false)
+    check(bee2.ranged and bee2.visual.texture.resource_path.ends_with("/bee2.png"),"Second hive type spawns the supplied second bee")
+    bee2.global_position=body.global_position+Vector2(230,-180)
+    bee2.lifetime=1
+    bee2._set_mode(bee2.Mode.WINDUP)
+    bee2._aim=body.global_position+Vector2(0,-50)
+    var count_before: int=encounter.get_child_count()
+    bee2._physics_process(.56)
+    check(bee2.mode==bee2.Mode.RECOVERING and encounter.get_child_count()==count_before+1,"Second bee fires a stinger instead of dashing")
+    check(encounter.enemies().size()==2,"Projectiles are excluded from flight separation neighbors")
+    var needle=encounter.get_child(encounter.get_child_count()-1)
+    needle.set_physics_process(false)
+    var shot_velocity: Vector2=needle.velocity
+    body.global_position.x+=100
+    needle._physics_process(.01)
+    check(is_equal_approx(needle.velocity.x,shot_velocity.x),"Stinger follows its launch arc without homing")
+    needle.global_position=body.global_position+Vector2(-60,-50)
+    needle.velocity=Vector2(680,0)
+    needle._physics_process(.02)
+    check(needle.is_queued_for_deletion() and not game.dead,"Stinger impact is nonlethal and consumes the projectile")
     game.die(&"impact")
     encounter._physics_process(.01)
     check(bee.is_queued_for_deletion() and not bee.visible,"Death immediately stops active bees")

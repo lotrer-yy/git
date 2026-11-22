@@ -2,6 +2,9 @@ extends CharacterBody2D
 ## 复用地狱小恶魔飞行模块；只用作者蜜蜂原图，蓄力后锁定方向冲刺蜇击。
 signal stung
 const FLIGHT = preload("res://modules/enemies/flying_motion.gd")
+const ART2 = preload("res://assets/art/jungle/formal/bee2.png")
+@export var ranged: bool = false
+var art_scale: float = .52
 const ART = preload("res://assets/art/jungle/formal/bee.png")
 enum Mode { EMERGING, FLYING, WINDUP, DARTING, RECOVERING }
 @export var attack_interval: float = 3.5
@@ -25,8 +28,9 @@ func _ready() -> void:
     shape.shape.radius=45
     add_child(shape)
     visual=Sprite2D.new()
-    visual.texture=ART
-    visual.scale=Vector2.ONE*.52
+    visual.texture=ART2 if ranged else ART
+    art_scale=150.0/maxf(visual.texture.get_width(),visual.texture.get_height())
+    visual.scale=Vector2.ONE*art_scale
     add_child(visual)
     flight=Node.new()
     flight.set_script(FLIGHT)
@@ -67,9 +71,13 @@ func _physics_process(delta: float) -> void:
             cooldown=.6
             _set_mode(Mode.FLYING)
         elif elapsed>=warning_seconds:
-            _dart_velocity=(_aim-global_position).normalized()*950
-            _hit=false
-            _set_mode(Mode.DARTING)
+            if ranged:
+                encounter.fire_stinger(global_position,_aim)
+                _set_mode(Mode.RECOVERING)
+            else:
+                _dart_velocity=(_aim-global_position).normalized()*950
+                _hit=false
+                _set_mode(Mode.DARTING)
     elif mode==Mode.DARTING:
         var before: Vector2 = global_position
         velocity=_dart_velocity
@@ -103,6 +111,6 @@ func _pose(delta: float) -> void:
     var stretch: float = 1+sin(lifetime*42)*.025
     if mode==Mode.WINDUP: stretch=1+sin(elapsed*40)*.07
     elif mode==Mode.DARTING: stretch=.84
-    visual.scale=Vector2.ONE*.52*maxf(.05,pop)*Vector2(1/stretch,stretch)
+    visual.scale=Vector2.ONE*art_scale*maxf(.05,pop)*Vector2(1/stretch,stretch)
     var lean: float = clampf(velocity.x/950,-1,1)*.25
     visual.rotation=lerp_angle(visual.rotation,lean,1-exp(-delta*12))

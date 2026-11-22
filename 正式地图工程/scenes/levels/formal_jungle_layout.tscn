@@ -94,6 +94,7 @@ scale = Vector2(0.9,0.9)
 texture = ExtResource("beehive_art")
 offset = Vector2(0,167.5)
 script = ExtResource("beehive_behavior")
+bee_variant = 1
 metadata/trunk_from_bottom = 7
 
 [node name="Beehive03" type="Sprite2D" parent="Beehives"]
@@ -110,6 +111,7 @@ scale = Vector2(0.9,0.9)
 texture = ExtResource("beehive_art")
 offset = Vector2(0,167.5)
 script = ExtResource("beehive_behavior")
+bee_variant = 1
 metadata/trunk_from_bottom = 5
 
 [node name="Beehive05" type="Sprite2D" parent="Beehives"]
@@ -126,6 +128,7 @@ scale = Vector2(0.9,0.9)
 texture = ExtResource("beehive_art")
 offset = Vector2(0,167.5)
 script = ExtResource("beehive_behavior")
+bee_variant = 1
 metadata/trunk_from_bottom = 3
 
 [node name="Beehive07" type="Sprite2D" parent="Beehives"]

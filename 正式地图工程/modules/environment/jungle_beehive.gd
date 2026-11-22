@@ -3,6 +3,7 @@ extends Sprite2D
 signal loosened
 signal dropped
 enum State { HANGING, SHAKING, FALLING, GONE }
+@export_enum("冲刺蜜蜂", "射刺蜜蜂") var bee_variant: int = 0
 @export var trigger_radius: float = 430.0
 @export var warning_seconds: float = 0.9
 @export var fall_gravity: float = 1450.0

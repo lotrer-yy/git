@@ -16,5 +16,5 @@ func pump(rope: SwingVine, velocity: Vector2, delta: float, bias: float, max_ang
     var energy: float = .5*tangential_speed*tangential_speed+rope.gravity*maxf(0,length-radius.y)
     var target: float = rope.gravity*length*(1-cos(deg_to_rad(max_angle_degrees)))
     var reserve: float = clampf((target-energy)/maxf(target*.35,1),0,1)
-    var ramp: float = smoothstep(0,1.4,held_seconds)
+    var ramp: float = smoothstep(0,.6,held_seconds)
     return clampf(direction+bias*.15,-1,1)*ramp*reserve

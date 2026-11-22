@@ -3,6 +3,9 @@ extends Node
 ## 可配置抓取与松手抛出；W/S 攀爬，自动或 A/D 借力，优先未抓过的可达藤蔓。
 const SWING_ASSIST = preload("res://modules/movement/vine_swing_assist.gd")
 @export_range(1,3) var launch_multiplier: float = 1.0
+@export var launch_upward_multiplier: float = 1.0
+@export var launch_lift_ratio: float = 0.0
+@export var automatic_swing_strength: float = 1.0
 @export var max_launch_speed: float = 2600.0
 @export var automatic_swing: bool = false
 @export_range(30,75) var automatic_swing_angle: float = 62.0
@@ -66,7 +69,7 @@ func _physics_process(delta: float) -> void:
 			detach(false)
 			return
 		vine.climb_axis=float(_reader.down_held)-float(_reader.jump_held)
-		vine.pump_axis=_swing_assist.pump(vine,_body.velocity,delta,_reader.move_axis,automatic_swing_angle) if automatic_swing else _reader.move_axis
+		vine.pump_axis=_swing_assist.pump(vine,_body.velocity,delta,_reader.move_axis,automatic_swing_angle)*automatic_swing_strength if automatic_swing else _reader.move_axis
 		if Input.is_action_just_pressed(&"vine_release"):
 			detach(true)
 		elif vine.grip_length>=vine.length-1.0 and _reader.down_held:
@@ -127,7 +130,10 @@ func detach(jump: bool) -> void:
 	vine=null
 	_motor.enabled=true
 	_motor.reset()
-	var launch := (exit_velocity*launch_multiplier).limit_length(max_launch_speed)+(Vector2(_reader.move_axis*120,-440) if jump else Vector2.ZERO)
+	var launch := exit_velocity*launch_multiplier
+	if exit_velocity.y<=0:
+		launch.y=minf(launch.y*launch_upward_multiplier,-absf(launch.x)*launch_lift_ratio)
+	launch=launch.limit_length(max_launch_speed)+(Vector2(_reader.move_axis*120,-440) if jump else Vector2.ZERO)
 	_motor.launch_with_momentum(launch)
 	jump_origin=_body.global_position
 	_cooldown=0.3

@@ -99,6 +99,8 @@ class Probe extends Node2D:
     var manager: Node
     var body: CharacterBody2D
     var hit: bool=false
+    func can_simulate() -> bool: return not hit
+    func bee_deflected() -> void: pass
     func player_spinning() -> bool: return false
     func is_active() -> bool: return not hit
     func is_on_screen(_point: Vector2) -> bool: return true

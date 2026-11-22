@@ -4,6 +4,7 @@ const ART=preload("res://assets/art/characters/squirrel/formal/backflip.png")
 @export var slow_turns_per_second: float=1.2
 @export var fast_turns_per_second: float=2.0
 var _turn_direction: float=1.0
+var _deflect_elapsed: float=10.0
 var active: bool=false
 var elapsed: float=0
 var turns_per_second: float=2
@@ -30,6 +31,7 @@ func begin(launch_velocity: Vector2) -> void:
     if not body.get_node("Host").claimed: return
     active=true
     elapsed=0
+    _deflect_elapsed=10
     _turn_direction=1.0 if launch_velocity.x>=0 else -1.0
     turns_per_second=lerpf(slow_turns_per_second,fast_turns_per_second,clampf(launch_velocity.length()/1600,0,1))
     source.hide()
@@ -46,14 +48,19 @@ func _process(delta: float) -> void:
         stop()
         return
     elapsed+=delta
+    _deflect_elapsed+=delta
     sample(elapsed)
 func is_invulnerable() -> bool:
     var level: Node=body.get_node("Defeat").level
     return active and body.get_node("Host").claimed and body.get_node("VineClimber").vine==null and not body.is_on_floor() and (level==null or not level.dead)
+func play_deflect_pulse() -> void:
+    _deflect_elapsed=0
+    if active: sample(elapsed)
 func sample(time: float) -> void:
     var phase: float=time*TAU*turns_per_second*_turn_direction
     var spring: float=.24*cos(time*30)*exp(-time*12) if time<.32 else 0.0
-    var width: float=1+spring
+    var hit_pop: float=.23*cos(_deflect_elapsed*28)*exp(-_deflect_elapsed*12)
+    var width: float=1+spring+hit_pop
     sprite.global_position=source.global_position
     sprite.global_rotation=body.global_rotation+phase
     sprite.global_scale=body.global_scale*1.1*Vector2(width,1.0/width)

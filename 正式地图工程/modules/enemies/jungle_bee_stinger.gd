@@ -3,6 +3,7 @@ extends "res://modules/enemies/enemy_fork.gd"
 @export var tracking_seconds: float = 1.8
 @export var turn_rate: float = 5.0
 var _previous_target := Vector2.INF
+var _pierced_player: bool=false
 const ART = preload("res://assets/art/jungle/formal/bee_stinger.png")
 func _ready() -> void:
     gravity=100
@@ -13,7 +14,7 @@ func _ready() -> void:
     art.scale=Vector2.ONE*.6
     add_child(art)
 func _physics_process(delta: float) -> void:
-    if not is_instance_valid(encounter) or not encounter.is_active():
+    if not is_instance_valid(encounter) or not encounter.can_simulate():
         hide()
         queue_free()
         return
@@ -24,7 +25,7 @@ func _physics_process(delta: float) -> void:
     var center: Vector2 = encounter.target_position()
     var last_target: Vector2 = center if not _previous_target.is_finite() or _previous_target.distance_to(center)>500 else _previous_target
     _previous_target=center
-    if _age<=tracking_seconds and encounter.is_on_screen(global_position):
+    if encounter.is_active() and _age<=tracking_seconds and encounter.is_on_screen(global_position):
         var toward: Vector2 = encounter.intercept_target(global_position,velocity.length(),.2)-global_position
         if velocity.dot(toward)>0:
             var turn: float = clampf(wrapf(toward.angle()-velocity.angle(),-PI,PI),-turn_rate*delta,turn_rate*delta)
@@ -34,16 +35,18 @@ func _physics_process(delta: float) -> void:
     velocity.y+=gravity*delta
     var closest: Vector2 = Geometry2D.get_closest_point_to_segment(center,previous,next)
     var relative: Vector2 = Geometry2D.get_closest_point_to_segment(Vector2.ZERO,previous-last_target,next-center)
-    var hits_player: bool = relative.length()<55 and encounter.is_on_screen(closest)
+    var hits_player: bool = not _pierced_player and encounter.is_active() and relative.length()<55 and encounter.is_on_screen(closest)
     var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(PhysicsRayQueryParameters2D.create(previous,next,32))
     if not hit.is_empty() and (not hits_player or previous.distance_squared_to(hit.position)<previous.distance_squared_to(closest)):
         hide()
         queue_free()
         return
     if hits_player:
-        if not encounter.player_spinning(): encounter.defeat_player()
-        hide()
-        queue_free()
-        return
+        if encounter.player_spinning():
+            hide()
+            queue_free()
+            return
+        _pierced_player=true
+        encounter.defeat_player()
     global_position=next
     rotation=velocity.angle()+PI*.5

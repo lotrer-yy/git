@@ -36,7 +36,7 @@ func run():
         if not game.dead: bee._physics_process(1.0/120.0)
     check(game.dead and game.death_reason==&"bee","Bee reaches and defeats a hanging squirrel from 500 pixels away")
     check(body.get_node("Defeat").corpse.visible and not body.get_node("Visual/Sprite").visible,"Melee hit displays stunned artwork")
-    check(bee.is_queued_for_deletion(),"Defeat clears the attacking bee")
+    check(not bee.is_queued_for_deletion(),"Defeat leaves the attacking bee alive")
     layout.reset()
     check(not body.get_node("Defeat").corpse.visible,"Replay removes the stunned pose")
     print("SQUIRREL_BEE_DEFEAT_FAILURES=",failures.size())

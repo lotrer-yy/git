@@ -1,10 +1,14 @@
 extends Node2D
 ## 被击中立即换作者晕倒原图；使用图集区域与白底透明着色器保留源素材。
 const ART=preload("res://assets/art/characters/squirrel/formal/stunned.png")
+signal finished
+var falling: bool=false
+var _fall_velocity:=Vector2.ZERO
 var corpse: Sprite2D
 var level: Node
 @onready var body: CharacterBody2D=get_parent()
 func _ready() -> void:
+    process_mode=Node.PROCESS_MODE_ALWAYS
     level=body
     while level!=null and not level.has_signal("died"): level=level.get_parent()
     var region:=AtlasTexture.new()
@@ -30,6 +34,8 @@ func _on_death() -> void:
     corpse.scale*=208.0/217.0
     corpse.flip_h=source.flip_h
     corpse.show()
+    falling=true
+    _fall_velocity=Vector2(clampf(body.velocity.x*.12,-140,140),100)
     source.hide()
     visual.get_node("SelectedSprite").hide()
     body.get_node("Input").enabled=false
@@ -38,7 +44,19 @@ func _on_death() -> void:
     body.get_node("VineClimber").set_physics_process(false)
     body.velocity=Vector2.ZERO
     body.set_active(false)
+func _process(delta: float) -> void:
+    if not falling: return
+    corpse.global_position+=_fall_velocity*delta+Vector2(0,850*delta*delta)
+    _fall_velocity.y+=1700*delta
+    corpse.rotation+=delta*.6
+    var camera: Camera2D=level.camera
+    var bottom: float=camera.global_position.y+camera.offset.y+camera.get_viewport_rect().size.y*.5/camera.zoom.y
+    if corpse.global_position.y>bottom+180:
+        falling=false
+        corpse.hide()
+        finished.emit()
 func reset() -> void:
+    falling=false
     if is_instance_valid(corpse): corpse.hide()
     body.get_node("Visual/Sprite").show()
     body.get_node("VineClimber").set_physics_process(true)

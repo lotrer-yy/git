@@ -38,6 +38,8 @@ func run():
         bee._set_mode(bee.Mode.FLYING)
         bee._physics_process(.01)
         check(bee.mode==bee.Mode.DEFLECTED and bee.is_defeated(),"Touching either bee type during spin knocks it away, even outside an attack")
+        check(bee.visual.scale.x>bee.art_scale*1.5,"Deflection starts with a pronounced duang squash")
+        for tick in 8: bee._physics_process(.01)
         var before: Vector2=bee.global_position
         bee._physics_process(.01)
         check(bee.global_position.distance_to(before)>5 and bee.velocity.x>500,"Deflected bee physically flies away")

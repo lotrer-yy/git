@@ -50,7 +50,7 @@ func _ready() -> void:
 func is_defeated() -> bool:
     return mode==Mode.DEFLECTED or is_queued_for_deletion()
 func _physics_process(delta: float) -> void:
-    if not is_instance_valid(encounter) or not encounter.is_active():
+    if not is_instance_valid(encounter) or not encounter.can_simulate():
         queue_free()
         return
     elapsed+=delta
@@ -63,6 +63,10 @@ func _physics_process(delta: float) -> void:
         return
     if mode==Mode.DEFLECTED:
         _tick_deflection(delta)
+        return
+    if not encounter.is_active():
+        flight.tick(self,target,encounter.flight_bounds(),delta,encounter.enemies())
+        _pose(delta)
         return
     var motion_start: Vector2=global_position
     if encounter.player_spinning() and motion_start.distance_to(target)<95:
@@ -134,13 +138,18 @@ func deflect(origin: Vector2) -> void:
     if away.length_squared()<.01: away=Vector2.UP
     velocity=away*1100+(encounter.body.velocity*.25).limit_length(350)+Vector2(0,-220)
     _set_mode(Mode.DEFLECTED)
+    encounter.bee_deflected()
     _tick_deflection(0)
 func _tick_deflection(delta: float) -> void:
+    if elapsed<.065:
+        visual.scale=Vector2(1.65,.55)*art_scale
+        return
     velocity.y+=1100*delta
     move_and_slide()
     visual.rotation+=delta*14*(1 if velocity.x>=0 else -1)
-    var spring: float=cos(elapsed*24)*exp(-elapsed*10)
-    visual.scale=Vector2(1+.28*spring,1-.25*spring)*art_scale
+    var impact_time: float=elapsed-.065
+    var spring: float=cos(impact_time*26)*exp(-impact_time*8)
+    visual.scale=Vector2(1+.65*spring,1-.4*spring)*art_scale
     if elapsed>=1.8: queue_free()
 func _set_mode(value: Mode) -> void:
     mode=value

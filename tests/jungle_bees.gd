@@ -78,10 +78,10 @@ func run():
     needle.launch(encounter.target_position())
     for tick in 120:
         if not game.dead: needle._physics_process(.01)
-    check(needle.is_queued_for_deletion() and game.dead and game.death_reason==&"bee","Stinger impact defeats the squirrel and consumes the projectile")
+    check(not needle.is_queued_for_deletion() and game.dead and game.death_reason==&"bee","Stinger defeats the squirrel and keeps travelling")
     check(body.get_node("Defeat").corpse.visible and not body.get_node("Visual/Sprite").visible,"Defeat displays the supplied stunned expression")
     encounter._physics_process(.01)
-    check(bee.is_queued_for_deletion() and not bee.visible,"Death immediately stops active bees")
+    check(not bee.is_queued_for_deletion() and bee.visible,"Death leaves bees visible")
     layout.reset()
     check(bee.is_queued_for_deletion() and not bee.visible and hive.state==hive.State.HANGING,"Replay removes bees and restores hives")
     check(not body.get_node("Defeat").corpse.visible and body.get_node("Visual/Sprite").visible,"Replay restores the normal squirrel expression")

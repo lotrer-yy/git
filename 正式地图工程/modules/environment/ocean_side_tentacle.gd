@@ -164,10 +164,10 @@ func _sample_attack() -> void:
     if _clock >= strike_start+strike_seconds*.45 and _clock < retract_start+_flex.tip_lag_seconds and not _hit and _touches_fish():
         _hit = true
         fish_hit.emit()
-        level.die(&"tentacle")
+        fish.get_node("Stun").apply(Vector2(float(-side),.25))
 
 func _touches_fish() -> bool:
-    if fish.get_node("Teleport").is_invulnerable(): return false
+    if fish.get_node("Teleport").is_invulnerable() or fish.get_node("Stun").is_protected(): return false
     var shape := fish.get_node("Collision") as CollisionShape2D
     var center := _rig.to_local(shape.global_position)
     var radius: float = shape.shape.radius / artwork_scale

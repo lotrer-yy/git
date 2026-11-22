@@ -26,6 +26,8 @@
 
 [ext_resource type="Script" path="res://modules/environment/formal_jungle_handoff.gd" id="jungle_handoff"]
 
+[ext_resource type="Script" path="res://modules/status/fish_tentacle_stun.gd" id="fish_stun"]
+
 [sub_resource type="AtlasTexture" id="StrandedFish"]
 atlas = ExtResource("stranded_art")
 region = Rect2(1087,1968,130,85)
@@ -54,6 +56,9 @@ texture = ExtResource("fish_art")
 
 [node name="Teleport" type="Node" parent="Fish"]
 script = ExtResource("teleport")
+
+[node name="Stun" type="Node" parent="Fish"]
+script = ExtResource("fish_stun")
 
 [node name="Possession" type="Node" parent="."]
 script = ExtResource("possession")

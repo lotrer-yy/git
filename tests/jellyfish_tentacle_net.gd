@@ -126,9 +126,9 @@ func run():
     check(not game.dead,"Teleport immunity protects against the extending stroke")
     teleport._invulnerability_remaining = 0
     advance(net,.01)
-    check(game.dead and game.death_reason==&"jellyfish_net","Collision during extension enters the actual death flow")
+    check(not game.dead and fish.get_node("Stun").stun_remaining>0,"Extending tentacle causes temporary stun instead of death")
     await create_timer(.08,true,false,true).timeout
-    check(is_instance_valid(stage.get_node("SharkKnockback").corpse),"Net death plays the real fish impact animation instead of jumping straight to the overlay")
+    check(fish.get_node("Visual/Sprite").material!=null and not is_instance_valid(stage.get_node("SharkKnockback").corpse),"Net hit shows the spiral eye without a death animation")
     stage.reset()
     check(net.rows.is_empty() and not net.enabled,"Retry removes every old tendril, collider and electric strand")
     print("JELLYFISH_NET_FAILURES=",failures.size())

@@ -60,8 +60,7 @@ func _on_pink_shark_hit(direction: Vector2) -> void:
     level.die(&"pink_shark")
 
 func _on_boss_net_hit(direction: Vector2) -> void:
-    $SharkKnockback.impact_direction = direction
-    level.die(&"jellyfish_net")
+    fish.get_node("Stun").apply(direction)
 
 func activate() -> void:
     if active: return
@@ -83,6 +82,7 @@ func _on_transfer_finished(chosen_host: PossessableHost) -> void:
     for lane in $PinkSharks.get_children(): lane.running = true
 
 func _on_player_died() -> void:
+    fish.get_node("Stun").reset(false)
     if not active: return
     $JungleHandoff.cancel()
     $SurfaceGrab.reset()
@@ -104,6 +104,7 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
+    fish.get_node("Stun").reset(false)
     $JungleHandoff.reset()
     $JungleLayout.reset()
     $SurfaceGrab.reset()

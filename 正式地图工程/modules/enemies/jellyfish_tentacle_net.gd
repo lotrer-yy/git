@@ -43,6 +43,8 @@ func configure(player: CharacterBody2D, jellyfish: Node2D, walls: Node2D) -> voi
 
 func _physics_process(delta: float) -> void:
     if not enabled or not is_instance_valid(target): return
+    var stun: Node=target.get_node_or_null("Stun")
+    if _hit and (stun==null or not stun.is_protected()): _hit=false
     _elapsed += delta
     _blink_grace = maxf(0,_blink_grace-delta)
     var fish_y := to_local(target.global_position).y
@@ -79,7 +81,7 @@ func _physics_process(delta: float) -> void:
             var local_center: Vector2 = tendril.to_local(center)
             var nearby: bool = local_center.y>=minf(tendril.start.y,tendril.finish.y)-tentacle_thickness and local_center.y<=maxf(tendril.start.y,tendril.finish.y)+tentacle_thickness
             var teleport := target.get_node_or_null("Teleport")
-            if row.dodge_grace<=0 and nearby and not _hit and (teleport==null or not teleport.is_invulnerable()) and tendril.touches(center,24):
+            if row.dodge_grace<=0 and nearby and not _hit and (stun==null or not stun.is_protected()) and (teleport==null or not teleport.is_invulnerable()) and tendril.touches(center,24):
                 _hit = true
                 player_hit.emit(Vector2(float(-_side),-.5))
         if row_top-fish_y>1900: remove.append(row)

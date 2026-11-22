@@ -28,6 +28,8 @@ func run():
     await create_timer(.05).timeout
     check(attacks.is_empty() and is_zero_approx(trap.linger_elapsed),"An unpossessed fish never triggers the trap")
     stage.activate()
+    for name in ["Shark","Octopus","PinkSharks","JellyfishBoss","BossTentacleNet","SurfaceGrab"]:
+        stage.get_node(name).process_mode=Node.PROCESS_MODE_DISABLED
     stage.host.take_control()
     stage._on_transfer_finished(stage.host)
     fish.get_node("Movement").enabled = false
@@ -64,29 +66,23 @@ func run():
     await create_timer(.09).timeout
     check(attacks==[-1,1] and trap._rig.scale.x<0 and trap._anchor.x>trap._bounds_at(y-trap.spawn_above_pixels).y,"Right wall attack mirrors the arm while preserving its root")
     check(absf(trap._anchor.y-(y-340.0))<.01,"Right tentacle uses the same above-fish emergence height")
+    var stun=fish.get_node("Stun")
     for i in 160:
         await physics_frame
-        if game.dead: break
-    check(game.dead and game.death_reason==&"tentacle","The visible fast slap kills a fish that remains in its actual silhouette")
-    await create_timer(.025).timeout
-    check(is_instance_valid(trap.corpse) and trap.corpse.visible,"Hit creates a visible fish death body instead of immediately hiding it")
-    var start_y: float = trap.corpse.global_position.y
-    var zoom: Vector2 = game.camera.zoom
-    var flow = game.get_node("DeathFlow")
-    check(not flow.overlay.visible,"Death screen waits while the fish is knocked down")
-    await create_timer(.18).timeout
-    check(maximum_shake>0.01,"Tentacle hit fires the existing brief screen shake")
-    check(trap.corpse.global_position.y>start_y+120,"Slapped fish is driven downward with a strong initial impulse")
-    check(not fish.get_node("Input").enabled and not fish.get_node("Movement").enabled,"Dead fish cannot continue swimming or blinking")
-    await create_timer(.75).timeout
-    check(game.camera.offset.is_zero_approx() and game.camera.zoom.is_equal_approx(zoom),"Shake returns to zero without altering established camera zoom")
-    check(not trap.corpse.visible and flow.overlay.visible,"Fish leaves the screen before the existing death overlay appears")
-    flow._retry.call_deferred()
-    for i in 600:
-        await process_frame
-        if flow.state==flow.State.PLAYING and not game.dead: break
-    check(not game.dead and game.player==game.soul,"Existing retry flow returns to the original ghost entry")
-    check(not trap.attacking and is_zero_approx(trap.linger_elapsed) and not is_instance_valid(trap.corpse),"Retry clears pending tentacles, timer and fish death body")
-    check(fish.get_node("Visual").visible and not stage.host.claimed,"Retry restores the fish's ordinary patrol state")
+        if stun.dizzy_remaining>0: break
+    check(not game.dead and trap._hit and stun.stun_remaining>0,"Visible wall slap stuns the fish instead of losing the run")
+    check(not is_instance_valid(trap.corpse) and fish.get_node("Visual").visible,"Stun keeps the real fish visible without a death body")
+    check(fish.get_node("Visual/Sprite").material!=null,"Hit displays the spiral eye over the original fish artwork")
+    check(not fish.get_node("Input").enabled and not fish.get_node("Movement").enabled,"Fish briefly pauses swimming while dazed")
+    trap.linger_seconds=10
+    await create_timer(.7).timeout
+    check(not game.dead and fish.get_node("Input").enabled and fish.get_node("Teleport").enabled,"Swimming input and blink recover automatically")
+    check(not stun.apply(Vector2.RIGHT),"Short recovery protection prevents consecutive tentacle stun")
+    await create_timer(.5).timeout
+    check(fish.get_node("Visual/Sprite").material==null,"Dizzy eye returns exactly to the original appearance")
+    check(not game.get_node("DeathFlow").overlay.visible,"No failure screen is shown for a tentacle stun")
+    stage.reset()
+    check(not trap.attacking and is_zero_approx(trap.linger_elapsed) and not is_instance_valid(trap.corpse),"Replay clears pending tentacles")
+    check(not stun.is_protected() and fish.get_node("Visual").visible and not stage.host.claimed,"Replay clears stun and restores ordinary patrol")
     print("OCEAN_SIDE_TENTACLE_FAILURES=",failures.size())
     quit(0 if failures.is_empty() else 1)

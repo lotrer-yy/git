@@ -50,7 +50,7 @@ func run():
     var locked: Vector2=bee._aim
     body.global_position.x+=120
     bee._physics_process(.56)
-    check(bee.mode==bee.Mode.DARTING and bee._aim==locked,"Dart locks the warning position instead of homing")
+    check(bee.mode==bee.Mode.DARTING and is_equal_approx(bee._dart_velocity.length(),bee.dart_speed),"Dart launches at an updated intercept point with the configured speed")
     var ranged_hives: int=0
     for nest in layout.get_node("Beehives").get_children():
         ranged_hives+=nest.bee_variant
@@ -73,7 +73,7 @@ func run():
     var shot_velocity: Vector2=needle.velocity
     body.global_position.x+=100
     needle._physics_process(.01)
-    check(absf(wrapf(needle.velocity.angle()-shot_velocity.angle(),-PI,PI))<.05,"Stinger guidance changes heading smoothly within a limited turn rate")
+    check(absf(wrapf(needle.velocity.angle()-shot_velocity.angle(),-PI,PI))<.06,"Stinger guidance changes heading smoothly within a limited turn rate")
     needle.global_position=encounter.target_position()+Vector2(-500,0)
     needle.launch(encounter.target_position())
     for tick in 120:

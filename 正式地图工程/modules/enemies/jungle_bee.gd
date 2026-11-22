@@ -9,8 +9,11 @@ const ART = preload("res://assets/art/jungle/formal/bee.png")
 enum Mode { EMERGING, FLYING, WINDUP, DARTING, RECOVERING }
 @export var attack_interval: float = 3.5
 @export var warning_seconds: float = .55
-@export var dart_tracking_seconds: float = .55
-@export var dart_turn_rate: float = 3.2
+@export var dart_tracking_seconds: float = .82
+@export var dart_turn_rate: float = 6.0
+@export var dart_speed: float = 1450.0
+@export var dart_seconds: float = .9
+var _previous_target := Vector2.INF
 var encounter: Node
 var mode: Mode = Mode.EMERGING
 var elapsed: float = 0
@@ -53,6 +56,8 @@ func _physics_process(delta: float) -> void:
     elapsed+=delta
     lifetime+=delta
     var target: Vector2 = encounter.target_position()
+    var last_target: Vector2 = target if not _previous_target.is_finite() or _previous_target.distance_to(target)>500 else _previous_target
+    _previous_target=target
     if global_position.distance_to(target)>1900:
         queue_free()
         return
@@ -68,7 +73,7 @@ func _physics_process(delta: float) -> void:
             _set_mode(Mode.WINDUP)
     elif mode==Mode.WINDUP:
         if elapsed<warning_seconds-.12:
-            var predicted: Vector2 = encounter.predicted_target(.18)
+            var predicted: Vector2 = encounter.intercept_target(global_position,1200 if ranged else dart_speed,.3)
             _aim=_aim.lerp(predicted,1-exp(-delta*16))
         velocity=velocity.move_toward(Vector2.ZERO,delta*1100)
         move_and_slide()
@@ -77,28 +82,30 @@ func _physics_process(delta: float) -> void:
             _set_mode(Mode.FLYING)
         elif elapsed>=warning_seconds:
             if ranged:
-                encounter.fire_stinger(global_position,_aim)
+                encounter.fire_stinger(global_position,encounter.intercept_target(global_position,1200,.3))
                 _set_mode(Mode.RECOVERING)
             else:
-                _dart_velocity=(_aim-global_position).normalized()*950
+                _aim=encounter.intercept_target(global_position,dart_speed,.3)
+                _dart_velocity=(_aim-global_position).normalized()*dart_speed
                 _hit=false
                 _set_mode(Mode.DARTING)
     elif mode==Mode.DARTING:
         var before: Vector2 = global_position
         if elapsed<=dart_tracking_seconds and encounter.is_on_screen(global_position):
-            var toward: Vector2 = encounter.predicted_target(.08)-global_position
+            var toward: Vector2 = encounter.intercept_target(global_position,dart_speed,.2)-global_position
             if _dart_velocity.dot(toward)>0:
                 var turn: float = clampf(wrapf(toward.angle()-_dart_velocity.angle(),-PI,PI),-dart_turn_rate*delta,dart_turn_rate*delta)
                 _dart_velocity=_dart_velocity.rotated(turn)
         velocity=_dart_velocity
         move_and_slide()
         var closest: Vector2 = Geometry2D.get_closest_point_to_segment(target,before,global_position)
-        if not _hit and closest.distance_to(target)<70 and encounter.is_on_screen(global_position):
+        var relative: Vector2 = Geometry2D.get_closest_point_to_segment(Vector2.ZERO,before-last_target,global_position-target)
+        if not _hit and relative.length()<70 and encounter.is_on_screen(closest):
             _hit=true
             encounter.defeat_player()
             stung.emit()
             _set_mode(Mode.RECOVERING)
-        elif elapsed>=.70: _set_mode(Mode.RECOVERING)
+        elif elapsed>=dart_seconds: _set_mode(Mode.RECOVERING)
     elif mode==Mode.RECOVERING:
         velocity=velocity.move_toward(Vector2.ZERO,delta*1400)
         move_and_slide()

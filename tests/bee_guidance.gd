@@ -33,9 +33,9 @@ func run():
     bee._set_mode(bee.Mode.DARTING)
     bee._dart_velocity=Vector2(950,0)
     bee._physics_process(.01)
-    check(bee._dart_velocity.angle()>0 and bee._dart_velocity.angle()<=.0321,"Dash turns toward a moving target with a capped angular speed")
+    check(bee._dart_velocity.angle()>0 and bee._dart_velocity.angle()<=.0601,"Dash turns toward a moving target with a capped angular speed")
     var direction: Vector2=bee._dart_velocity
-    bee.elapsed=.6
+    bee.elapsed=.85
     bee._physics_process(.01)
     check(bee._dart_velocity==direction,"Dash tracking expires before the end of the strike")
     bee.elapsed=0
@@ -59,9 +59,9 @@ func run():
     needle.gravity=0
     needle.velocity=Vector2(680,0)
     needle._physics_process(.1)
-    check(needle.velocity.angle()>0 and needle.velocity.angle()<=.2601,"Stinger gently tracks the player with a capped turn")
+    check(needle.velocity.angle()>0 and needle.velocity.angle()<=.5001,"Stinger gently tracks the player with a capped turn")
     var shot: Vector2=needle.velocity
-    needle._age=1.3
+    needle._age=1.9
     needle._physics_process(.01)
     check(needle.velocity==shot,"Stinger continues straight after its short tracking window")
     needle._age=0

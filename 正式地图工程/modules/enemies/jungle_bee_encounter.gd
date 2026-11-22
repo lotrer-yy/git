@@ -28,6 +28,22 @@ func target_position() -> Vector2:
     return art.to_global(torso)
 func predicted_target(seconds: float) -> Vector2:
     return target_position()+(body.velocity*seconds).limit_length(140)
+func intercept_target(origin: Vector2,attack_speed: float,max_lead: float = .3) -> Vector2:
+    var target: Vector2=target_position()
+    var motion: Vector2=body.velocity.limit_length(1700)
+    var offset: Vector2=target-origin
+    var a: float=motion.length_squared()-attack_speed*attack_speed
+    var b: float=2*offset.dot(motion)
+    var c: float=offset.length_squared()
+    var time: float=offset.length()/maxf(attack_speed,1)
+    var discriminant: float=b*b-4*a*c
+    if absf(a)>.001 and discriminant>=0:
+        var first: float=(-b-sqrt(discriminant))/(2*a)
+        var second: float=(-b+sqrt(discriminant))/(2*a)
+        if first>0 and second>0: time=minf(first,second)
+        elif first>0: time=first
+        elif second>0: time=second
+    return target+(motion*clampf(time,.02,max_lead)).limit_length(420)
 func defeat_player() -> void:
     if is_active(): stage.level.die(&"bee")
 func fire_stinger(origin: Vector2,aim: Vector2) -> void:

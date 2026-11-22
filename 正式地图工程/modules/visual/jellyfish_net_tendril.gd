@@ -7,6 +7,7 @@ const SEGMENTS = 24
 @export var strike_seconds: float = .18
 @export var cap_texture_pixels: float = 64.0
 @export var curve_height: float = 0.0
+@export var initial_reach: float = 160.0
 var start := Vector2.ZERO
 var finish := Vector2.ZERO
 var delay: float = 0.0
@@ -72,11 +73,11 @@ func sample(age: float) -> void:
     if t<charge_seconds:
         var emerge := 1-pow(1-clampf(t/.2,0,1),3)
         var windup := clampf((t-.2)/maxf(.01,charge_seconds-.2),0,1)
-        reach = 160*emerge-40*sin(windup*PI)
+        reach = initial_reach*emerge-40*sin(windup*PI)
         bend = 40*sin(windup*PI)
     else:
         var u := clampf((t-charge_seconds)/strike_seconds,0,1)
-        reach = lerpf(160,total,1-pow(1-u,3))
+        reach = lerpf(initial_reach,total,1-pow(1-u,3))
         bend = -28*sin(u*PI)*exp(-u*2)
     reach = minf(reach,total)
     centerline.clear()

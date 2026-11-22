@@ -21,7 +21,7 @@ enum State { WAITING, LOCKING, DASHING }
     set(value):
         if enabled == value: return
         enabled = value
-        # 出手后即使玩家死亡或暂时失去控制，也完成当前冲刺再退场。
+        # 暂时失控时可完成当前冲刺；玩家死亡由统一清理和自身检查立即退场。
         if is_node_ready() and state != State.DASHING: reset()
 var target: CharacterBody2D
 var camera: Camera2D
@@ -51,7 +51,7 @@ func configure(player: CharacterBody2D, view: Camera2D) -> void:
     camera = view
 
 func _physics_process(delta: float) -> void:
-    if state==State.LOCKING and _target_dead():
+    if _target_dead():
         cancel_pending_attack()
         return
     if state == State.DASHING and is_instance_valid(camera):
@@ -77,7 +77,7 @@ func _physics_process(delta: float) -> void:
                 sprite.play(&"windup")
 
 func _process(_delta: float) -> void:
-    if state==State.LOCKING and _target_dead():
+    if _target_dead():
         cancel_pending_attack()
         return
     if enabled and state == State.LOCKING: _follow_lock_view()
@@ -89,7 +89,7 @@ func _target_dead() -> bool:
 
 func cancel_pending_attack() -> void:
     enabled = false
-    if state!=State.DASHING: reset()
+    reset()
 
 func _view_rect() -> Rect2:
     var size := camera.get_viewport_rect().size/camera.zoom

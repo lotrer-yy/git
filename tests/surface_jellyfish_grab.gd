@@ -32,9 +32,35 @@ func run():
     fish.velocity = Vector2(0,-420)
     grab._physics_process(.01)
     check(grab.state==grab.State.WAITING,"Deep water cannot start the final grab")
-    fish.position.y = shore.surface_y+600
+    fish.position.y = shore.surface_y+1000
+    game.get_node("CameraAttention").enabled = false
+    game.camera.set_follow_target(fish,true)
+    game.camera.set_process(false)
+    game.camera.global_position = fish.global_position
+    game.camera.zoom = Vector2.ONE*1.35
     grab._physics_process(.01)
-    check(grab.state==grab.State.REACHING and grab._arm.start.y>grab._arm.finish.y,"Final grab reaches from behind and below the rising fish")
+    check(grab.state==grab.State.WARNING and grab._warning_arms.size()==4,"Four tendrils announce the final encounter before any grab")
+    var first_position: Vector2 = grab._warning_arms[0].global_position
+    for i in 60:
+        fish.position += fish.velocity*.01
+        game.camera.global_position = fish.global_position
+        grab._physics_process(.01)
+    check(grab.state==grab.State.WARNING and motor.enabled,"Warning leaves swimming available and cannot grab early")
+    check(grab._warning_arms[0].rotation!=0 and grab._warning_arms[0].global_position.y<first_position.y,"Tendrils rise independently with a smooth sway")
+    check(grab._warning_arms[0].get_node("Warning").visible,"Emerging tendrils visibly show the warning art")
+    for arm in grab._warning_arms:
+        check(not arm.dangerous and arm.body.collision_layer==0,"Every warning tendril is harmless")
+    if DisplayServer.get_name()!="headless":
+        game.camera.make_current()
+        game.camera.force_update_scroll()
+        await process_frame
+        await process_frame
+        root.get_texture().get_image().save_png("C:/Users/14930/Documents/Codex/2026-11-18/m/work/surface-grab-warning.png")
+    for i in 82:
+        fish.position += fish.velocity*.01
+        game.camera.global_position = fish.global_position
+        grab._physics_process(.01)
+    check(grab.state==grab.State.REACHING,"Grab begins only after the full warning")
     for i in 65:
         fish.position += fish.velocity*.01
         grab._physics_process(.01)
@@ -70,6 +96,7 @@ func run():
     grab.reset()
     fish.position.y = shore.surface_y+600
     grab._physics_process(.01)
+    check(grab.state==grab.State.WARNING,"Retry starts with warning rather than a surprise reach")
     check(blink.try_teleport(Vector2.RIGHT),"Player can dodge during the reaching animation")
     await create_timer(.12).timeout
     check(grab.state==grab.State.FINISHED and grab._arm==null,"Blink during reach makes the fixed-direction arm miss")

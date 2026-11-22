@@ -193,7 +193,7 @@ func run():
         if game.dead:break
     Engine.time_scale = 1.0
     check(game.dead and game.death_reason==&"shark","Real ocean-stage dash hits the controlled fish")
-    check(not enemy.enabled and enemy.visible and enemy.state==enemy.State.DASHING,"Death blocks new attacks but preserves the current charge")
+    check(not enemy.enabled and not enemy.visible and enemy.state==enemy.State.WAITING,"Death immediately removes the attacking shark")
     check(prepared_octopus and octopus.enabled and octopus.visible and octopus._visit_elapsed>1.4,"An actual shark hit keeps the octopus alive at its existing visit progress")
     check(ink.visible,"Shark impact does not erase existing screen ink")
     var octopus_elapsed: float = octopus._visit_elapsed
@@ -201,7 +201,7 @@ func run():
     var pink_distance: float = pink_lane.distance
     var death_position: Vector2 = enemy.global_position
     await create_timer(.16,true,false,true).timeout
-    check(enemy.global_position.distance_to(death_position)>100,"Shark keeps moving while the death animation freezes the level")
+    check(enemy.global_position==death_position,"Shark stops moving while the death animation freezes the level")
     check(octopus.visible and octopus._visit_elapsed>octopus_elapsed+.1,"Octopus animation and movement continue through the real death freeze")
     check(pink_lane.running and pink_lane.distance>pink_distance+15 and pink_lane.lead.visible and pink_lane.follower.visible,"Cyan-shark death leaves the fixed pink-shark pair running and visible")
     var knockback = stage.get_node("SharkKnockback")
@@ -215,7 +215,7 @@ func run():
     await create_timer(.15,true,false,true).timeout
     check(corpse.global_position.y>before_fall.y+20,"Fish turns over the apex and accelerates downward along the parabola")
     check(corpse.global_scale.is_equal_approx(saved_scale),"Impact keeps the character artwork at its original proportions")
-    check(not enemy.visible and enemy.state==enemy.State.WAITING and enemy._fully_offscreen(),"The hitting shark leaves the viewport before being hidden")
+    check(not enemy.visible and enemy.state==enemy.State.WAITING,"The hitting shark remains hidden throughout the death sequence")
     var flow = game.get_node("DeathFlow")
     for i in 40:
         if flow.overlay.visible:break

@@ -51,6 +51,9 @@ func configure(player: CharacterBody2D, view: Camera2D) -> void:
     camera = view
 
 func _physics_process(delta: float) -> void:
+    if state==State.LOCKING and _target_dead():
+        cancel_pending_attack()
+        return
     if state == State.DASHING and is_instance_valid(camera):
         state_elapsed += delta
         if enabled: cycle_elapsed += delta
@@ -74,7 +77,19 @@ func _physics_process(delta: float) -> void:
                 sprite.play(&"windup")
 
 func _process(_delta: float) -> void:
+    if state==State.LOCKING and _target_dead():
+        cancel_pending_attack()
+        return
     if enabled and state == State.LOCKING: _follow_lock_view()
+
+func _target_dead() -> bool:
+    if not is_instance_valid(target): return false
+    var stage := target.get_parent()
+    return stage.get("level")!=null and stage.level.dead
+
+func cancel_pending_attack() -> void:
+    enabled = false
+    if state!=State.DASHING: reset()
 
 func _view_rect() -> Rect2:
     var size := camera.get_viewport_rect().size/camera.zoom

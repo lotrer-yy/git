@@ -37,10 +37,10 @@ func run():
     shark.set_process(false)
     shark.lock_started.connect(func():locks.append(simulation_time))
     shark.dash_started.connect(func():dashes+=1)
-    advance(shark,5.99)
-    check(shark.state==shark.State.WAITING and not shark.visible,"No shark appears before six active seconds")
+    advance(shark,1.99)
+    check(shark.state==shark.State.WAITING and not shark.visible,"No shark appears before two active seconds")
     advance(shark,.03)
-    check(shark.state==shark.State.LOCKING and shark.visible,"Six seconds starts the visible locking phase")
+    check(shark.state==shark.State.LOCKING and shark.visible,"Two seconds starts the visible locking phase")
     advance(shark,.3)
     var screen_offset: Vector2 = shark.global_position-shark._view_rect().position
     view.global_position += Vector2(200,-120)

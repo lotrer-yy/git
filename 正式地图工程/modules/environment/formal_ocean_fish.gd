@@ -76,7 +76,7 @@ func _on_player_died() -> void:
     if not active: return
     $JellyfishBoss.enabled = false
     $BossTentacleNet.enabled = false
-    $Shark.enabled = false
+    $Shark.cancel_pending_attack()
     for lane in $PinkSharks.get_children(): lane.damage_enabled = false
     if level.death_reason in [&"shark",&"pink_shark"]:
         $Octopus.finish_current_visit()

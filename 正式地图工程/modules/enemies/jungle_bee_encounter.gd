@@ -21,7 +21,10 @@ func _spawn(hive: Sprite2D) -> void:
     bee.ranged=hive.bee_variant==1
     add_child(bee)
     bee.global_position=hive.to_global(Vector2(0,210))
+func player_spinning() -> bool:
+    return body.get_node("AirSpin").is_invulnerable()
 func target_position() -> Vector2:
+    if player_spinning(): return body.get_node("AirSpin").sprite.global_position
     var art: Sprite2D = body.get_node("Visual/Sprite")
     # 以可见躯干为目标，包含挂藤时的视觉偏移、摆动倾斜和翻转。
     var torso:=Vector2(art.texture.get_width()*.14*(1 if art.flip_h else -1),-art.texture.get_height()*.05)
@@ -45,7 +48,7 @@ func intercept_target(origin: Vector2,attack_speed: float,max_lead: float = .3) 
         elif second>0: time=second
     return target+(motion*clampf(time,.02,max_lead)).limit_length(420)
 func defeat_player() -> void:
-    if is_active(): stage.level.die(&"bee")
+    if is_active() and not player_spinning(): stage.level.die(&"bee")
 func fire_stinger(origin: Vector2,aim: Vector2) -> void:
     if not is_active() or not is_on_screen(origin): return
     var needle:=Node2D.new()

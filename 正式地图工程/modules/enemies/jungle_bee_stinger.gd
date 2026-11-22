@@ -41,7 +41,7 @@ func _physics_process(delta: float) -> void:
         queue_free()
         return
     if hits_player:
-        encounter.defeat_player()
+        if not encounter.player_spinning(): encounter.defeat_player()
         hide()
         queue_free()
         return

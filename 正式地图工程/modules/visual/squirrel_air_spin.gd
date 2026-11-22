@@ -47,6 +47,9 @@ func _process(delta: float) -> void:
         return
     elapsed+=delta
     sample(elapsed)
+func is_invulnerable() -> bool:
+    var level: Node=body.get_node("Defeat").level
+    return active and body.get_node("Host").claimed and body.get_node("VineClimber").vine==null and not body.is_on_floor() and (level==null or not level.dead)
 func sample(time: float) -> void:
     var phase: float=time*TAU*turns_per_second*_turn_direction
     var pop: float=1+.08*sin(minf(time/.18,1)*PI)

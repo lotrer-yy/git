@@ -6,7 +6,7 @@ const ART2 = preload("res://assets/art/jungle/formal/bee2.png")
 @export var ranged: bool = false
 var art_scale: float = .52
 const ART = preload("res://assets/art/jungle/formal/bee.png")
-enum Mode { EMERGING, FLYING, WINDUP, DARTING, RECOVERING }
+enum Mode { EMERGING, FLYING, WINDUP, DARTING, RECOVERING, DEFLECTED }
 @export var attack_interval: float = 3.5
 @export var warning_seconds: float = .55
 @export var dart_tracking_seconds: float = .82
@@ -48,7 +48,7 @@ func _ready() -> void:
     velocity=Vector2(0,-300)
     _pose(0)
 func is_defeated() -> bool:
-    return is_queued_for_deletion()
+    return mode==Mode.DEFLECTED or is_queued_for_deletion()
 func _physics_process(delta: float) -> void:
     if not is_instance_valid(encounter) or not encounter.is_active():
         queue_free()
@@ -60,6 +60,13 @@ func _physics_process(delta: float) -> void:
     _previous_target=target
     if global_position.distance_to(target)>1900:
         queue_free()
+        return
+    if mode==Mode.DEFLECTED:
+        _tick_deflection(delta)
+        return
+    var motion_start: Vector2=global_position
+    if encounter.player_spinning() and motion_start.distance_to(target)<95:
+        deflect(target)
         return
     if mode==Mode.EMERGING:
         velocity=velocity.move_toward(Vector2.ZERO,delta*500)
@@ -101,6 +108,9 @@ func _physics_process(delta: float) -> void:
         var closest: Vector2 = Geometry2D.get_closest_point_to_segment(target,before,global_position)
         var relative: Vector2 = Geometry2D.get_closest_point_to_segment(Vector2.ZERO,before-last_target,global_position-target)
         if not _hit and relative.length()<70 and encounter.is_on_screen(closest):
+            if encounter.player_spinning():
+                deflect(target)
+                return
             _hit=true
             encounter.defeat_player()
             stung.emit()
@@ -112,7 +122,26 @@ func _physics_process(delta: float) -> void:
         if elapsed>=.65:
             cooldown=attack_interval
             _set_mode(Mode.FLYING)
+    if encounter.player_spinning():
+        var swept: Vector2=Geometry2D.get_closest_point_to_segment(Vector2.ZERO,motion_start-last_target,global_position-target)
+        if swept.length()<95:
+            deflect(target)
+            return
     _pose(delta)
+func deflect(origin: Vector2) -> void:
+    if mode==Mode.DEFLECTED: return
+    var away: Vector2=(global_position-origin).normalized()
+    if away.length_squared()<.01: away=Vector2.UP
+    velocity=away*1100+(encounter.body.velocity*.25).limit_length(350)+Vector2(0,-220)
+    _set_mode(Mode.DEFLECTED)
+    _tick_deflection(0)
+func _tick_deflection(delta: float) -> void:
+    velocity.y+=1100*delta
+    move_and_slide()
+    visual.rotation+=delta*14*(1 if velocity.x>=0 else -1)
+    var spring: float=cos(elapsed*24)*exp(-elapsed*10)
+    visual.scale=Vector2(1+.28*spring,1-.25*spring)*art_scale
+    if elapsed>=1.8: queue_free()
 func _set_mode(value: Mode) -> void:
     mode=value
     elapsed=0

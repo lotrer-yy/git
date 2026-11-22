@@ -11,11 +11,13 @@ var elapsed: float = 0.0
 var velocity := Vector2.ZERO
 var _origin := Vector2.ZERO
 var _rest_rotation: float = 0.0
+var _rest_scale := Vector2.ONE
 @onready var body: CharacterBody2D = get_node("../../Squirrel")
 @onready var stage: Node = get_node("../../..")
 func _ready() -> void:
     _origin=position
     _rest_rotation=rotation
+    _rest_scale=scale
 func _physics_process(delta: float) -> void:
     if not stage.has_node("ShoreExit") or not stage.active or stage.level.dead: return
     if state==State.HANGING:
@@ -34,16 +36,25 @@ func _physics_process(delta: float) -> void:
         if elapsed>=warning_seconds:
             state=State.FALLING
             elapsed=0
-            velocity=Vector2(sin(phase)*65,35)
+            velocity=Vector2(sin(phase)*65,160)
+            _drop_pop(0)
             dropped.emit()
     elif state==State.FALLING:
         elapsed+=delta
+        _drop_pop(elapsed)
         velocity.y+=fall_gravity*delta
         position+=velocity*delta
         rotation+=delta*.65
         if elapsed>=4:
             state=State.GONE
             hide()
+func _drop_pop(time: float) -> void:
+    # 脱落时向下拉长，随后横向回弹，短促衰减并准确恢复原尺寸。
+    if time>=.4:
+        scale=_rest_scale
+        return
+    var stretch: float = 1+.24*cos(time*27)*exp(-time*10)
+    scale=_rest_scale*Vector2(1.0/stretch,stretch)
 func reset() -> void:
     state=State.HANGING
     elapsed=0

@@ -92,16 +92,6 @@ func _physics_process(delta: float) -> void:
 		if collision!=null:
 			rope.correct_point(rope.load_index,to_local(rider.global_position-rider_offset))
 			_rider_velocity*=0.3
-			if collision.get_collider().is_in_group("jungle_side_boundaries") and rider.has_method("bounce_from_boundary"):
-				_rider_velocity=rider.bounce_from_boundary(collision,rider.velocity)
-				# 反转整条绳的向墙速度，不能只把角色推回去后又被绳索拉住。
-				var normal: Vector2 = collision.get_normal()
-				for i in range(1,rope.points.size()):
-					var velocity: Vector2 = (rope.points[i]-rope.previous[i])/rope._last_step
-					velocity.x=normal.x*absf(velocity.x)*.8
-					rope.previous[i]=rope.points[i]-velocity*rope._last_step
-				rope.previous[rope.load_index]=rope.points[rope.load_index]-_rider_velocity*rope._last_step
-				pump_axis=normal.x
 		rider.velocity=_rider_velocity
 
 func _tangent(distance: float) -> Vector2:

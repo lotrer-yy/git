@@ -7,6 +7,7 @@ func run():
     var layout = load("res://scenes/levels/formal_jungle_layout.tscn").instantiate()
     root.add_child(layout)
     layout.set_process(false)
+    layout.get_node("SoftSideReturn").set_physics_process(false) # Isolate free-flight height from map edge assistance.
     var body = layout.get_node("Squirrel")
     body.get_node("Host").take_control()
     body.set_physics_process(false)

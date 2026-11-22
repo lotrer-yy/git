@@ -10,9 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/reference_map/10.png" id="canopy_lower"]
 
 [ext_resource type="PackedScene" path="res://scenes/actors/formal_squirrel.tscn" id="squirrel"]
-
-[sub_resource type="RectangleShape2D" id="BoundaryShape"]
-size = Vector2(256,11000)
+[ext_resource type="Script" path="res://modules/movement/jungle_soft_side_return.gd" id="soft_return"]
 
 [sub_resource type="ShaderMaterial" id="CanopyOcclusion"]
 shader = ExtResource("canopy_mask")
@@ -309,12 +307,5 @@ centered = false
 
 [node name="Squirrel" parent="." instance=ExtResource("squirrel")]
 
-[node name="SideBoundaries" type="StaticBody2D" parent="." groups=["jungle_side_boundaries"]]
-collision_layer = 16
-collision_mask = 2
-[node name="Left" type="CollisionShape2D" parent="SideBoundaries"]
-position = Vector2(-128,24800)
-shape = SubResource("BoundaryShape")
-[node name="Right" type="CollisionShape2D" parent="SideBoundaries"]
-position = Vector2(2048,24800)
-shape = SubResource("BoundaryShape")
+[node name="SoftSideReturn" type="Node" parent="."]
+script = ExtResource("soft_return")

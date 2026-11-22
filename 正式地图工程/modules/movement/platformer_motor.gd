@@ -3,7 +3,6 @@ extends Node
 ## Attach under a CharacterBody2D. Moves collision geometry, never visual scale.
 ## Signals allow visuals, camera and audio to react without coupling them to movement.
 
-signal boundary_hit(collision: KinematicCollision2D, incoming: Vector2)
 signal jumped
 signal landed(impact_speed: float)
 signal facing_changed(direction: float)
@@ -69,13 +68,7 @@ func _physics_process(delta: float) -> void:
 	if not _carried_momentum and not reader.jump_held and body.velocity.y < -jump_speed * jump_release_multiplier:
 		body.velocity.y = -jump_speed * jump_release_multiplier
 	var impact_speed := maxf(body.velocity.y, 0.0)
-	var incoming: Vector2 = body.velocity
 	body.move_and_slide()
-	for i in body.get_slide_collision_count():
-		var hit := body.get_slide_collision(i)
-		if hit.get_collider().is_in_group("jungle_side_boundaries"):
-			boundary_hit.emit(hit,incoming)
-			break
 	if not grounded_before and body.is_on_floor() and not did_jump:
 		landed.emit(impact_speed)
 

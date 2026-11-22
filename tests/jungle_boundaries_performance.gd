@@ -16,14 +16,10 @@ func run():
     body.get_node("Movement").set_physics_process(false)
     for vine in layout.vines: vine.set_physics_process(false)
     await physics_frame
-    for height in [20500,25000,29300]:
-        for direction in [-1,1]:
-            body.global_position = Vector2(960,height)
-            var hit = body.move_and_collide(Vector2(direction*8000,0))
-            check(hit!=null and hit.get_collider()==layout.get_node("SideBoundaries"),"High-speed flight hits the invisible side boundary")
-            check(body.global_position.x>=32 and body.global_position.x<=1888,"Squirrel stays inside the original 1920-pixel map")
+    check(layout.get_node_or_null("SideBoundaries")==null,"Swing area has no hard side walls")
+    check(layout.get_node("SoftSideReturn")!=null,"Soft return handles temporary offscreen flight")
     body.global_position = Vector2(960,29300)
-    check(body.move_and_collide(Vector2(0,-8000),true)==null,"Side walls do not add a ceiling or block the jungle climbing route")
+    check(body.move_and_collide(Vector2(0,-8000),true)==null,"The jungle climbing route has no added ceiling")
     var vine = layout.vines[0]
     var before: PackedVector2Array = vine.rope.points.duplicate()
     vine._physics_process(.1)

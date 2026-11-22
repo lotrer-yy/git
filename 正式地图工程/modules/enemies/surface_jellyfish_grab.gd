@@ -1,5 +1,6 @@
 extends Node2D
 ## 海面前随机单次追尾缠绕：固定出手方向，瞬移避开或挣脱，不产生额外死亡。
+const RETREAT = preload("res://modules/visual/surface_tentacle_retreat.gd")
 const SHOT = preload("res://modules/camera/surface_grab_camera.gd")
 const PROMPT = preload("res://modules/visual/struggle_shift_prompt.gd")
 const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
@@ -27,6 +28,7 @@ var _pull_speed: float = 0
 var shot: Node
 var prompt: CanvasLayer
 var _warning_arms: Array[Node2D] = []
+var retreats: Array[Node2D] = []
 var _arm: Node2D
 var _caught_art: Sprite2D
 var _restore_motor: bool = false
@@ -71,7 +73,7 @@ func _physics_process(delta: float) -> void:
             if closest.distance_to(center)<_arm.thickness*.5+24:
                 _catch()
         _previous_tip = tip
-        if state==State.REACHING and elapsed>anticipation_seconds+reach_seconds+.18: _end_round()
+        if state==State.REACHING and elapsed>anticipation_seconds+reach_seconds+.18: _end_round(true)
     elif state==State.COOLDOWN:
         if elapsed>=round_rest_seconds: _begin_warning()
     elif state==State.CAUGHT:
@@ -102,6 +104,7 @@ func _begin_warning() -> void:
     var view := Rect2(camera.global_position+camera.offset-size*.5,size)
     for i in 4:
         var arm := TENDRIL.new()
+        arm.set_meta(&"formation_index",i)
         arm.visual_only = true
         arm.thickness = 118
         arm.wave_amplitude = 85
@@ -153,10 +156,11 @@ func _begin_reach() -> void:
     state = State.REACHING
     attacks_started += 1
     elapsed = 0
+    var others: Array[Node2D] = []
     for candidate in _warning_arms:
         candidate.get_node("Warning").hide()
-        if candidate!=_arm:
-            candidate.create_tween().tween_property(candidate,"modulate:a",0.0,.25)
+        if candidate!=_arm: others.append(candidate)
+    _retire_arms(others)
     _previous_tip = _arm.to_global(_arm.centerline[-1])
     _arm.initial_reach = _arm.start.distance_to(_arm.finish)
     _arm.finish = _arm.to_local(predicted)
@@ -220,7 +224,18 @@ func _clear_arms() -> void:
         if is_instance_valid(arm): arm.queue_free()
     _warning_arms.clear()
     _arm = null
-func _end_round() -> void:
+func _retire_arms(arms: Array[Node2D]) -> void:
+    if arms.is_empty(): return
+    retreats = retreats.filter(func(node): return is_instance_valid(node))
+    var retreat := RETREAT.new()
+    add_child(retreat)
+    retreat.configure(arms,stage.level.camera)
+    retreats.append(retreat)
+    for arm in arms: _warning_arms.erase(arm)
+func _end_round(retreat_on_miss: bool = false) -> void:
+    if retreat_on_miss:
+        _retire_arms(_warning_arms.duplicate())
+        _arm = null
     _finish()
     rounds_completed += 1
     if rounds_completed<total_rounds:
@@ -238,6 +253,9 @@ func _hold_surface_route() -> void:
         fish.velocity.y = maxf(fish.velocity.y,0)
 func reset() -> void:
     _finish()
+    for retreat in retreats:
+        if is_instance_valid(retreat): retreat.queue_free()
+    retreats.clear()
     if is_instance_valid(shot): shot.reset()
     if is_instance_valid(prompt): prompt.hide_prompt(true)
     state = State.WAITING

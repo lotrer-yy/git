@@ -42,13 +42,31 @@ func run():
         grab._physics_process(.01)
         for i in 140: grab._physics_process(.01)
         check(grab.state==grab.State.REACHING,"A random on-screen arm launches after warning")
-        var selected: int = grab._warning_arms.find(grab._arm)
+        var selected: int = int(grab._arm.get_meta(&"formation_index"))
         if not choices.has(selected): choices.append(selected)
         for arm in grab._warning_arms:
             check(arm.visual_only and arm._shapes.is_empty(),"Visual tentacles do not rebuild needless physics capsules")
         grab._evaded = true
         for i in 70: grab._physics_process(.01)
         check(grab.state==grab.State.FINISHED and grab.attacks_started==1 and not grab.blocks_exit(),"One missed random attack opens the way to shore")
+        if trial==0:
+            check(grab.retreats.size()==2,"Unused arms and the missed attacking arm both receive a sinking retreat")
+            var retreat = grab.retreats.back()
+            retreat.set_physics_process(false)
+            var sinking = retreat._arms[0]
+            var original_y: float = sinking.global_position.y
+            retreat._physics_process(.25)
+            check(sinking.visible and sinking.modulate.a==1 and not sinking.is_queued_for_deletion(),"A missed arm stays visible instead of instantly disappearing or fading")
+            check(sinking.global_position.y>original_y,"Retreat physically moves the arm down through the water")
+            var midway: float = sinking.global_position.y
+            retreat._physics_process(.4)
+            check(sinking.global_position.y>midway,"The sinking movement continues smoothly")
+            retreat._physics_process(.6)
+            var highest := INF
+            for point in sinking.centerline:
+                highest = minf(highest,sinking.to_global(point).y-sinking.thickness*.5)
+            var bottom: float = game.camera.global_position.y+game.camera.get_viewport_rect().size.y*.5/game.camera.zoom.y
+            check(highest>bottom and retreat.is_queued_for_deletion(),"Retreat frees the original arm only after its full body has sunk out of view")
     check(choices.size()>=3,"Random selection varies across the visible arms rather than always choosing the nearest")
     grab.reset()
     grab._physics_process(.01)

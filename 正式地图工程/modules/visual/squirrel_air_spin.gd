@@ -14,11 +14,11 @@ func _ready() -> void:
     process_priority=10
     var atlas:=AtlasTexture.new()
     atlas.atlas=ART
-    atlas.region=Rect2(89,2291,212,146)
+    atlas.region=Rect2(127,2291,147,146)
     atlas.filter_clip=true
     sprite=Sprite2D.new()
     sprite.texture=atlas
-    sprite.offset=Vector2(-5,0)
+    sprite.offset=Vector2(.5,0)
     sprite.z_index=2
     var material:=ShaderMaterial.new()
     material.shader=preload("res://shaders/white_paper_cutout.gdshader")
@@ -54,6 +54,7 @@ func sample(time: float) -> void:
     sprite.global_rotation=body.global_rotation+phase
     sprite.global_scale=body.global_scale*1.1*pop
     sprite.flip_h=source.flip_h
+    sprite.offset.x=-10.5 if source.flip_h else .5
 func stop(restore: bool=true) -> void:
     active=false
     elapsed=0

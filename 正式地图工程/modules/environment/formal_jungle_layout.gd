@@ -19,6 +19,7 @@ func _process(delta: float) -> void:
     _update_nearby()
 func _update_nearby() -> void:
     if not is_instance_valid(camera): return
+    if $Squirrel/Host.claimed: $Squirrel.set_active(true)
     var half: float = camera.get_viewport_rect().size.y*.5/camera.zoom.y
     var center: float = camera.global_position.y+camera.offset.y
     for vine in vines:

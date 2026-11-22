@@ -20,7 +20,7 @@ func _ready() -> void:
     possession.possession_started.connect(_on_transfer_started)
     possession.possession_finished.connect(_on_transfer_finished)
     level.died.connect(_on_player_died)
-    $ShoreExit.died_on_shore.connect(func(): level.die(&"stranded"))
+    $ShoreExit.died_on_shore.connect(_on_stranded_fish_died)
     $Shark.configure(fish,get_node("../../Camera"))
     $Shark.player_hit.connect(_on_shark_hit)
     $Octopus.configure(fish,get_node("../../Camera"))
@@ -45,6 +45,9 @@ func _physics_process(_delta: float) -> void:
     if not (level.dead and level.death_reason in [&"shark",&"pink_shark"]):
         $Octopus.enabled = can_attack and y<=octopus_zone_bottom and y>=octopus_zone_top
         if not can_attack: $InkOverlay.reset()
+
+func _on_stranded_fish_died() -> void:
+    if level.player==fish: level.die(&"stranded")
 
 func _on_shark_hit(direction: Vector2) -> void:
     if fish.position.y<=$ShoreExit.surface_y+shark_surface_safe_depth: return
@@ -80,6 +83,7 @@ func _on_transfer_finished(chosen_host: PossessableHost) -> void:
 
 func _on_player_died() -> void:
     if not active: return
+    $JungleHandoff.cancel()
     $SurfaceGrab.reset()
     $JellyfishBoss.enabled = false
     $BossTentacleNet.enabled = false
@@ -99,6 +103,7 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
+    $JungleHandoff.reset()
     $JungleLayout.reset()
     $SurfaceGrab.reset()
     $ShoreExit.reset()

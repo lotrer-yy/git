@@ -1,6 +1,7 @@
 class_name VineClimber
 extends Node
 ## S 大范围抓取，W/S 攀爬，A/D 借力摆荡，空格带着惯性跳离。
+@export var allow_mantle: bool = true
 @export var hands_offset := Vector2(0,-60)
 @export var grip_body_offset := Vector2(78,60)
 var grip_side: float = 1.0
@@ -52,7 +53,7 @@ func _physics_process(delta: float) -> void:
 			detach(false)
 			_body.velocity.y=maxf(_body.velocity.y,120.0)
 			_wait_for_grab_release=true
-		elif vine.grip_length<=40 and _reader.jump_held:
+		elif allow_mantle and vine.grip_length<=40 and _reader.jump_held:
 			var anchor:=vine.global_position
 			var side:float=-1 if vine.position.x<900 else 1
 			detach(false)

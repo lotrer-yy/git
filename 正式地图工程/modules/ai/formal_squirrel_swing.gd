@@ -7,15 +7,19 @@ extends CharacterBody2D
 var vine: SwingVine
 var active: bool = false
 var selected: bool = false
+var transferring: bool = false
 var _direction: float = 1.0
-@onready var pose: Node2D = $GraspPivot
+@onready var pose: Node2D = $Visual
 func _ready() -> void:
     process_physics_priority = -10
+    process_priority = 1
     add_to_group("idle_vine_squirrels")
     vine = get_node(vine_path) as SwingVine
     reset()
 func reset() -> void:
     if not is_instance_valid(vine): return
+    $VineClimber.reset()
+    $Host.reset()
     if vine.rider==self: vine.release()
     _direction = 1.0
     # 从一个小倾角开始，整条绳的各段都保持原长。
@@ -36,10 +40,10 @@ func set_active(value: bool) -> void:
     set_process(value)
 func set_selected(value: bool) -> void:
     selected = value
-    $GraspPivot/Sprite.visible = not value
-    $GraspPivot/SelectedSprite.visible = value
+    $Visual/Sprite.visible = not value
+    $Visual/SelectedSprite.visible = value
 func _physics_process(_delta: float) -> void:
-    if not active or vine.rider!=self: return
+    if not active or vine.rider!=self or $Host.claimed or transferring: return
     var grip: Vector2 = vine.rope.sample(vine.grip_length)
     var speed: float = velocity.x
     if absf(speed)>8: _direction = signf(speed)
@@ -48,6 +52,8 @@ func _physics_process(_delta: float) -> void:
     vine.pump_axis = lerpf(_direction*pumping_strength,-signf(grip.x)*pumping_strength,edge)
     vine.climb_axis = 0
 func _process(delta: float) -> void:
-    if vine.rider!=self: return
+    var attached: SwingVine = $VineClimber.vine if $Host.claimed else vine
+    if attached==null or attached.rider!=self: return
+    $Visual/Sprite.flip_h = false
     # 手的位置固定在绳上，身体根据摆幅倾斜。
-    pose.rotation = lerp_angle(pose.rotation,-vine.angle*.55,1-exp(-8*delta))
+    pose.rotation = lerp_angle(pose.rotation,-attached.angle*.55,1-exp(-8*delta))

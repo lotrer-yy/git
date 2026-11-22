@@ -2,6 +2,14 @@
 [ext_resource type="Script" path="res://modules/ai/formal_squirrel_swing.gd" id="controller"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/squirrel/formal/walking.png" id="walk"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/squirrel/formal/selected.png" id="selected"]
+[ext_resource type="Script" path="res://modules/input/platformer_input.gd" id="input"]
+[ext_resource type="Script" path="res://modules/movement/platformer_motor.gd" id="motor"]
+[ext_resource type="Script" path="res://modules/visual/squash_stretch.gd" id="visual"]
+[ext_resource type="Script" path="res://modules/possession/formal_squirrel_host.gd" id="host"]
+[ext_resource type="Script" path="res://modules/movement/vine_climber.gd" id="climber"]
+[sub_resource type="CapsuleShape2D" id="Body"]
+radius = 32.0
+height = 100.0
 [sub_resource type="AtlasTexture" id="Walk"]
 atlas = ExtResource("walk")
 region = Rect2(682,2678,208,167)
@@ -16,12 +24,33 @@ collision_mask = 0
 z_index = 10
 script = ExtResource("controller")
 vine_path = NodePath("../InteractiveVines/Vine16")
-[node name="GraspPivot" type="Node2D" parent="."]
+[node name="Visual" type="Node2D" parent="."]
+script = ExtResource("visual")
+artwork_faces_right = false
 position = Vector2(-60,-90)
-[node name="Sprite" type="Sprite2D" parent="GraspPivot"]
+[node name="Sprite" type="Sprite2D" parent="Visual"]
 position = Vector2(94,8.5)
 texture = SubResource("Walk")
-[node name="SelectedSprite" type="Sprite2D" parent="GraspPivot"]
+[node name="SelectedSprite" type="Sprite2D" parent="Visual"]
 visible = false
 position = Vector2(92,-26.5)
 texture = SubResource("Selected")
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+position = Vector2(0,-50)
+shape = SubResource("Body")
+[node name="Input" type="Node" parent="."]
+script = ExtResource("input")
+enabled = false
+external_control = true
+[node name="Movement" type="Node" parent="."]
+script = ExtResource("motor")
+enabled = false
+[node name="Host" type="Node" parent="."]
+script = ExtResource("host")
+focus_offset = Vector2(0,-75)
+[node name="VineClimber" type="Node" parent="."]
+script = ExtResource("climber")
+hands_offset = Vector2(-60,-90)
+grip_body_offset = Vector2(60,90)
+allow_mantle = false

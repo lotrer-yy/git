@@ -45,7 +45,7 @@ func run():
     check(max_step<16,"No frame-to-frame pose jumps")
     check(max_stretch<1.35,"Rope keeps its segment lengths under load")
     squirrel.set_selected(true)
-    check(squirrel.get_node("GraspPivot/SelectedSprite").visible and not squirrel.get_node("GraspPivot/Sprite").visible,"Authored selected artwork is available")
+    check(squirrel.get_node("Visual/SelectedSprite").visible and not squirrel.get_node("Visual/Sprite").visible,"Authored selected artwork is available")
     layout.reset()
     check(vine.rider==squirrel and not squirrel.selected,"Replay restores the squirrel on its vine")
     print("FORMAL_SQUIRREL_SWING_FAILURES=",failures.size())

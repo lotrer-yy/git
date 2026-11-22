@@ -24,6 +24,8 @@
 
 [ext_resource type="PackedScene" path="res://scenes/levels/formal_jungle_layout.tscn" id="jungle_layout"]
 
+[ext_resource type="Script" path="res://modules/environment/formal_jungle_handoff.gd" id="jungle_handoff"]
+
 [sub_resource type="AtlasTexture" id="StrandedFish"]
 atlas = ExtResource("stranded_art")
 region = Rect2(1087,1968,130,85)
@@ -112,3 +114,20 @@ one_way_collision_margin = 8.0
 script = ExtResource("surface_grab")
 
 [node name="JungleLayout" parent="." instance=ExtResource("jungle_layout")]
+
+[node name="JunglePossession" type="Node" parent="."]
+script = ExtResource("possession")
+soul_path = NodePath("../../../Soul")
+camera_path = NodePath("../../../Camera")
+shot_path = NodePath("../JunglePossessionCamera")
+source_body_path = NodePath("../Fish")
+source_focus_offset = Vector2(8,-12)
+center_soul_artwork = true
+enabled = false
+selection_radius = 600.0
+host_group = &"formal_jungle_hosts"
+[node name="JunglePossessionCamera" type="Node" parent="."]
+script = ExtResource("shot")
+camera_path = NodePath("../../../Camera")
+[node name="JungleHandoff" type="Node" parent="."]
+script = ExtResource("jungle_handoff")

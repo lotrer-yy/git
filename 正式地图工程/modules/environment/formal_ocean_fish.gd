@@ -79,6 +79,7 @@ func _on_transfer_finished(chosen_host: PossessableHost) -> void:
 
 func _on_player_died() -> void:
     if not active: return
+    $SurfaceGrab.reset()
     $JellyfishBoss.enabled = false
     $BossTentacleNet.enabled = false
     $Shark.cancel_pending_attack()
@@ -97,6 +98,7 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
+    $SurfaceGrab.reset()
     $ShoreExit.reset()
     $BossTentacleNet.reset()
     $JellyfishBoss.reset()

@@ -51,7 +51,8 @@ func _physics_process(delta: float) -> void:
     if not stage.active or stage.level.dead or stage.level.player!=fish: return
     _hold_surface_route()
     if shore.state!=shore.State.SWIMMING:
-        if state in [State.WARNING,State.REACHING,State.CAUGHT]: _finish()
+        if state in [State.WARNING,State.REACHING]: _end_round(true)
+        elif state==State.CAUGHT: _finish()
         return
     if state==State.WAITING:
         var depth: float = fish.position.y-shore.surface_y
@@ -150,8 +151,8 @@ func _begin_reach() -> void:
         if view.has_point(tip): candidates.append(candidate)
     if not candidates.is_empty(): _arm = candidates.pick_random()
     if _arm==null:
-        _clear_arms()
-        _begin_warning()
+        # 玩家已游走或闪避使原触手离屏，本轮算落空，不能重新生成一轮。
+        _end_round(true)
         return
     state = State.REACHING
     attacks_started += 1
@@ -189,7 +190,7 @@ func _catch() -> void:
     _caught_art.z_index = 1
     fish.add_child(_caught_art)
 func _on_blink(_from: Vector2, _destination: Vector2) -> void:
-    if state in [State.WARNING,State.REACHING]:
+    if state in [State.WARNING,State.REACHING] and not _evaded:
         _evaded = true
         _evade_point = _from
 func _input(event: InputEvent) -> void:
@@ -242,7 +243,8 @@ func _end_round(retreat_on_miss: bool = false) -> void:
         state = State.COOLDOWN
         elapsed = 0
 func blocks_exit() -> bool:
-    return state!=State.WAITING and rounds_completed<total_rounds and state!=State.FINISHED
+    # 闪避已成功，即使落空动画仍在播放也立即允许出水。
+    return not _evaded and state!=State.WAITING and rounds_completed<total_rounds and state!=State.FINISHED
 func _hold_surface_route() -> void:
     if not blocks_exit(): return
     var depth: float = fish.position.y-shore.surface_y

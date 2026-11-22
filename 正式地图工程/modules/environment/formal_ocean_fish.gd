@@ -2,6 +2,7 @@ extends Node2D
 ## 仅装配旧鱼角色、附身和游泳程序；原海图与地形仍由正式场景提供。
 @export var octopus_zone_bottom: float = 36000.0
 @export var octopus_zone_top: float = 33000.0
+@export var shark_surface_safe_depth: float = 1200.0
 var active: bool = false
 var _spawn: Vector2
 @onready var level: Node2D = get_parent().get_parent()
@@ -33,7 +34,10 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
     var y: float = level.to_local(fish.global_position).y
     var can_attack: bool = $ShoreExit.state==$ShoreExit.State.SWIMMING and active and host.claimed and level.player == fish and not level.dead and not level.exit_in_progress and level.visible and y >= 29978.0 and y <= 39138.0
-    $Shark.enabled = can_attack
+    var near_surface: bool = fish.position.y<=$ShoreExit.surface_y+shark_surface_safe_depth
+    $Shark.enabled = can_attack and not near_surface
+    # 浅水区连已发出的冲刺也退场，不把深水追击带到出水位置。
+    if near_surface and $Shark.state!=$Shark.State.WAITING: $Shark.reset()
     $JellyfishBoss.enabled = can_attack
     $BossTentacleNet.enabled = can_attack and y>=32000.0
     for lane in $PinkSharks.get_children(): lane.damage_enabled = can_attack
@@ -42,6 +46,7 @@ func _physics_process(_delta: float) -> void:
         if not can_attack: $InkOverlay.reset()
 
 func _on_shark_hit(direction: Vector2) -> void:
+    if fish.position.y<=$ShoreExit.surface_y+shark_surface_safe_depth: return
     $SharkKnockback.impact_direction = direction
     level.die(&"shark")
 

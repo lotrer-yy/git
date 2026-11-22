@@ -12,6 +12,9 @@
 [ext_resource type="PackedScene" path="res://scenes/actors/formal_squirrel.tscn" id="squirrel"]
 [ext_resource type="Script" path="res://modules/movement/jungle_soft_side_return.gd" id="soft_return"]
 
+[sub_resource type="RectangleShape2D" id="JungleFloorShape"]
+size = Vector2(18304,256)
+
 [sub_resource type="ShaderMaterial" id="CanopyOcclusion"]
 shader = ExtResource("canopy_mask")
 shader_parameter/canopy_upper = ExtResource("canopy_upper")
@@ -309,3 +312,10 @@ centered = false
 
 [node name="SoftSideReturn" type="Node" parent="."]
 script = ExtResource("soft_return")
+
+[node name="JungleFloor" type="StaticBody2D" parent="."]
+collision_layer = 32
+collision_mask = 2
+[node name="Collision" type="CollisionShape2D" parent="JungleFloor"]
+position = Vector2(960,29548)
+shape = SubResource("JungleFloorShape")

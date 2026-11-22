@@ -46,7 +46,6 @@ func set_selected(value: bool) -> void:
     selected = value
     $Visual/Sprite.visible = not value
     $Visual/SelectedSprite.visible = value
-    $Visual/SelectedPrompt.visible = value
 func _physics_process(_delta: float) -> void:
     if not active or vine.rider!=self or $Host.claimed or transferring: return
     var grip: Vector2 = vine.rope.sample(vine.grip_length)

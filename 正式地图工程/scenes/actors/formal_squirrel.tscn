@@ -42,9 +42,8 @@ visible = false
 position = Vector2(92,1.5)
 texture = SubResource("Selected")
 
-[node name="SelectedPrompt" type="Sprite2D" parent="Visual"]
-visible = false
-position = Vector2(92,-117)
+[node name="SelectedPrompt" type="Sprite2D" parent="Visual/SelectedSprite"]
+position = Vector2(0,-118.5)
 texture = SubResource("SelectedPrompt")
 
 [node name="Collision" type="CollisionShape2D" parent="."]

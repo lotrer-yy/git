@@ -9,6 +9,7 @@ var active: bool = false
 var selected: bool = false
 var transferring: bool = false
 var _direction: float = 1.0
+var _swing_facing: float = 1.0
 @onready var pose: Node2D = $Visual
 func _ready() -> void:
     process_physics_priority = -10
@@ -24,6 +25,7 @@ func reset() -> void:
     $Host.reset()
     if vine.rider==self: vine.release()
     _direction = 1.0
+    _swing_facing = 1.0
     # 从一个小倾角开始，整条绳的各段都保持原长。
     for i in range(1,vine.rope.points.size()):
         var point: Vector2 = Vector2(0,vine.rope.segment_length*i).rotated(.28)
@@ -44,6 +46,7 @@ func set_selected(value: bool) -> void:
     selected = value
     $Visual/Sprite.visible = not value
     $Visual/SelectedSprite.visible = value
+    $Visual/SelectedPrompt.visible = value
 func _physics_process(_delta: float) -> void:
     if not active or vine.rider!=self or $Host.claimed or transferring: return
     var grip: Vector2 = vine.rope.sample(vine.grip_length)
@@ -56,6 +59,9 @@ func _physics_process(_delta: float) -> void:
 func _process(delta: float) -> void:
     var attached: SwingVine = $VineClimber.vine if $Host.claimed else vine
     if attached==null or attached.rider!=self: return
-    $Visual/Sprite.flip_h = false
+    if absf(velocity.x)>35:
+        _swing_facing=signf(velocity.x)
+    $Visual/Sprite.flip_h = _swing_facing>0
+    $Visual/SelectedSprite.flip_h = _swing_facing>0
     # 手的位置固定在绳上，身体根据摆幅倾斜。
     pose.rotation = lerp_angle(pose.rotation,-attached.angle*.55,1-exp(-8*delta))

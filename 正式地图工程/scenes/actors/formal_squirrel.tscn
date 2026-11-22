@@ -18,7 +18,11 @@ region = Rect2(682,2678,208,167)
 filter_clip = true
 [sub_resource type="AtlasTexture" id="Selected"]
 atlas = ExtResource("selected")
-region = Rect2(667,2622,242,237)
+region = Rect2(667,2678,242,181)
+filter_clip = true
+[sub_resource type="AtlasTexture" id="SelectedPrompt"]
+atlas = ExtResource("selected")
+region = Rect2(667,2622,242,56)
 filter_clip = true
 [node name="Squirrel" type="CharacterBody2D"]
 collision_layer = 0
@@ -35,8 +39,13 @@ position = Vector2(94,8.5)
 texture = SubResource("Walk")
 [node name="SelectedSprite" type="Sprite2D" parent="Visual"]
 visible = false
-position = Vector2(92,-26.5)
+position = Vector2(92,1.5)
 texture = SubResource("Selected")
+
+[node name="SelectedPrompt" type="Sprite2D" parent="Visual"]
+visible = false
+position = Vector2(92,-117)
+texture = SubResource("SelectedPrompt")
 
 [node name="Collision" type="CollisionShape2D" parent="."]
 position = Vector2(0,-50)

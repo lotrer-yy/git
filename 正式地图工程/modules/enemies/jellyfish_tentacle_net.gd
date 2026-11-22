@@ -81,7 +81,7 @@ func _physics_process(delta: float) -> void:
             var local_center: Vector2 = tendril.to_local(center)
             var nearby: bool = local_center.y>=minf(tendril.start.y,tendril.finish.y)-tentacle_thickness and local_center.y<=maxf(tendril.start.y,tendril.finish.y)+tentacle_thickness
             var teleport := target.get_node_or_null("Teleport")
-            if row.dodge_grace<=0 and nearby and not _hit and (stun==null or not stun.is_protected()) and (teleport==null or not teleport.is_invulnerable()) and tendril.touches(center,24):
+            if row.dodge_grace<=0 and nearby and not _hit and (stun==null or not stun.is_protected()) and (teleport==null or not teleport.is_invulnerable()) and tendril.touches(center,24+(stun.contact_margin if stun!=null else 0)):
                 _hit = true
                 player_hit.emit(Vector2(signf(tendril.finish.x-tendril.start.x),.15))
         if row_top-fish_y>1900: remove.append(row)

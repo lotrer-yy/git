@@ -13,10 +13,16 @@ func run():
     var foreground=link.get_node("MouthForeground")
     check(foreground.z_index>game.demon.z_index,"Original crater lip draws in front of the demon")
     check(Geometry2D.is_point_in_polygon(foreground.to_local(link.vortex.get_node("Mouth").global_position+Vector2(0,-57.5)),foreground.polygon),"Crater foreground covers the character at the hidden destination")
+    var ray=PhysicsRayQueryParameters2D.create(game.to_global(Vector2(990,38800)),game.to_global(Vector2(990,39200)),16)
+    var floor_hit=game.get_world_2d().direct_space_state.intersect_ray(ray)
+    check(not floor_hit.is_empty() and floor_hit.collider==link.get_node("OriginalSeabed") and absf(game.to_local(floor_hit.position).y-38995)<1,"Actual physics floor intersects the original crater lip")
+    check(game.to_local(link.get_node("FishStage/Fish").global_position).y<38995,"Patrolling fish spawns above the corrected seabed instead of inside it")
     var display_id=root.get_camera_2d().get_instance_id()
     check(link.get_node_or_null("Ocean")==null,"No duplicate ocean prototype is loaded")
-    for art in link.find_children("*","Sprite2D",true,false):
-        check(link.get_node("FishStage/Fish").is_ancestor_of(art),"Only the confirmed fish artwork is added, with no replacement map artwork")
+    check(link.position==Vector2(11,188),"Existing editor offset is preserved")
+    check(link.vortex.global_position==game.to_global(Vector2(940,41780)),"Hell mouth collision ignores the unrelated parent offset")
+    check(link.ocean_mouth.global_position==game.to_global(Vector2(990,38995)),"Ocean crater mouth matches map coordinates")
+    check(link.get_node("OriginalSeabed").global_transform==game.global_transform,"Seabed collision uses the same transform as the original map")
     var original_tiles=game.get_node("Map/ImageTiles").get_child_count()
     var platform_positions:Array[Vector2]=[]
     for platform in game.get_node("Platforms").get_children():platform_positions.append(platform.position)

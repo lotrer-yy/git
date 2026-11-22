@@ -17,6 +17,8 @@ extends Camera2D
 ## Cinematic modules can temporarily drive these without touching the follow center.
 var use_unscaled_time: bool = false
 var cinematic_offset: Vector2 = Vector2.ZERO
+## 活跃游玩中的受击震动独立叠加，不覆盖过场构图。
+var hit_offset: Vector2 = Vector2.ZERO
 ## 构图模块提供世界单位偏移；仍由本相机统一平滑和限制地图边界。
 var framing_bias: Vector2 = Vector2.ZERO
 ## 机关构图有明确安全区时，不让跟随死区抵消已经计算好的偏移。
@@ -69,7 +71,7 @@ func _process(delta: float) -> void:
 	var shake := Vector2(_noise.get_noise_2d(noise_point, 0.0), _noise.get_noise_2d(0.0, noise_point + 31.0)) * _trauma * _trauma * max_impulse_pixels
 	global_position = _center
 	# Offset layers the impact over follow; clamp the result to avoid exposing edges.
-	offset = _clamp_center(_center + shake + cinematic_offset) - _center
+	offset = _clamp_center(_center + shake + cinematic_offset + hit_offset) - _center
 
 
 func snap_to_target() -> void:
@@ -94,6 +96,7 @@ func clear_impulse() -> void:
 	_trauma = 0.0
 	offset = Vector2.ZERO
 	cinematic_offset = Vector2.ZERO
+	hit_offset = Vector2.ZERO
 
 
 func set_follow_target(new_target: Node2D, snap: bool = false) -> void:

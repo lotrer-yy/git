@@ -170,7 +170,7 @@ func _touches_fish() -> bool:
     if fish.get_node("Teleport").is_invulnerable() or fish.get_node("Stun").is_protected(): return false
     var shape := fish.get_node("Collision") as CollisionShape2D
     var center := _rig.to_local(shape.global_position)
-    var radius: float = shape.shape.radius / artwork_scale
+    var radius: float = (shape.shape.radius+fish.get_node("Stun").contact_margin) / artwork_scale
     if Geometry2D.is_point_in_polygon(center,_stroke): return true
     for i in _stroke.size():
         var nearest := Geometry2D.get_closest_point_to_segment(center,_stroke[i],_stroke[(i+1)%_stroke.size()])

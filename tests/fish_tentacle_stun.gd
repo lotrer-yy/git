@@ -40,6 +40,9 @@ func run():
     check(fish.get_node("Visual/Sprite").texture==texture,"Stun keeps the exact original fish artwork")
     check(not stun.apply(Vector2.LEFT),"Repeated contact cannot stack stun")
     check(game.camera._trauma>0,"Stun adds a brief camera impulse")
+    check((game.camera.hit_offset*game.camera.zoom).length()>=25,"Stun starts with a clear screen-space impact kick")
+    stun._sample_shake(stun.hit_shake_seconds)
+    check(game.camera.hit_offset==Vector2.ZERO,"Strong impact layer returns exactly to zero")
     for tick in 60:
         stun._physics_process(.01)
         game.camera._process(.01)

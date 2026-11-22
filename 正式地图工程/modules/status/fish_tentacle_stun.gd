@@ -8,6 +8,9 @@ signal recovered
 @export var knockback_speed: float=900.0
 @export var knockback_drag: float=3.6
 @export_range(0,1) var hit_shake: float=.8
+@export var hit_shake_pixels: float=26.0
+@export var hit_shake_seconds: float=.28
+@export var contact_margin: float=14.0
 var stun_remaining: float=0
 var dizzy_remaining: float=0
 var protection_remaining: float=0
@@ -27,7 +30,7 @@ var _dizzy_material: ShaderMaterial
 @onready var art: Sprite2D=visual.get_node("Sprite")
 func _ready() -> void:
     process_physics_priority=-15
-    process_priority=10
+    process_priority=5
     _rest_material=art.material
     _dizzy_material=ShaderMaterial.new()
     _dizzy_material.shader=preload("res://shaders/fish_dizzy_eye.gdshader")
@@ -52,6 +55,7 @@ func apply(direction: Vector2=Vector2.RIGHT) -> bool:
     var away: Vector2=direction.normalized() if not direction.is_zero_approx() else Vector2.RIGHT
     body.velocity=away*knockback_speed
     stage.level.camera.add_trauma(hit_shake)
+    _sample_shake(0)
     art.material=_dizzy_material
     visual.play_selection_pulse()
     stunned.emit()
@@ -75,8 +79,13 @@ func _physics_process(delta: float) -> void:
 func _process(delta: float) -> void:
     if dizzy_remaining<=0: return
     _elapsed+=delta
+    _sample_shake(_elapsed)
     _dizzy_material.set_shader_parameter("phase",_elapsed*5)
     visual.rotation=sin(_elapsed*17)*.10
+func _sample_shake(time: float) -> void:
+    var u: float=clampf(time/maxf(hit_shake_seconds,.001),0,1)
+    var kick:=Vector2(sin(time*80)*.8,-cos(time*67))*hit_shake_pixels*pow(1-u,1.6)
+    stage.level.camera.hit_offset=kick/stage.level.camera.zoom
 func _restore_controls() -> void:
     if _locked and _can_play():
         reader.enabled=_input_enabled
@@ -90,4 +99,5 @@ func reset(restore_controls: bool=true) -> void:
     dizzy_remaining=0
     protection_remaining=0
     art.material=_rest_material
+    stage.level.camera.hit_offset=Vector2.ZERO
     visual.rotation=0

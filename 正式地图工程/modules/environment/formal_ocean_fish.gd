@@ -12,7 +12,10 @@ var _spawn: Vector2
 @onready var breath: Node = get_node("../Breath")
 
 func _ready() -> void:
+    # 原海底鱼的出生坐标也以地图为准，避免转场父节点偏移后埋进火山口碰撞。
+    fish.global_position=level.to_global(fish.position)
     _spawn = fish.position
+    fish.get_node("Patrol").center=_spawn
     $JungleLayout.configure(get_node("../../Camera"),level.global_transform)
     $JungleLayout.align_floor_to_bank($OriginalShoreBank/Collision)
     # 海洋宿主只供海洋控制器选择，地狱幽灵不会跨阶段选择它。

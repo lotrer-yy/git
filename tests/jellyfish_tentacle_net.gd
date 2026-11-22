@@ -120,6 +120,8 @@ func run():
     advance(net,net.charge_seconds+.05)
     var launching = net.rows[0].arms[0]
     check(launching.dangerous,"Only the actual extending stroke is dangerous")
+    var graze=launching.to_global(launching.centerline[12]+Vector2(0,launching.thickness*.5+32))
+    check(not launching.touches(graze,24) and launching.touches(graze,24+fish.get_node("Stun").contact_margin),"Visible body-edge grazing is included without needing a center hit")
     fish.global_position = launching.to_global(launching.centerline[12])
     teleport._invulnerability_remaining = 1
     advance(net,.01)

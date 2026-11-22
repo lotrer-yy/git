@@ -16,9 +16,18 @@ var _enemies_enabled: bool = true
 @onready var ocean_mouth: Marker2D = $OceanMouth
 
 func _ready() -> void:
+    _align_volcano_anchors_to_map()
     vortex.capture_started.connect(_capture)
     vortex.capture_finished.connect(_travel)
     transition.finished.connect(_arrive)
+
+func _align_volcano_anchors_to_map() -> void:
+    # 这三处坐标来自原地图；OceanLink 的编辑器位移只影响其余分段布局。
+    for path in ["Exit","OceanMouth","OriginalSeabed"]:
+        var node: Node2D=get_node(path)
+        var authored: Transform2D=node.transform
+        node.top_level=true
+        node.global_transform=level.global_transform*authored
 
 func _physics_process(_delta: float) -> void:
     if stage != Stage.HELL: return

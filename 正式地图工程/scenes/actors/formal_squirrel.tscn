@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://modules/possession/formal_squirrel_host.gd" id="host"]
 [ext_resource type="Script" path="res://modules/movement/vine_climber.gd" id="climber"]
 [ext_resource type="Script" path="res://modules/visual/squirrel_defeat.gd" id="defeat"]
+[ext_resource type="Script" path="res://modules/visual/squirrel_air_spin.gd" id="air_spin"]
 [sub_resource type="CapsuleShape2D" id="Body"]
 radius = 32.0
 height = 100.0
@@ -71,3 +72,6 @@ prefer_unvisited_vines = true
 
 [node name="Defeat" type="Node2D" parent="."]
 script = ExtResource("defeat")
+
+[node name="AirSpin" type="Node2D" parent="."]
+script = ExtResource("air_spin")

@@ -18,6 +18,7 @@ func _ready() -> void:
     reset()
 func reset() -> void:
     if not is_instance_valid(vine): return
+    $AirSpin.reset()
     $Defeat.reset()
     $VineClimber.reset()
     $Host.reset()

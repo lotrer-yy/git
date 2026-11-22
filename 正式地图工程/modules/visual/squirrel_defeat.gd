@@ -14,16 +14,15 @@ func _ready() -> void:
     corpse=Sprite2D.new()
     corpse.texture=region
     corpse.z_index=3
-    var shader:=Shader.new()
-    shader.code="shader_type canvas_item; void fragment(){ vec4 c=texture(TEXTURE,UV); float lo=min(c.r,min(c.g,c.b)); float hi=max(c.r,max(c.g,c.b)); float neutral=1.0-smoothstep(0.02,0.12,hi-lo); c.a*=mix(1.0,1.0-lo,neutral); c.rgb=mix(c.rgb,vec3(0.0),neutral); COLOR=c; }"
     var material:=ShaderMaterial.new()
-    material.shader=shader
+    material.shader=preload("res://shaders/white_paper_cutout.gdshader")
     corpse.material=material
     add_child(corpse)
     corpse.hide()
     if level!=null: level.died.connect(_on_death)
 func _on_death() -> void:
     if level.player!=body: return
+    body.get_node("AirSpin").stop(false)
     var visual: Node2D=body.get_node("Visual")
     var source: Sprite2D=visual.get_node("Sprite")
     # 对齐现有身体中心和朝向，不带入3240像素画布的留白。

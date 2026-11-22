@@ -36,7 +36,7 @@ func start_segment(index: int) -> void:
         camera.make_current()
         Bgm.play_track(Bgm.Track.HELL)
 
-    elif index == 3:
+    elif index in [3,4]:
         entry.reset_for_replay()
         entry.completed = true
         level.soul.hide()
@@ -61,11 +61,23 @@ func start_segment(index: int) -> void:
         stage.possession.enabled = false
         stage._on_transfer_finished(stage.host)
         var boss := stage.get_node("JellyfishBoss")
-        boss.enabled = true
+        boss.enabled = index==3
         boss._start_y = stage.fish.global_position.y+boss.ascent_before_entrance
         boss._has_baseline = true
         camera.set_follow_target(stage.fish,true)
         camera.set_process(true)
         camera.make_current()
-        boss._begin_entrance()
+        if index==3:
+            boss._begin_entrance()
+        else:
+            var shore := stage.get_node("ShoreExit")
+            var squirrel := stage.get_node("JungleLayout/Squirrel")
+            shore.start_on_shore(squirrel.global_position.x+120)
+            var grab := stage.get_node("SurfaceGrab")
+            grab._finish()
+            grab.rounds_completed = grab.total_rounds
+            stage.get_node("JungleLayout")._update_nearby()
+            stage.get_node("JungleHandoff")._physics_process(0)
+            stage.get_node("JunglePossession")._physics_process(0)
+            camera.set_follow_target(stage.fish,true)
         Bgm.play_track(Bgm.Track.OCEAN)

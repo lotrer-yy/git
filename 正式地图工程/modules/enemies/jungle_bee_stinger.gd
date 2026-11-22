@@ -1,9 +1,11 @@
 extends "res://modules/enemies/enemy_fork.gd"
 ## 小恶魔弹道发射加短时有限追踪，命中触发松鼠晕倒失败。
-@export var tracking_seconds: float = .65
-@export var turn_rate: float = 1.25
+@export var tracking_seconds: float = 1.2
+@export var turn_rate: float = 2.6
 const ART = preload("res://assets/art/jungle/formal/bee_stinger.png")
 func _ready() -> void:
+    gravity=180
+    speed=820
     add_to_group("bee_stingers")
     var art:=Sprite2D.new()
     art.texture=ART
@@ -18,9 +20,9 @@ func _physics_process(delta: float) -> void:
     if _age>lifetime:
         queue_free()
         return
-    var center: Vector2 = encounter.body.global_position+Vector2(0,-50)
+    var center: Vector2 = encounter.target_position()
     if _age<=tracking_seconds and encounter.is_on_screen(global_position):
-        var toward: Vector2 = center-global_position
+        var toward: Vector2 = encounter.predicted_target(.08)-global_position
         if velocity.dot(toward)>0:
             var turn: float = clampf(wrapf(toward.angle()-velocity.angle(),-PI,PI),-turn_rate*delta,turn_rate*delta)
             velocity=velocity.rotated(turn)

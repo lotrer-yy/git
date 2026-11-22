@@ -9,8 +9,8 @@ const ART = preload("res://assets/art/jungle/formal/bee.png")
 enum Mode { EMERGING, FLYING, WINDUP, DARTING, RECOVERING }
 @export var attack_interval: float = 3.5
 @export var warning_seconds: float = .55
-@export var dart_tracking_seconds: float = .22
-@export var dart_turn_rate: float = 1.8
+@export var dart_tracking_seconds: float = .55
+@export var dart_turn_rate: float = 3.2
 var encounter: Node
 var mode: Mode = Mode.EMERGING
 var elapsed: float = 0
@@ -37,9 +37,9 @@ func _ready() -> void:
     flight=Node.new()
     flight.set_script(FLIGHT)
     add_child(flight)
-    flight.max_speed=340
-    flight.acceleration=650
-    flight.orbit_radius=Vector2(290,95)
+    flight.max_speed=440
+    flight.acceleration=900
+    flight.orbit_radius=Vector2(240,85)
     flight.setup(int(get_instance_id()),-1 if get_instance_id()%2==0 else 1)
     add_to_group("jungle_bees")
     velocity=Vector2(0,-300)
@@ -52,7 +52,7 @@ func _physics_process(delta: float) -> void:
         return
     elapsed+=delta
     lifetime+=delta
-    var target: Vector2 = encounter.body.global_position+Vector2(0,-50)
+    var target: Vector2 = encounter.target_position()
     if global_position.distance_to(target)>1900:
         queue_free()
         return
@@ -68,8 +68,8 @@ func _physics_process(delta: float) -> void:
             _set_mode(Mode.WINDUP)
     elif mode==Mode.WINDUP:
         if elapsed<warning_seconds-.12:
-            var predicted: Vector2 = target+(encounter.body.velocity*.12).limit_length(100)
-            _aim=_aim.lerp(predicted,1-exp(-delta*10))
+            var predicted: Vector2 = encounter.predicted_target(.18)
+            _aim=_aim.lerp(predicted,1-exp(-delta*16))
         velocity=velocity.move_toward(Vector2.ZERO,delta*1100)
         move_and_slide()
         if not encounter.is_on_screen(global_position):
@@ -86,7 +86,7 @@ func _physics_process(delta: float) -> void:
     elif mode==Mode.DARTING:
         var before: Vector2 = global_position
         if elapsed<=dart_tracking_seconds and encounter.is_on_screen(global_position):
-            var toward: Vector2 = target-global_position
+            var toward: Vector2 = encounter.predicted_target(.08)-global_position
             if _dart_velocity.dot(toward)>0:
                 var turn: float = clampf(wrapf(toward.angle()-_dart_velocity.angle(),-PI,PI),-dart_turn_rate*delta,dart_turn_rate*delta)
                 _dart_velocity=_dart_velocity.rotated(turn)
@@ -98,7 +98,7 @@ func _physics_process(delta: float) -> void:
             encounter.defeat_player()
             stung.emit()
             _set_mode(Mode.RECOVERING)
-        elif elapsed>=.32: _set_mode(Mode.RECOVERING)
+        elif elapsed>=.70: _set_mode(Mode.RECOVERING)
     elif mode==Mode.RECOVERING:
         velocity=velocity.move_toward(Vector2.ZERO,delta*1400)
         move_and_slide()

@@ -21,6 +21,13 @@ func _spawn(hive: Sprite2D) -> void:
     bee.ranged=hive.bee_variant==1
     add_child(bee)
     bee.global_position=hive.to_global(Vector2(0,210))
+func target_position() -> Vector2:
+    var art: Sprite2D = body.get_node("Visual/Sprite")
+    # 以可见躯干为目标，包含挂藤时的视觉偏移、摆动倾斜和翻转。
+    var torso:=Vector2(art.texture.get_width()*.14*(1 if art.flip_h else -1),-art.texture.get_height()*.05)
+    return art.to_global(torso)
+func predicted_target(seconds: float) -> Vector2:
+    return target_position()+(body.velocity*seconds).limit_length(140)
 func defeat_player() -> void:
     if is_active(): stage.level.die(&"bee")
 func fire_stinger(origin: Vector2,aim: Vector2) -> void:

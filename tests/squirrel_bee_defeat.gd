@@ -29,10 +29,12 @@ func run():
     bee.set_physics_process(false)
     game.camera.global_position=body.global_position
     bee._set_mode(bee.Mode.DARTING)
-    bee.global_position=body.global_position+Vector2(-60,-50)
+    bee.global_position=encounter.target_position()+Vector2(-500,0)
     bee._dart_velocity=Vector2(950,0)
-    bee._physics_process(.01)
-    check(game.dead and game.death_reason==&"bee","Melee bee hit immediately loses the run")
+    check(body.get_node("VineClimber").vine!=null,"Fixture squirrel is still hanging from a vine")
+    for tick in 90:
+        if not game.dead: bee._physics_process(1.0/120.0)
+    check(game.dead and game.death_reason==&"bee","Bee reaches and defeats a hanging squirrel from 500 pixels away")
     check(body.get_node("Defeat").corpse.visible and not body.get_node("Visual/Sprite").visible,"Melee hit displays stunned artwork")
     check(bee.is_queued_for_deletion(),"Defeat clears the attacking bee")
     layout.reset()

@@ -74,9 +74,10 @@ func run():
     body.global_position.x+=100
     needle._physics_process(.01)
     check(absf(wrapf(needle.velocity.angle()-shot_velocity.angle(),-PI,PI))<.05,"Stinger guidance changes heading smoothly within a limited turn rate")
-    needle.global_position=body.global_position+Vector2(-60,-50)
-    needle.velocity=Vector2(680,0)
-    needle._physics_process(.02)
+    needle.global_position=encounter.target_position()+Vector2(-500,0)
+    needle.launch(encounter.target_position())
+    for tick in 120:
+        if not game.dead: needle._physics_process(.01)
     check(needle.is_queued_for_deletion() and game.dead and game.death_reason==&"bee","Stinger impact defeats the squirrel and consumes the projectile")
     check(body.get_node("Defeat").corpse.visible and not body.get_node("Visual/Sprite").visible,"Defeat displays the supplied stunned expression")
     encounter._physics_process(.01)

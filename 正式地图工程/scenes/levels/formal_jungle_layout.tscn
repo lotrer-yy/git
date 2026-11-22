@@ -22,82 +22,47 @@ shader_parameter/canopy_lower = ExtResource("canopy_lower")
 
 [sub_resource type="AtlasTexture" id="Vine00"]
 atlas = ExtResource("hanging_art")
-region = Rect2(27,0,71,756)
+region = Rect2(7,0,71,756)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Vine01"]
 atlas = ExtResource("hanging_art")
-region = Rect2(794,275,70,615)
+region = Rect2(1174,994,72,878)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Vine02"]
 atlas = ExtResource("hanging_art")
-region = Rect2(1266,1015,68,628)
+region = Rect2(0,2078,73,1078)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Vine03"]
 atlas = ExtResource("hanging_art")
-region = Rect2(699,1196,72,877)
+region = Rect2(1213,3325,72,1198)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Vine04"]
 atlas = ExtResource("hanging_art")
-region = Rect2(0,2058,71,822)
+region = Rect2(23,4529,72,1198)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Vine05"]
 atlas = ExtResource("hanging_art")
-region = Rect2(539,2343,73,1076)
+region = Rect2(1077,5855,70,1059)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Vine06"]
 atlas = ExtResource("hanging_art")
-region = Rect2(1254,3361,68,791)
+region = Rect2(25,7041,69,902)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Vine07"]
 atlas = ExtResource("hanging_art")
-region = Rect2(672,3666,73,946)
+region = Rect2(1203,7914,68,660)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Vine08"]
 atlas = ExtResource("hanging_art")
-region = Rect2(45,4529,69,901)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="Vine09"]
-atlas = ExtResource("hanging_art")
-region = Rect2(725,4901,69,853)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="Vine10"]
-atlas = ExtResource("hanging_art")
-region = Rect2(1246,5719,69,772)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="Vine11"]
-atlas = ExtResource("hanging_art")
-region = Rect2(626,5940,69,1059)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="Vine12"]
-atlas = ExtResource("hanging_art")
-region = Rect2(45,7041,69,901)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="Vine13"]
-atlas = ExtResource("hanging_art")
-region = Rect2(809,7343,68,595)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="Vine14"]
-atlas = ExtResource("hanging_art")
-region = Rect2(1223,7915,68,659)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="Vine15"]
-atlas = ExtResource("hanging_art")
-region = Rect2(462,8235,67,656)
+region = Rect2(441,8235,68,656)
 filter_clip = true
 
 [node name="FormalJungleLayout" type="Node2D"]
@@ -109,7 +74,7 @@ z_index = 9
 
 [node name="MainVines" type="Sprite2D" parent="DecorativeTrunks"]
 material = SubResource("CanopyOcclusion")
-position = Vector2(0,20166)
+position = Vector2(0,20143)
 texture = ExtResource("main_art")
 centered = false
 
@@ -117,11 +82,11 @@ centered = false
 z_index = 8
 
 [node name="Vine01" type="Node2D" parent="InteractiveVines"]
-position = Vector2(350.5,20604)
+position = Vector2(342.5,20612)
 script = ExtResource("vine")
 length = 756.0
 grab_radius = 105.0
-metadata/source_region = Rect2(27,0,71,756)
+metadata/source_region = Rect2(7,0,71,756)
 
 [node name="Art" type="Sprite2D" parent="InteractiveVines/Vine01"]
 position = Vector2(-35.5,0)
@@ -129,35 +94,35 @@ texture = SubResource("Vine00")
 centered = false
 
 [node name="Vine02" type="Node2D" parent="InteractiveVines"]
-position = Vector2(1117.0,20879)
+position = Vector2(1510.0,21606)
 script = ExtResource("vine")
-length = 615.0
+length = 878.0
 grab_radius = 105.0
-metadata/source_region = Rect2(794,275,70,615)
+metadata/source_region = Rect2(1174,994,72,878)
 
 [node name="Art" type="Sprite2D" parent="InteractiveVines/Vine02"]
-position = Vector2(-35.0,0)
+position = Vector2(-36.0,0)
 texture = SubResource("Vine01")
 centered = false
 
 [node name="Vine03" type="Node2D" parent="InteractiveVines"]
-position = Vector2(1588.0,21619)
+position = Vector2(336.5,22690)
 script = ExtResource("vine")
-length = 628.0
+length = 1078.0
 grab_radius = 105.0
-metadata/source_region = Rect2(1266,1015,68,628)
+metadata/source_region = Rect2(0,2078,73,1078)
 
 [node name="Art" type="Sprite2D" parent="InteractiveVines/Vine03"]
-position = Vector2(-34.0,0)
+position = Vector2(-36.5,0)
 texture = SubResource("Vine02")
 centered = false
 
 [node name="Vine04" type="Node2D" parent="InteractiveVines"]
-position = Vector2(1023.0,21800)
+position = Vector2(1549.0,23937)
 script = ExtResource("vine")
-length = 877.0
+length = 1198.0
 grab_radius = 105.0
-metadata/source_region = Rect2(699,1196,72,877)
+metadata/source_region = Rect2(1213,3325,72,1198)
 
 [node name="Art" type="Sprite2D" parent="InteractiveVines/Vine04"]
 position = Vector2(-36.0,0)
@@ -165,147 +130,63 @@ texture = SubResource("Vine03")
 centered = false
 
 [node name="Vine05" type="Node2D" parent="InteractiveVines"]
-position = Vector2(323.5,22662)
+position = Vector2(359.0,25141)
 script = ExtResource("vine")
-length = 822.0
+length = 1198.0
 grab_radius = 105.0
-metadata/source_region = Rect2(0,2058,71,822)
+metadata/source_region = Rect2(23,4529,72,1198)
 
 [node name="Art" type="Sprite2D" parent="InteractiveVines/Vine05"]
-position = Vector2(-35.5,0)
+position = Vector2(-36.0,0)
 texture = SubResource("Vine04")
 centered = false
 
 [node name="Vine06" type="Node2D" parent="InteractiveVines"]
-position = Vector2(863.5,22947)
+position = Vector2(1412.0,26467)
 script = ExtResource("vine")
-length = 1076.0
+length = 1059.0
 grab_radius = 105.0
-metadata/source_region = Rect2(539,2343,73,1076)
+metadata/source_region = Rect2(1077,5855,70,1059)
 
 [node name="Art" type="Sprite2D" parent="InteractiveVines/Vine06"]
-position = Vector2(-36.5,0)
+position = Vector2(-35.0,0)
 texture = SubResource("Vine05")
 centered = false
 
 [node name="Vine07" type="Node2D" parent="InteractiveVines"]
-position = Vector2(1576.0,23965)
+position = Vector2(359.5,27653)
 script = ExtResource("vine")
-length = 791.0
+length = 902.0
 grab_radius = 105.0
-metadata/source_region = Rect2(1254,3361,68,791)
+metadata/source_region = Rect2(25,7041,69,902)
 
 [node name="Art" type="Sprite2D" parent="InteractiveVines/Vine07"]
-position = Vector2(-34.0,0)
+position = Vector2(-34.5,0)
 texture = SubResource("Vine06")
 centered = false
 
 [node name="Vine08" type="Node2D" parent="InteractiveVines"]
-position = Vector2(996.5,24270)
+position = Vector2(1537.0,28526)
 script = ExtResource("vine")
-length = 946.0
+length = 660.0
 grab_radius = 105.0
-metadata/source_region = Rect2(672,3666,73,946)
+metadata/source_region = Rect2(1203,7914,68,660)
 
 [node name="Art" type="Sprite2D" parent="InteractiveVines/Vine08"]
-position = Vector2(-36.5,0)
+position = Vector2(-34.0,0)
 texture = SubResource("Vine07")
 centered = false
 
 [node name="Vine09" type="Node2D" parent="InteractiveVines"]
-position = Vector2(367.5,25133)
-script = ExtResource("vine")
-length = 901.0
-grab_radius = 105.0
-metadata/source_region = Rect2(45,4529,69,901)
-
-[node name="Art" type="Sprite2D" parent="InteractiveVines/Vine09"]
-position = Vector2(-34.5,0)
-texture = SubResource("Vine08")
-centered = false
-
-[node name="Vine10" type="Node2D" parent="InteractiveVines"]
-position = Vector2(1047.5,25505)
-script = ExtResource("vine")
-length = 853.0
-grab_radius = 105.0
-metadata/source_region = Rect2(725,4901,69,853)
-
-[node name="Art" type="Sprite2D" parent="InteractiveVines/Vine10"]
-position = Vector2(-34.5,0)
-texture = SubResource("Vine09")
-centered = false
-
-[node name="Vine11" type="Node2D" parent="InteractiveVines"]
-position = Vector2(1568.5,26323)
-script = ExtResource("vine")
-length = 772.0
-grab_radius = 105.0
-metadata/source_region = Rect2(1246,5719,69,772)
-
-[node name="Art" type="Sprite2D" parent="InteractiveVines/Vine11"]
-position = Vector2(-34.5,0)
-texture = SubResource("Vine10")
-centered = false
-
-[node name="Vine12" type="Node2D" parent="InteractiveVines"]
-position = Vector2(948.5,26544)
-script = ExtResource("vine")
-length = 1059.0
-grab_radius = 105.0
-metadata/source_region = Rect2(626,5940,69,1059)
-
-[node name="Art" type="Sprite2D" parent="InteractiveVines/Vine12"]
-position = Vector2(-34.5,0)
-texture = SubResource("Vine11")
-centered = false
-
-[node name="Vine13" type="Node2D" parent="InteractiveVines"]
-position = Vector2(367.5,27645)
-script = ExtResource("vine")
-length = 901.0
-grab_radius = 105.0
-metadata/source_region = Rect2(45,7041,69,901)
-
-[node name="Art" type="Sprite2D" parent="InteractiveVines/Vine13"]
-position = Vector2(-34.5,0)
-texture = SubResource("Vine12")
-centered = false
-
-[node name="Vine14" type="Node2D" parent="InteractiveVines"]
-position = Vector2(1131.0,27947)
-script = ExtResource("vine")
-length = 595.0
-grab_radius = 105.0
-metadata/source_region = Rect2(809,7343,68,595)
-
-[node name="Art" type="Sprite2D" parent="InteractiveVines/Vine14"]
-position = Vector2(-34.0,0)
-texture = SubResource("Vine13")
-centered = false
-
-[node name="Vine15" type="Node2D" parent="InteractiveVines"]
-position = Vector2(1545.0,28519)
-script = ExtResource("vine")
-length = 659.0
-grab_radius = 105.0
-metadata/source_region = Rect2(1223,7915,68,659)
-
-[node name="Art" type="Sprite2D" parent="InteractiveVines/Vine15"]
-position = Vector2(-34.0,0)
-texture = SubResource("Vine14")
-centered = false
-
-[node name="Vine16" type="Node2D" parent="InteractiveVines"]
-position = Vector2(783.5,28839)
+position = Vector2(775.0,28847)
 script = ExtResource("vine")
 length = 656.0
 grab_radius = 105.0
-metadata/source_region = Rect2(462,8235,67,656)
+metadata/source_region = Rect2(441,8235,68,656)
 
-[node name="Art" type="Sprite2D" parent="InteractiveVines/Vine16"]
-position = Vector2(-33.5,0)
-texture = SubResource("Vine15")
+[node name="Art" type="Sprite2D" parent="InteractiveVines/Vine09"]
+position = Vector2(-34.0,0)
+texture = SubResource("Vine08")
 centered = false
 
 [node name="Squirrel" parent="." instance=ExtResource("squirrel")]

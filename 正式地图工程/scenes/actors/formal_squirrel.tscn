@@ -23,7 +23,7 @@ collision_layer = 0
 collision_mask = 0
 z_index = 10
 script = ExtResource("controller")
-vine_path = NodePath("../InteractiveVines/Vine16")
+vine_path = NodePath("../InteractiveVines/Vine09")
 [node name="Visual" type="Node2D" parent="."]
 script = ExtResource("visual")
 artwork_faces_right = false

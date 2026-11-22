@@ -1,14 +1,70 @@
 {
-  "reference": "绀轰緥.png",
+  "reference": "示例.png",
   "main_origin": [
     0,
-    20166
+    20143
   ],
   "hanging_origin": [
-    288,
-    20604
+    300,
+    20612
   ],
-  "interactive_vines": 16,
+  "interactive_vines": 9,
   "decorative_trunks_collision": false,
-  "scope": "authored layout; squirrel pumps the lowest thin vine with the existing Verlet solver; jungle progression unchanged"
+  "scope": "authored layout; squirrel pumps the lowest thin vine with the existing Verlet solver; jungle progression unchanged",
+  "source_regions": [
+    [
+      7,
+      0,
+      71,
+      756
+    ],
+    [
+      1174,
+      994,
+      72,
+      878
+    ],
+    [
+      0,
+      2078,
+      73,
+      1078
+    ],
+    [
+      1213,
+      3325,
+      72,
+      1198
+    ],
+    [
+      23,
+      4529,
+      72,
+      1198
+    ],
+    [
+      1077,
+      5855,
+      70,
+      1059
+    ],
+    [
+      25,
+      7041,
+      69,
+      902
+    ],
+    [
+      1203,
+      7914,
+      68,
+      660
+    ],
+    [
+      441,
+      8235,
+      68,
+      656
+    ]
+  ]
 }

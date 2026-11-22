@@ -3,7 +3,7 @@ shader_type canvas_item;
 uniform sampler2D canopy_upper : filter_linear, repeat_disable;
 uniform sampler2D canopy_lower : filter_linear, repeat_disable;
 void fragment() {
-    float map_y = 20166.0 + UV.y * 9146.0;
+    float map_y = 20143.0 + UV.y * 9146.0;
     if (map_y < 21166.0) {
         vec4 canopy;
         if (map_y < 20480.0) {

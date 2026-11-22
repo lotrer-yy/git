@@ -52,16 +52,20 @@ func is_invulnerable() -> bool:
     return active and body.get_node("Host").claimed and body.get_node("VineClimber").vine==null and not body.is_on_floor() and (level==null or not level.dead)
 func sample(time: float) -> void:
     var phase: float=time*TAU*turns_per_second*_turn_direction
-    var pop: float=1+.08*sin(minf(time/.18,1)*PI)
+    var spring: float=.24*cos(time*30)*exp(-time*12) if time<.32 else 0.0
+    var width: float=1+spring
     sprite.global_position=source.global_position
     sprite.global_rotation=body.global_rotation+phase
-    sprite.global_scale=body.global_scale*1.1*pop
+    sprite.global_scale=body.global_scale*1.1*Vector2(width,1.0/width)
     sprite.flip_h=source.flip_h
     sprite.offset.x=-10.5 if source.flip_h else .5
-func stop(restore: bool=true) -> void:
+func stop(restore: bool=true,pulse: bool=true) -> void:
+    var was_active: bool=active
     active=false
     elapsed=0
     if is_instance_valid(sprite): sprite.hide()
-    if restore: source.show()
+    if restore:
+        source.show()
+        if was_active and pulse: body.get_node("Visual").play_selection_pulse()
 func reset() -> void:
-    stop()
+    stop(true,false)

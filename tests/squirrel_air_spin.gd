@@ -28,9 +28,10 @@ func run():
     climber.detach(false)
     check(spin.active and spin.sprite.visible and not body.get_node("Visual/Sprite").visible,"Releasing a real vine starts the authored air-spin pose")
     check(spin.sprite.texture.atlas.resource_path.ends_with("/backflip.png"),"Air pose uses the author supplied backflip drawing")
+    check(spin.sprite.scale.x>spin.sprite.scale.y,"Entering spin gives the curled pose an elastic squash")
     var velocity_before: Vector2=body.velocity
     spin.sample(.25/spin.turns_per_second)
-    check(is_equal_approx(absf(spin.sprite.global_rotation),PI*.5) and is_equal_approx(spin.sprite.scale.x,spin.sprite.scale.y),"Quarter-turn rotates the curled original without squeezing it")
+    check(is_equal_approx(absf(spin.sprite.global_rotation),PI*.5),"Quarter-turn rotates the curled original while its transition settles")
     spin.sample(.5/spin.turns_per_second)
     check(spin.sprite.flip_h==body.get_node("Visual/Sprite").flip_h and is_equal_approx(absf(spin.sprite.global_rotation),PI),"Half-turn is upside down with a stable facing")
     check(body.velocity==velocity_before,"Air animation never changes launch momentum")

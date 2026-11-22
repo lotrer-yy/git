@@ -21,6 +21,8 @@ func _spawn(hive: Sprite2D) -> void:
     bee.ranged=hive.bee_variant==1
     add_child(bee)
     bee.global_position=hive.to_global(Vector2(0,210))
+func defeat_player() -> void:
+    if is_active(): stage.level.die(&"bee")
 func fire_stinger(origin: Vector2,aim: Vector2) -> void:
     if not is_active() or not is_on_screen(origin): return
     var needle:=Node2D.new()

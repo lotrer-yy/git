@@ -85,9 +85,7 @@ func _physics_process(delta: float) -> void:
         var closest: Vector2 = Geometry2D.get_closest_point_to_segment(target,before,global_position)
         if not _hit and closest.distance_to(target)<70 and encounter.is_on_screen(global_position):
             _hit=true
-            var direction: Vector2 = (target-before).normalized()
-            encounter.body.get_node("Movement").launch_with_momentum(Vector2(direction.x*350,180))
-            encounter.body.get_node("Visual").play_selection_pulse()
+            encounter.defeat_player()
             stung.emit()
             _set_mode(Mode.RECOVERING)
         elif elapsed>=.32: _set_mode(Mode.RECOVERING)

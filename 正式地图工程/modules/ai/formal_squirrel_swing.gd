@@ -18,6 +18,7 @@ func _ready() -> void:
     reset()
 func reset() -> void:
     if not is_instance_valid(vine): return
+    $Defeat.reset()
     $VineClimber.reset()
     $Host.reset()
     if vine.rider==self: vine.release()

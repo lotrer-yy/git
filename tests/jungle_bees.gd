@@ -51,14 +51,6 @@ func run():
     body.global_position.x+=120
     bee._physics_process(.56)
     check(bee.mode==bee.Mode.DARTING and bee._aim==locked,"Dart locks the warning position instead of homing")
-    bee._set_mode(bee.Mode.DARTING)
-    bee._hit=false
-    bee.global_position=body.global_position+Vector2(-90,-50)
-    bee._dart_velocity=Vector2(950,0)
-    bee._physics_process(.01)
-    for tick in 10:
-        if bee.mode==bee.Mode.DARTING: bee._physics_process(.01)
-    check(bee._hit and not game.dead,"A sting knocks back but does not kill the squirrel")
     var ranged_hives: int=0
     for nest in layout.get_node("Beehives").get_children():
         ranged_hives+=nest.bee_variant
@@ -85,11 +77,12 @@ func run():
     needle.global_position=body.global_position+Vector2(-60,-50)
     needle.velocity=Vector2(680,0)
     needle._physics_process(.02)
-    check(needle.is_queued_for_deletion() and not game.dead,"Stinger impact is nonlethal and consumes the projectile")
-    game.die(&"impact")
+    check(needle.is_queued_for_deletion() and game.dead and game.death_reason==&"bee","Stinger impact defeats the squirrel and consumes the projectile")
+    check(body.get_node("Defeat").corpse.visible and not body.get_node("Visual/Sprite").visible,"Defeat displays the supplied stunned expression")
     encounter._physics_process(.01)
     check(bee.is_queued_for_deletion() and not bee.visible,"Death immediately stops active bees")
     layout.reset()
     check(bee.is_queued_for_deletion() and not bee.visible and hive.state==hive.State.HANGING,"Replay removes bees and restores hives")
+    check(not body.get_node("Defeat").corpse.visible and body.get_node("Visual/Sprite").visible,"Replay restores the normal squirrel expression")
     print("JUNGLE_BEES_FAILURES=",failures.size())
     quit(0 if failures.is_empty() else 1)

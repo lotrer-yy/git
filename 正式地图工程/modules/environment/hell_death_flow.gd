@@ -60,6 +60,8 @@ func _freeze() -> void:
 	elif level.death_reason in [&"shark",&"pink_shark",&"jellyfish_net"]:
 		var knockback = level.get_node("OceanLink/FishStage/SharkKnockback")
 		await knockback.play(level.player, camera, knockback.impact_direction)
+	elif level.death_reason == &"bee":
+		await get_tree().create_timer(.65, true, false, true).timeout
 	elif level.player == level.demon:
 		await death_animation.play(level.demon, camera, level.get_node("Fork").held)
 	overlay.show_death()

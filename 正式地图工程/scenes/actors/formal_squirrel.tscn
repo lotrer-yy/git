@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://modules/visual/squash_stretch.gd" id="visual"]
 [ext_resource type="Script" path="res://modules/possession/formal_squirrel_host.gd" id="host"]
 [ext_resource type="Script" path="res://modules/movement/vine_climber.gd" id="climber"]
+[ext_resource type="Script" path="res://modules/visual/squirrel_defeat.gd" id="defeat"]
 [sub_resource type="CapsuleShape2D" id="Body"]
 radius = 32.0
 height = 100.0
@@ -67,3 +68,6 @@ max_launch_speed = 3000.0
 automatic_swing_strength = 2.2
 automatic_swing_angle = 80.0
 prefer_unvisited_vines = true
+
+[node name="Defeat" type="Node2D" parent="."]
+script = ExtResource("defeat")

@@ -28,8 +28,7 @@ func _physics_process(delta: float) -> void:
         queue_free()
         return
     if hits_player:
-        encounter.body.get_node("Movement").launch_with_momentum(Vector2(signf(velocity.x)*300,150))
-        encounter.body.get_node("Visual").play_selection_pulse()
+        encounter.defeat_player()
         hide()
         queue_free()
         return

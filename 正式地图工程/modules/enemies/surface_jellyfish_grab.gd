@@ -1,18 +1,23 @@
 extends Node2D
-## 海面前的一次追尾缠绕：固定出手方向，瞬移避开或挣脱，不产生额外死亡。
+## 海面前四轮追尾缠绕：固定出手方向，瞬移避开或挣脱，不产生额外死亡。
 const TENDRIL = preload("res://modules/visual/jellyfish_net_tendril.gd")
 const WARNING = preload("res://modules/visual/tentacle_warning.gd")
 const CAUGHT_ART = preload("res://assets/art/characters/fish/abilities/entangled.png")
-enum State { WAITING, WARNING, REACHING, CAUGHT, FINISHED }
+enum State { WAITING, WARNING, REACHING, CAUGHT, COOLDOWN, FINISHED }
 @export var trigger_depth: float = 1100.0
 @export var warning_seconds: float = 1.4
-@export var warning_rise_speed: float = 260.0
+@export var warning_rise_speed: float = 360.0
+@export var total_rounds: int = 4
+@export var round_rest_seconds: float = .7
 @export var anticipation_seconds: float = 0.0
 @export var reach_seconds: float = .38
-@export var recent_blink_seconds: float = .7
 var state: State = State.WAITING
 var elapsed: float = 0
-var _since_blink: float = 100
+var rounds_completed: int = 0
+var attacks_started: int = 0
+var _evaded: bool = false
+var _evade_point := Vector2.ZERO
+var _last_mesh_time: float = -1
 var _warning_arms: Array[Node2D] = []
 var _arm: Node2D
 var _caught_art: Sprite2D
@@ -30,17 +35,14 @@ func _ready() -> void:
     blink.teleported.connect(_on_blink)
 func _physics_process(delta: float) -> void:
     if not stage.active or stage.level.dead or stage.level.player!=fish: return
-    _since_blink += delta
+    _hold_surface_route()
     if shore.state!=shore.State.SWIMMING:
         if state in [State.WARNING,State.REACHING,State.CAUGHT]: _finish()
         return
     if state==State.WAITING:
         var depth: float = fish.position.y-shore.surface_y
         if depth>trigger_depth or depth<80 or fish.velocity.y>-40: return
-        if _since_blink<recent_blink_seconds or blink.is_invulnerable():
-            state = State.FINISHED
-        else:
-            _begin_warning()
+        _begin_warning()
         return
     elapsed += delta
     if state==State.WARNING:
@@ -52,12 +54,14 @@ func _physics_process(delta: float) -> void:
         _arm.dangerous = false
         var tip: Vector2 = _arm.to_global(_arm.centerline[-1])
         var center: Vector2 = fish.get_node("Collision").global_position
-        if elapsed>=anticipation_seconds and not blink.is_invulnerable():
+        if not _evaded and elapsed>=anticipation_seconds and not blink.is_invulnerable():
             var closest := Geometry2D.get_closest_point_to_segment(center,_previous_tip,tip)
             if closest.distance_to(center)<_arm.thickness*.5+24:
                 _catch()
         _previous_tip = tip
-        if state==State.REACHING and elapsed>anticipation_seconds+reach_seconds+.18: _finish()
+        if state==State.REACHING and elapsed>anticipation_seconds+reach_seconds+.18: _end_round()
+    elif state==State.COOLDOWN:
+        if elapsed>=round_rest_seconds: _begin_warning()
     elif state==State.CAUGHT:
         var spring := sin(elapsed*22)*exp(-elapsed*8)
         _caught_art.scale = Vector2(1+spring*.28,1-spring*.20)
@@ -65,12 +69,16 @@ func _physics_process(delta: float) -> void:
 func _begin_warning() -> void:
     state = State.WARNING
     elapsed = 0
+    _evaded = false
+    _last_mesh_time = -1
     var camera: Camera2D = stage.level.camera
     var size := camera.get_viewport_rect().size/camera.zoom
     var view := Rect2(camera.global_position+camera.offset-size*.5,size)
     for i in 4:
         var arm := TENDRIL.new()
-        arm.thickness = 62
+        arm.thickness = 118
+        arm.wave_amplitude = 85
+        arm.wave_phase = float(i)*1.2
         arm.charge_seconds = 0
         arm.strike_seconds = .4
         var x: float = view.position.x+view.size.x*(.20+float(i)*.20)
@@ -92,22 +100,35 @@ func _sample_warning(delta: float) -> void:
         var arm := _warning_arms[i]
         # 按自身速度向上游动，不复制相机位置；微微摆动并带蓄力回弹。
         arm.position.y -= warning_rise_speed*delta
-        arm.rotation = sin(elapsed*4.8+i*1.4)*.045
-        arm.sample(maxf(0,elapsed-float(i)*.07))
+        arm.rotation = sin(elapsed*4.8+i*1.4)*.07
+        if elapsed-_last_mesh_time>=1.0/24:
+            arm.wave_phase = elapsed*3.8+i*1.2
+            arm.geometry_locked = false
+            arm.sample(maxf(0,elapsed-float(i)*.07))
         arm.body.collision_layer = 0
         arm.dangerous = false
         arm.get_node("Warning").sample(elapsed-.20-float(i)*.07)
+    if elapsed-_last_mesh_time>=1.0/24: _last_mesh_time = elapsed
 func _begin_reach() -> void:
-    state = State.REACHING
-    elapsed = 0
     var center: Vector2 = fish.get_node("Collision").global_position
-    var predicted: Vector2 = center+(fish.velocity*reach_seconds).limit_length(240)
+    var predicted: Vector2 = _evade_point if _evaded else center+(fish.velocity*reach_seconds).limit_length(240)
+    var camera: Camera2D = stage.level.camera
+    var size := camera.get_viewport_rect().size/camera.zoom
+    var view := Rect2(camera.global_position+camera.offset-size*.5,size).grow(-60)
     var nearest := INF
+    _arm = null
     for candidate in _warning_arms:
         var tip: Vector2 = candidate.to_global(candidate.centerline[-1])
-        if tip.distance_to(center)<nearest:
+        if view.has_point(tip) and tip.distance_to(center)<nearest:
             nearest = tip.distance_to(center)
             _arm = candidate
+    if _arm==null:
+        _clear_arms()
+        _begin_warning()
+        return
+    state = State.REACHING
+    attacks_started += 1
+    elapsed = 0
     for candidate in _warning_arms:
         candidate.get_node("Warning").hide()
         if candidate!=_arm:
@@ -133,8 +154,11 @@ func _catch() -> void:
     _caught_art.z_index = 1
     fish.add_child(_caught_art)
 func _on_blink(_from: Vector2, _destination: Vector2) -> void:
-    _since_blink = 0
-    if state in [State.WARNING,State.REACHING,State.CAUGHT]: _finish()
+    if state in [State.WARNING,State.REACHING]:
+        _evaded = true
+        _evade_point = _from
+    elif state==State.CAUGHT:
+        _end_round()
 func _finish() -> void:
     if state==State.CAUGHT:
         motor.enabled = _restore_motor and not stage.level.dead
@@ -142,13 +166,33 @@ func _finish() -> void:
     if is_instance_valid(_caught_art):
         _caught_art.queue_free()
         _caught_art = null
+    _clear_arms()
+    state = State.FINISHED
+func _clear_arms() -> void:
     for arm in _warning_arms:
         if is_instance_valid(arm): arm.queue_free()
     _warning_arms.clear()
     _arm = null
-    state = State.FINISHED
+func _end_round() -> void:
+    _finish()
+    rounds_completed += 1
+    if rounds_completed<total_rounds:
+        state = State.COOLDOWN
+        elapsed = 0
+func blocks_exit() -> bool:
+    return state!=State.WAITING and rounds_completed<total_rounds and state!=State.FINISHED
+func _hold_surface_route() -> void:
+    if not blocks_exit(): return
+    var depth: float = fish.position.y-shore.surface_y
+    if depth<500:
+        fish.velocity.y = maxf(fish.velocity.y,-80)
+    if depth<220:
+        fish.position.y = shore.surface_y+220
+        fish.velocity.y = maxf(fish.velocity.y,0)
 func reset() -> void:
     _finish()
     state = State.WAITING
     elapsed = 0
-    _since_blink = 100
+    rounds_completed = 0
+    attacks_started = 0
+    _evaded = false

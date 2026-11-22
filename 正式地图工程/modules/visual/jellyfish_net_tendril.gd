@@ -8,6 +8,9 @@ const SEGMENTS = 24
 @export var cap_texture_pixels: float = 64.0
 @export var curve_height: float = 0.0
 @export var initial_reach: float = 160.0
+@export var wave_amplitude: float = 0.0
+var wave_phase: float = 0.0
+var _segments: int = SEGMENTS
 var start := Vector2.ZERO
 var finish := Vector2.ZERO
 var delay: float = 0.0
@@ -21,6 +24,7 @@ var _shapes: Array[CollisionShape2D] = []
 var geometry_locked: bool = false
 
 func _ready() -> void:
+    _segments = 48 if wave_amplitude>0 else SEGMENTS
     mesh = Polygon2D.new()
     mesh.texture = ART
     add_child(mesh)
@@ -29,7 +33,7 @@ func _ready() -> void:
     body.collision_mask = 0
     add_child(body)
     body.add_to_group(&"blink_passable_tentacles")
-    for i in SEGMENTS:
+    for i in _segments:
         var collision := CollisionShape2D.new()
         var capsule := CapsuleShape2D.new()
         capsule.radius = thickness*.5
@@ -39,10 +43,10 @@ func _ready() -> void:
         _shapes.append(collision)
     var uv := PackedVector2Array()
     var faces: Array[PackedInt32Array] = []
-    for i in SEGMENTS+1:
-        uv.append(Vector2(float(i)/SEGMENTS*ART.get_width(),0))
-        uv.append(Vector2(float(i)/SEGMENTS*ART.get_width(),ART.get_height()))
-        if i<SEGMENTS:
+    for i in _segments+1:
+        uv.append(Vector2(float(i)/_segments*ART.get_width(),0))
+        uv.append(Vector2(float(i)/_segments*ART.get_width(),ART.get_height()))
+        if i<_segments:
             var a := i*2
             faces.append(PackedInt32Array([a,a+2,a+3]))
             faces.append(PackedInt32Array([a,a+3,a+1]))
@@ -86,12 +90,15 @@ func sample(age: float) -> void:
     # 类似九宫格：圆头/黑边按粗度保留尺寸，只让中间长条伸缩。
     var cap_length := minf(cap_texture_pixels*thickness/ART.get_height(),reach*.45)
     var cap_ratio := cap_length/maxf(reach,.001)
-    for i in SEGMENTS+1:
-        var s := float(i)/SEGMENTS
+    for i in _segments+1:
+        var s := float(i)/_segments
         var curve := curve_height*clampf(reach/maxf(total,1),0,1)
         var arc := sin(s*PI)+.18*sin(s*TAU)
         var point := start+axis*reach*s+normal*bend*sin(s*PI)+Vector2(0,curve*arc)
+        var wave: float = wave_amplitude*clampf(reach/maxf(total,1),0,1)
+        point += normal*wave*sin(s*TAU+wave_phase)*sin(s*PI)
         var tangent := axis*reach+normal*bend*PI*cos(s*PI)+Vector2(0,curve*(PI*cos(s*PI)+.18*TAU*cos(s*TAU)))
+        tangent += normal*wave*(TAU*cos(s*TAU+wave_phase)*sin(s*PI)+PI*sin(s*TAU+wave_phase)*cos(s*PI))
         var section_normal := tangent.normalized().orthogonal() if tangent.length_squared()>.001 else normal
         centerline.append(point)
         vertices.append(point-section_normal*thickness*.5)
@@ -107,7 +114,7 @@ func sample(age: float) -> void:
         uv.append(Vector2(source_x,ART.get_height()))
     mesh.polygon = vertices
     mesh.uv = uv
-    for i in SEGMENTS:
+    for i in _segments:
         var a := centerline[i]
         var b := centerline[i+1]
         _shapes[i].position = (a+b)*.5

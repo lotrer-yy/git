@@ -84,7 +84,7 @@ func run():
         root.get_texture().get_image().save_png("C:/Users/14930/Documents/Codex/2026-11-18/m/work/surface-grab.png")
     check(blink.try_teleport(Vector2.UP),"Shift remains available while entangled")
     await create_timer(.12).timeout
-    check(grab.state==grab.State.FINISHED and motor.enabled and fish.get_node("Visual").visible,"Actual blink frees the fish and restores ordinary swimming")
+    check(grab.state==grab.State.COOLDOWN and grab.rounds_completed==1 and motor.enabled and fish.get_node("Visual").visible,"Actual blink frees the fish and restores ordinary swimming")
     check(grab._caught_art==null and grab._arm==null,"Escape removes both the wrapper art and the reaching arm")
     grab.reset()
     blink.reset()
@@ -92,14 +92,14 @@ func run():
     fish.velocity = Vector2(0,-420)
     grab._on_blink(Vector2.ZERO,fish.global_position)
     grab._physics_process(.01)
-    check(grab.state==grab.State.FINISHED and grab._arm==null,"A timely blink just before the trap avoids it entirely")
+    check(grab.state==grab.State.WARNING and grab._warning_arms.size()==4,"A pre-emptive blink cannot skip the complete four-wave sequence")
     grab.reset()
     fish.position.y = shore.surface_y+600
     grab._physics_process(.01)
     check(grab.state==grab.State.WARNING,"Retry starts with warning rather than a surprise reach")
     check(blink.try_teleport(Vector2.RIGHT),"Player can dodge during the reaching animation")
     await create_timer(.12).timeout
-    check(grab.state==grab.State.FINISHED and grab._arm==null,"Blink during reach makes the fixed-direction arm miss")
+    check(grab.state==grab.State.WARNING and grab._evaded,"Blink during the warning commits this attack to missing the fish")
     stage.reset()
     check(grab.state==grab.State.WAITING and grab._arm==null,"Retry rearms one clean final grab")
     print("SURFACE_GRAB_FAILURES=",failures.size())

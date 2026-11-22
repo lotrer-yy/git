@@ -40,6 +40,7 @@ func _update_nearby() -> void:
             vine.rider.set_active(near)
 func reset() -> void:
     $PythonEncounter.reset()
+    for cone in $Pinecones.get_children(): cone.reset()
     for vine in vines: vine.reset()
     $Squirrel.reset()
     _update_nearby()

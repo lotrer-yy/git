@@ -14,6 +14,8 @@
 
 [ext_resource type="Script" path="res://modules/enemies/jungle_python_encounter.gd" id="python_encounter"]
 
+[ext_resource type="Script" path="res://modules/environment/jungle_pinecone.gd" id="pinecone"]
+
 [sub_resource type="RectangleShape2D" id="JungleFloorShape"]
 size = Vector2(18304,256)
 
@@ -205,3 +207,14 @@ shape = SubResource("JungleFloorShape")
 
 [node name="PythonEncounter" type="Node2D" parent="."]
 script = ExtResource("python_encounter")
+
+[node name="Pinecones" type="Node2D" parent="."]
+[node name="Pinecone08" type="Node2D" parent="Pinecones"]
+position = Vector2(1180,28980)
+script = ExtResource("pinecone")
+[node name="Pinecone05" type="Node2D" parent="Pinecones"]
+position = Vector2(620,25940)
+script = ExtResource("pinecone")
+[node name="Pinecone03" type="Node2D" parent="Pinecones"]
+position = Vector2(690,23500)
+script = ExtResource("pinecone")

@@ -59,6 +59,7 @@
       "intensity": 0.75
     }
   ],
-  "snake_implemented": false,
-  "notes": "只调整细藤蔓挂点与绳长，主藤蔓及背景原图不变；新版原始位置仍保留在 source_regions；该路径抵达树冠下方，不增加通关转场。"
+  "snake_implemented": true,
+  "notes": "只调整细藤蔓挂点与绳长，主藤蔓及背景原图不变；新版原始位置仍保留在 source_regions；该路径抵达树冠下方，不增加通关转场。",
+  "counter_mechanic": "Contact with author pinecone automatically throws a homing projectile at the pursuing head; no QTE or slow motion."
 }

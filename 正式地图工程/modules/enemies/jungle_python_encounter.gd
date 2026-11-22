@@ -1,231 +1,202 @@
 extends Node2D
-## 巨蛇急扑临身后触发限时 WASD+Shift；成功脱险反击，失败打落但不直接死亡。
+## 地面离开镜头后巨蛇从下方追赶；玩家碰松果自动投向蛇头，无慢动作或按键序列。
 signal countered
 signal player_struck
 const BITE = preload("res://scenes/enemies/python_bite_animation.tscn")
 const IMPACT = preload("res://modules/visual/python_counter_impact.gd")
-const SEQUENCE = preload("res://modules/input/python_counter_sequence.gd")
-enum State { WAITING, ENTERING, COILING, LUNGING, SEQUENCE, RECOVERING }
-@export var first_attack_delay: float = 3.0
-@export var attack_rest: float = 6.0
-@export var warning_seconds: float = .95
-@export var lunge_seconds: float = .22
+enum State { WAITING, ENTERING, PURSUING, WINDUP, LUNGING, RECOVERING, STAGGERED }
+@export var shore_art_y: float = 29420.0
+@export var warning_seconds: float = 1.0
+@export var lunge_seconds: float = .28
+@export var attack_rest: float = 5.0
+@export var chase_speed: float = 900.0
+@export var knockback_seconds: float = 3.0
 var state: State = State.WAITING
 var elapsed: float = 0
+var lifetime: float = 0
 var attacks_started: int = 0
 var counters: int = 0
-var sequence: Node
-var background_dim: Polygon2D
-var impact: Node2D
-var snake: Node2D
 var pivot: Node2D
-var _side: float = 1
-var _start := Vector2.ZERO
-var _coil := Vector2.ZERO
+var snake: Node2D
+var impact: Node2D
+var _velocity := Vector2.ZERO
+var _attack_clock: float = 0
+var _lock_rotation: float = 0
 var _aim := Vector2.ZERO
 var _strike_start := Vector2.ZERO
-var _retreat_start := Vector2.ZERO
-var _rest: float = 3
-var _counter_success: bool = false
-var _frozen: bool = false
-var _reader_enabled: bool
-var _reader_external: bool
-var _motor_enabled: bool
-var _climber_processing: bool
-var _release_gate: bool = false
+var _previous_mouth := Vector2.ZERO
+var _hit_this_attack: bool = false
+var _ground_hidden_seconds: float = 0
 @onready var stage: Node = get_node("../..")
 @onready var body: CharacterBody2D = get_node("../Squirrel")
-@onready var reader: Node = body.get_node("Input")
-@onready var motor: Node = body.get_node("Movement")
-@onready var climber: Node = body.get_node("VineClimber")
 func _ready() -> void:
     z_index=9
-    # 同为z9时排在主藤蔓之后、蛇体之前；松鼠z10，不会被背景遮罩压暗。
-    background_dim=Polygon2D.new()
-    background_dim.color=Color(.015,.025,.015,.36)
-    add_child(background_dim)
-    background_dim.hide()
     pivot=Node2D.new()
+    pivot.scale=Vector2.ONE*1.8
     add_child(pivot)
     snake=BITE.instantiate()
+    snake.position=Vector2(-30,320)
     pivot.add_child(snake)
     snake.set_process(false)
-    sequence=SEQUENCE.new()
-    add_child(sequence)
-    sequence.completed.connect(_resolve_sequence)
     impact=Node2D.new()
     impact.set_script(IMPACT)
     impact.z_index=4
     add_child(impact)
     impact.hide()
     pivot.hide()
-    _rest=first_attack_delay
     if stage.has_node("ShoreExit") and stage.get_parent().get_parent().has_signal("died"):
         stage.get_parent().get_parent().died.connect(reset)
-func _can_play() -> bool:
+func can_play() -> bool:
     if not stage.has_node("ShoreExit"): return false
     return stage.active and not stage.level.dead and stage.level.player==body and body.get_node("Host").claimed
-func _view() -> Rect2:
+func view_rect() -> Rect2:
     var camera: Camera2D = stage.level.camera
     var size: Vector2 = camera.get_viewport_rect().size/camera.zoom
     return Rect2(camera.global_position+camera.offset-size*.5,size)
+func ground_hidden() -> bool:
+    var ground: float = get_parent().to_global(Vector2(960,shore_art_y)).y
+    return view_rect().end.y<ground-40
+func is_targetable() -> bool:
+    return can_play() and state!=State.WAITING and pivot.visible
+func target_position() -> Vector2:
+    const CENTERS = [Vector2(215,112),Vector2(225,190),Vector2(240,140),Vector2(250,110),Vector2(330,185),Vector2(330,170),Vector2(220,180),Vector2(205,120)]
+    var frame: int = snake.frames.find(snake.layers[0].texture)
+    return snake.layers[0].to_global(CENTERS[maxi(0,frame)])
 func _physics_process(delta: float) -> void:
-    if _release_gate and _directions_released():
-        _release_gate=false
-        reader.external_control=_reader_external
-        reader.clear()
-    if not _can_play():
+    if not can_play():
         if state!=State.WAITING: reset()
         return
     elapsed+=delta
+    lifetime+=delta
     if state==State.WAITING:
-        if elapsed>=_rest: _begin_attack()
-    elif state==State.ENTERING:
-        pivot.global_position=_start.lerp(_coil,smoothstep(0,.45,elapsed))
+        _ground_hidden_seconds=_ground_hidden_seconds+delta if ground_hidden() else 0.0
+        if _ground_hidden_seconds>=.4: _begin_entrance()
+        return
+    # 玩家落回岸上时蛇重新潜下，不在出水或附身阶段袭击。
+    if not ground_hidden() and body.global_position.y>get_parent().to_global(Vector2(960,shore_art_y-120)).y:
+        reset()
+        return
+    if state in [State.ENTERING,State.PURSUING]:
+        _chase(delta)
+        _look_at_player(delta)
         snake.sample(-1)
-        if elapsed>=.45:
-            state=State.COILING
+        _attack_clock+=delta
+        if state==State.ENTERING and elapsed>1.2:
+            state=State.PURSUING
             elapsed=0
-    elif state==State.COILING:
-        # 前半段观察玩家，最后350毫秒方向锁定，不追着瞬移或镜头修正。
-        if elapsed<warning_seconds-.35:
-            _aim=_aim_position()
-        snake.sample(.08+.35*clampf(elapsed/warning_seconds,0,1))
+        elif state==State.PURSUING and _attack_clock>=attack_rest and _on_screen():
+            _begin_windup()
+    elif state==State.WINDUP:
+        pivot.global_position.y-=delta*45
+        # 先跟随瞄准，最后300毫秒锁死，扑出后不随相机或玩家修正。
+        if elapsed<warning_seconds-.3:
+            _look_at_player(delta)
+            _aim=_predicted_aim()
+            _lock_rotation=pivot.rotation
+        snake.sample(.08+.36*clampf(elapsed/warning_seconds,0,1))
         if elapsed>=warning_seconds:
             state=State.LUNGING
             elapsed=0
             _strike_start=pivot.global_position
+            _previous_mouth=_mouth_position()
     elif state==State.LUNGING:
         var u: float = clampf(elapsed/lunge_seconds,0,1)
-        pivot.global_position=_strike_start.lerp(_aim,u*u)
-        snake.sample(.44+.12*u)
-        var mouth: Vector2 = pivot.to_global(Vector2(330,-270))
-        if u>=.7 and mouth.distance_to(body.global_position+Vector2(0,-50))<270 and _view().grow(80).has_point(mouth):
-            _begin_sequence()
-        elif u>=1:
-            _begin_retreat(false)
-    elif state==State.SEQUENCE:
-        _update_dim()
-        snake.sample(.55)
-    elif state==State.RECOVERING:
-        var u: float = smoothstep(0,.65,elapsed)
-        pivot.global_position=_retreat_start+Vector2(-_side*(700 if _counter_success else 500)*u,100*u)
-        snake.sample(.685+elapsed)
-        if _counter_success:
-            pivot.modulate=Color(1,1,1,1-u)
-        if elapsed>=.7:
-            pivot.hide()
-            pivot.modulate=Color.WHITE
-            state=State.WAITING
+        pivot.global_position=_strike_start.lerp(_aim,u*u*(3-2*u))
+        pivot.rotation=_lock_rotation
+        pivot.scale=Vector2.ONE*1.8
+        snake.sample(.44+.245*u)
+        var mouth: Vector2 = _mouth_position()
+        var center: Vector2 = body.global_position+Vector2(0,-50)
+        var nearest: Vector2 = Geometry2D.get_closest_point_to_segment(center,_previous_mouth,mouth)
+        if not _hit_this_attack and nearest.distance_to(center)<95 and view_rect().grow(60).has_point(mouth):
+            _hit_player()
+        _previous_mouth=mouth
+        if u>=1:
+            state=State.RECOVERING
             elapsed=0
-            _rest=attack_rest+(3 if attacks_started%2==0 else 0)
-func _escape_direction() -> float:
-    var nearest: Node2D
-    var distance: float = INF
-    for vine in get_parent().vines:
-        if vine.global_position.y>=body.global_position.y-120: continue
-        if climber.visited_vines.has(vine.get_instance_id()): continue
-        var current: float = body.global_position.distance_to(vine.global_position)
-        if current<distance:
-            distance=current
-            nearest=vine
-    if is_instance_valid(nearest):
-        var direction: float = signf(nearest.global_position.x-body.global_position.x)
-        if direction!=0: return direction
-    return -1 if body.global_position.x>960 else 1
-func _aim_position() -> Vector2:
-    var predicted: Vector2 = body.global_position+Vector2(0,-50)+(body.velocity*.15).limit_length(120)
-    return predicted-Vector2(_side*330*1.6,-270*1.6)
-func _begin_attack() -> void:
-    if not _can_play(): return
-    attacks_started+=1
-    elapsed=0
+    elif state==State.RECOVERING:
+        snake.sample(.685+elapsed)
+        pivot.global_position+=Vector2(0,200)*delta
+        _look_at_player(delta*.5)
+        if elapsed>=.6:
+            state=State.PURSUING
+            elapsed=0
+            _attack_clock=0
+    elif state==State.STAGGERED:
+        _velocity=_velocity.move_toward(Vector2(0,110),delta*300)
+        pivot.global_position+=_velocity*delta
+        pivot.rotation=lerp_angle(pivot.rotation,0,1-exp(-delta*3))
+        snake.sample(.685+elapsed)
+        pivot.modulate=Color(1.8,1.6,1.2).lerp(Color.WHITE,smoothstep(0,.25,elapsed))
+        if elapsed>=knockback_seconds:
+            state=State.PURSUING
+            elapsed=0
+            _attack_clock=0
+func _begin_entrance() -> void:
+    var view: Rect2 = view_rect()
+    pivot.global_position=Vector2(clampf(body.global_position.x+140,180,1740),view.end.y+230)
+    _velocity=Vector2.ZERO
     state=State.ENTERING
-    _side=_escape_direction()
-    pivot.scale=Vector2(_side*1.6,1.6)
-    var view: Rect2 = _view()
-    _coil=Vector2(view.position.x-120 if _side>0 else view.end.x+120,body.global_position.y+420)
-    _start=_coil+Vector2(-_side*500,0)
-    _aim=_aim_position()
-    pivot.global_position=_start
+    elapsed=0
+    _attack_clock=attack_rest-1.8
     pivot.modulate=Color.WHITE
     pivot.show()
-    snake.sample(-1)
-func _begin_sequence() -> void:
-    state=State.SEQUENCE
+    _look_at_player(1)
+func _chase(delta: float) -> void:
+    var desired:=Vector2(clampf(body.global_position.x+sin(lifetime*.8)*250,160,1760),body.global_position.y+210+sin(lifetime*1.35)*65)
+    var goal_velocity: Vector2 = ((desired-pivot.global_position)*2.8).limit_length(chase_speed)
+    _velocity=_velocity.move_toward(goal_velocity,delta*950)
+    pivot.global_position+=_velocity*delta
+func _look_at_player(delta: float) -> void:
+    var direction: Vector2 = body.global_position+Vector2(0,-50)-pivot.global_position
+    var angle: float = direction.angle()
+    pivot.scale=Vector2.ONE*1.8
+    pivot.rotation=lerp_angle(pivot.rotation,wrapf(angle,-PI,PI),1-exp(-delta*4))
+func _mouth_position() -> Vector2:
+    return pivot.to_global(Vector2(250,100))
+func _on_screen() -> bool:
+    return view_rect().grow(80).has_point(target_position())
+func _predicted_aim() -> Vector2:
+    var predicted: Vector2 = body.global_position+Vector2(0,-50)+(body.velocity*.18).limit_length(150)
+    var offset: Vector2 = pivot.global_transform.basis_xform(Vector2(250,100))
+    return predicted-offset
+func _begin_windup() -> void:
+    attacks_started+=1
+    state=State.WINDUP
     elapsed=0
-    _freeze_inputs()
-    _update_dim()
-    background_dim.show()
-    sequence.begin()
-func _update_dim() -> void:
-    var view: Rect2 = _view().grow(200)
-    background_dim.polygon=PackedVector2Array([to_local(view.position),to_local(Vector2(view.end.x,view.position.y)),to_local(view.end),to_local(Vector2(view.position.x,view.end.y))])
-func _freeze_inputs() -> void:
-    if _frozen: return
-    _frozen=true
-    _reader_enabled=reader.enabled
-    _reader_external=reader.external_control
-    _motor_enabled=motor.enabled
-    _climber_processing=climber.is_physics_processing()
-    reader.enabled=false
-    reader.external_control=true
-    reader.clear()
-    motor.enabled=false
-    climber.set_physics_process(false)
-    if is_instance_valid(climber.vine): climber.vine.pump_axis=0
-func _directions_released() -> bool:
-    for key in [KEY_W,KEY_A,KEY_S,KEY_D]:
-        if Input.is_physical_key_pressed(key): return false
-    return true
-func _restore_inputs(gate: bool) -> void:
-    if not _frozen: return
-    _frozen=false
-    reader.enabled=_reader_enabled
-    reader.clear()
-    _release_gate=gate and not _directions_released()
-    reader.external_control=true if _release_gate else _reader_external
-    motor.enabled=_motor_enabled
-    climber.set_physics_process(_climber_processing)
-func _resolve_sequence(success: bool) -> void:
-    if state!=State.SEQUENCE: return
-    background_dim.hide()
-    _restore_inputs(true)
+    _hit_this_attack=false
+    _aim=_predicted_aim()
+    _lock_rotation=pivot.rotation
+func _hit_player() -> void:
+    _hit_this_attack=true
+    var climber = body.get_node("VineClimber")
     if is_instance_valid(climber.vine): climber.detach(false)
-    if success:
-        counters+=1
-        impact.play_at(body.global_position+Vector2(-_side*55,-55))
-        # 最后一记Shift确认脱险反击，向下一条藤蔓甩出；恢复正常飞行与抓绳。
-        motor.launch_with_momentum(Vector2(_side*1000,-sqrt(2*motor.gravity*350)))
-        body.get_node("Visual").play_possession_pulse()
-        countered.emit()
-    else:
-        motor.launch_with_momentum(Vector2(-_side*500,420))
-        body.get_node("Visual").play_selection_pulse()
-        player_struck.emit()
-    _begin_retreat(success)
-func _begin_retreat(success: bool) -> void:
-    _counter_success=success
-    state=State.RECOVERING
+    var away: float = signf(body.global_position.x-pivot.global_position.x)
+    if away==0: away=1
+    body.get_node("Movement").launch_with_momentum(Vector2(away*500,380))
+    body.get_node("Visual").play_selection_pulse()
+    player_struck.emit()
+func hit_by_pinecone(world_hit: Vector2,incoming: Vector2) -> bool:
+    if not is_targetable(): return false
+    counters+=1
+    state=State.STAGGERED
     elapsed=0
-    _retreat_start=pivot.global_position
+    _attack_clock=0
+    _velocity=Vector2(incoming.x*.2,500)
+    impact.play_at(world_hit)
+    pivot.modulate=Color(1.8,1.6,1.2)
+    countered.emit()
+    return true
 func reset() -> void:
-    if is_instance_valid(sequence): sequence.cancel()
-    _restore_inputs(false)
-    if _release_gate:
-        reader.external_control=_reader_external
-        reader.clear()
-    _release_gate=false
     state=State.WAITING
     elapsed=0
-    _rest=first_attack_delay
+    lifetime=0
     attacks_started=0
     counters=0
-    if is_instance_valid(background_dim): background_dim.hide()
-    if is_instance_valid(impact): impact.hide()
+    _attack_clock=0
+    _ground_hidden_seconds=0
+    _velocity=Vector2.ZERO
     if is_instance_valid(pivot):
         pivot.hide()
         pivot.modulate=Color.WHITE
-func _exit_tree() -> void:
-    if is_instance_valid(sequence): sequence.cancel()
-    if is_instance_valid(reader): _restore_inputs(false)
+    if is_instance_valid(impact): impact.hide()

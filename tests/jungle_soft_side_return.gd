@@ -46,7 +46,7 @@ func run():
                 returned = true
                 break
         print("SOFT_RETURN direction=",direction," overshoot=",max_outside," frame_displacement=",max_jump)
-        check(max_outside>50 and max_outside<550,"Player may leave the frame briefly but cannot fly arbitrarily far")
+        check(max_outside>50 and max_outside<700,"Player may leave the frame briefly but cannot fly arbitrarily far")
         check(returned and max_jump<30,"Flight slides back continuously without snapping or rebounding off a wall")
     var rope = layout.vines[-1]
     rope.reset()

@@ -1,7 +1,7 @@
 extends Node
 ## 地图边缘外为柔和缓冲区，不碰撞、不瞬移；飞行与挂藤都顺势滑回。
-@export var left_edge: float = -70.0
-@export var right_edge: float = 1990.0
+@export var left_edge: float = -220.0
+@export var right_edge: float = 2140.0
 @export var stiffness: float = 24.0
 @export var outward_damping: float = 5.0
 @export var max_acceleration: float = 16000.0

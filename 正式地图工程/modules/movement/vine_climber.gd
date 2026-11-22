@@ -1,11 +1,17 @@
 class_name VineClimber
 extends Node
-## S 大范围抓取，W/S 攀爬，A/D 借力摆荡，空格带着惯性跳离。
+## 可配置抓取与松手抛出；W/S 攀爬，自动或 A/D 借力，优先未抓过的可达藤蔓。
+const SWING_ASSIST = preload("res://modules/movement/vine_swing_assist.gd")
+@export var automatic_swing: bool = false
+@export_range(30,75) var automatic_swing_angle: float = 62.0
+@export var prefer_unvisited_vines: bool = false
 @export var release_on_grab_release: bool = false
 @export var grab_action: StringName = &""
 @export var allow_mantle: bool = true
 @export var hands_offset := Vector2(0,-60)
 @export var grip_body_offset := Vector2(78,60)
+var visited_vines: Dictionary = {}
+var _swing_assist = SWING_ASSIST.new()
 var grip_side: float = 1.0
 var vine: SwingVine
 var jump_origin: Vector2
@@ -53,11 +59,12 @@ func _physics_process(delta: float) -> void:
 			_motor.reset()
 		return
 	if vine != null:
+		visited_vines[vine.get_instance_id()] = true
 		if release_on_grab_release and not _grab_held():
 			detach(false)
 			return
 		vine.climb_axis=float(_reader.down_held)-float(_reader.jump_held)
-		vine.pump_axis=_reader.move_axis
+		vine.pump_axis=_swing_assist.pump(vine,_body.velocity,delta,_reader.move_axis,automatic_swing_angle) if automatic_swing else _reader.move_axis
 		if Input.is_action_just_pressed(&"vine_release"):
 			detach(true)
 		elif vine.grip_length>=vine.length-1.0 and _reader.down_held:
@@ -84,12 +91,16 @@ func try_grab() -> bool:
 	var hands:=_body.global_position+hands_offset*_body.global_scale
 	var nearest: SwingVine
 	var distance:=INF
+	var chosen_visited: bool = true
 	for node in get_tree().get_nodes_in_group("swing_vines"):
 		var candidate:=node as SwingVine
 		var current_distance:=hands.distance_to(candidate.closest_grip(hands))
-		if candidate.can_grab(hands) and current_distance<distance:
+		if not candidate.can_grab(hands): continue
+		var seen: bool = prefer_unvisited_vines and visited_vines.has(candidate.get_instance_id())
+		if nearest==null or (chosen_visited and not seen) or (seen==chosen_visited and current_distance<distance):
 			nearest=candidate
 			distance=current_distance
+			chosen_visited=seen
 	if nearest==null:
 		return false
 	if _body.is_on_floor():
@@ -98,12 +109,18 @@ func try_grab() -> bool:
 	grip_side=signf(_body.global_position.x-grip.x) if absf(_body.global_position.x-grip.x)>15 else 1.0
 	nearest.rider_offset=Vector2(grip_body_offset.x*grip_side,grip_body_offset.y)*_body.global_scale
 	nearest.catch(_body,_body.velocity,jump_origin)
-	vine=nearest
+	adopt_vine(nearest)
 	_motor.enabled=false
 	return true
+func adopt_vine(value: SwingVine) -> void:
+	vine=value
+	visited_vines[value.get_instance_id()]=true
+	_swing_assist.reset()
+
 func detach(jump: bool) -> void:
 	if vine==null:
 		return
+	visited_vines[vine.get_instance_id()]=true
 	var exit_velocity:=vine.release()
 	vine=null
 	_motor.enabled=true
@@ -113,6 +130,8 @@ func detach(jump: bool) -> void:
 	jump_origin=_body.global_position
 	_cooldown=0.3
 func reset() -> void:
+	visited_vines.clear()
+	_swing_assist.reset()
 	if vine!=null:
 		vine.release()
 	vine=null

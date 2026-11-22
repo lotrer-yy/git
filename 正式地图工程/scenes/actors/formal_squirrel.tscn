@@ -56,3 +56,5 @@ grip_body_offset = Vector2(60,90)
 allow_mantle = false
 grab_action = &"possess"
 release_on_grab_release = true
+automatic_swing = true
+prefer_unvisited_vines = true

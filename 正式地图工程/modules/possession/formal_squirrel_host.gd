@@ -17,7 +17,7 @@ func take_control() -> void:
     body.remove_from_group("idle_vine_squirrels")
     body.collision_layer = 2
     body.collision_mask = 16
-    body.get_node("VineClimber").vine = body.vine
+    body.get_node("VineClimber").adopt_vine(body.vine)
     motor.enabled = false
     body.velocity = momentum
     body.set_active(true)

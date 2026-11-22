@@ -28,7 +28,7 @@ func run():
     reader.jump_held = true
     reader.move_axis = -1
     climber._physics_process(.01)
-    check(target.climb_axis==-1 and target.pump_axis==-1,"W and A/D still control climbing and swinging")
+    check(target.climb_axis==-1 and not body.get_node("Movement").enabled,"W still climbs while the assisted rope owns the body movement")
     climber.detach(true)
     climber._physics_process(.1)
     check(climber.vine==null,"Jump release has a cooldown before held Shift can catch again")

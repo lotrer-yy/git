@@ -86,7 +86,7 @@ func run():
     var grip: float = climber.vine.grip_length
     climber._physics_process(.01)
     climber.vine._physics_process(.1)
-    check(climber.vine.grip_length<grip and climber.vine.pump_axis==1,"W climbs while A/D input drives the real rope")
+    check(climber.vine.grip_length<grip and absf(climber.vine.pump_axis)<=1,"W climbs while automatic assistance drives the physical rope within bounded force")
     check(not climber.allow_mantle,"The player cannot mantle onto decorative thick main vines")
     climber.detach(true)
     Input.action_release(&"possess")

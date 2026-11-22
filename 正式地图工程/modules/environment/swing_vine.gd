@@ -17,6 +17,8 @@ var pump_axis: float = 0.0
 var rider_offset := Vector2(0,60)
 var rope: VerletRope2D
 var _ribbon: VineRibbon
+var _settle_remaining: float = 0.0
+var _ribbon_dirty: bool = false
 var _rider_velocity:=Vector2.ZERO
 
 func _ready() -> void:
@@ -52,6 +54,7 @@ func catch(body: CharacterBody2D,incoming_velocity: Vector2,jump_origin: Vector2
 	_rider_velocity=incoming_velocity
 
 func release() -> Vector2:
+	_settle_remaining=2.0
 	var velocity:=_rider_velocity
 	rider=null
 	rope.load_index=-1
@@ -60,6 +63,16 @@ func release() -> Vector2:
 	return velocity
 
 func _physics_process(delta: float) -> void:
+	# 原本静止的未抓藤蔓无需每物理帧求解；松手后等余摆自然减弱再休眠。
+	if not is_instance_valid(rider):
+		if _settle_remaining<=0:
+			var max_motion: float = 0
+			for i in range(1,rope.points.size()):
+				max_motion=maxf(max_motion,rope.points[i].distance_squared_to(rope.previous[i]))
+			if max_motion<.0001: return
+			_settle_remaining=.25
+		_settle_remaining=maxf(0,_settle_remaining-delta)
+	_ribbon_dirty=true
 	var before:=to_global(rope.sample(grip_length))
 	if is_instance_valid(rider):
 		grip_length=clampf(grip_length+climb_axis*310.0*delta,35,length)
@@ -87,10 +100,13 @@ func _tangent(distance: float) -> Vector2:
 	return Vector2(along.y,-along.x)
 
 func _process(_delta: float) -> void:
-	if _ribbon!=null:
+	if _ribbon!=null and _ribbon_dirty:
 		_ribbon.update_points(rope.points)
+		_ribbon_dirty=false
 
 func reset() -> void:
+	_settle_remaining=0
+	_ribbon_dirty=false
 	rider=null
 	rope.reset()
 	angle=0

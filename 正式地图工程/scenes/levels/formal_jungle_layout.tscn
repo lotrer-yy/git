@@ -11,6 +11,9 @@
 
 [ext_resource type="PackedScene" path="res://scenes/actors/formal_squirrel.tscn" id="squirrel"]
 
+[sub_resource type="RectangleShape2D" id="BoundaryShape"]
+size = Vector2(256,11000)
+
 [sub_resource type="ShaderMaterial" id="CanopyOcclusion"]
 shader = ExtResource("canopy_mask")
 shader_parameter/canopy_upper = ExtResource("canopy_upper")
@@ -305,3 +308,13 @@ texture = SubResource("Vine15")
 centered = false
 
 [node name="Squirrel" parent="." instance=ExtResource("squirrel")]
+
+[node name="SideBoundaries" type="StaticBody2D" parent="."]
+collision_layer = 16
+collision_mask = 2
+[node name="Left" type="CollisionShape2D" parent="SideBoundaries"]
+position = Vector2(-128,24800)
+shape = SubResource("BoundaryShape")
+[node name="Right" type="CollisionShape2D" parent="SideBoundaries"]
+position = Vector2(2048,24800)
+shape = SubResource("BoundaryShape")

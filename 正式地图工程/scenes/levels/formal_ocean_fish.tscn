@@ -22,6 +22,8 @@
 
 [ext_resource type="Script" path="res://modules/enemies/surface_jellyfish_grab.gd" id="surface_grab"]
 
+[ext_resource type="PackedScene" path="res://scenes/levels/formal_jungle_layout.tscn" id="jungle_layout"]
+
 [sub_resource type="AtlasTexture" id="StrandedFish"]
 atlas = ExtResource("stranded_art")
 region = Rect2(1087,1968,130,85)
@@ -108,3 +110,5 @@ one_way_collision_margin = 8.0
 
 [node name="SurfaceGrab" type="Node2D" parent="."]
 script = ExtResource("surface_grab")
+
+[node name="JungleLayout" parent="." instance=ExtResource("jungle_layout")]

@@ -13,6 +13,7 @@ var _spawn: Vector2
 
 func _ready() -> void:
     _spawn = fish.position
+    $JungleLayout.configure(get_node("../../Camera"),level.global_transform)
     # 海洋宿主只供海洋控制器选择，地狱幽灵不会跨阶段选择它。
     host.remove_from_group("possessable_hosts")
     host.add_to_group("formal_ocean_fish_hosts")
@@ -98,6 +99,7 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
+    $JungleLayout.reset()
     $SurfaceGrab.reset()
     $ShoreExit.reset()
     $BossTentacleNet.reset()

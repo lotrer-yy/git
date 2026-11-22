@@ -1,12 +1,17 @@
 extends Node2D
 ## 舌头独立放在嘴缘前方，跟随前端嘴唇，咬合前收回。
 var amount: float = 0
-func configure(frame: int,time: float) -> void:
-    # 待机舌根压在前唇黑边内，不能从轮廓外悬空开始。
+func configure(frame: int,time: float,attack_duration: float,initial_amount: float=1.0) -> void:
     position = Vector2(301,149)
-    amount = 1-smoothstep(0,.075,time)
-    # 蓄力初段收回；所有张嘴、冲刺、咬合和回弹姿势都不吐舌。
-    visible = frame==0 and amount>.04
+    if time<0:
+        amount=1
+    elif time<.075:
+        amount=initial_amount*(1-smoothstep(0,.075,time))
+    else:
+        # 咬完恢复站姿后停120毫秒，再用300毫秒从嘴里慢慢伸出。
+        amount=smoothstep(attack_duration+.12,attack_duration+.42,time)
+    visible=frame==0 and amount>.001
+    modulate.a=smoothstep(0,.08,amount)
     queue_redraw()
 func _draw() -> void:
     if not visible: return

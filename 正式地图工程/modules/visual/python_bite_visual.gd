@@ -14,6 +14,8 @@ var layers: Array[Sprite2D] = []
 var frames: Array[AtlasTexture] = []
 var bases: Array[Vector2] = []
 var _struck: bool = false
+var _returning: bool = false
+var _initial_tongue: float = 1
 func _ready() -> void:
     var data = JSON.parse_string(FileAccess.get_file_as_string("res://assets/art/jungle/python/bite_frames.json"))
     for item in data.frames:
@@ -34,22 +36,26 @@ func _ready() -> void:
         layer.add_child(tongue)
         layers.append(layer)
     for duration in DURATIONS: total_duration+=duration
-    sample(0)
+    sample(-1)
 func play_bite() -> void:
+    _initial_tongue=layers[0].get_node("Tongue").amount
+    _returning=false
     elapsed=0
     _struck=false
     playing=true
     sample(0)
 func _process(delta: float) -> void:
-    if not playing: return
+    if not playing and not _returning: return
     elapsed+=delta*playback_speed
     sample(elapsed)
-    if not _struck and elapsed>=.51:
+    if playing and not _struck and elapsed>=.51:
         _struck=true
         bite_started.emit()
-    if elapsed>=total_duration:
+    if playing and elapsed>=total_duration:
         playing=false
+        _returning=true
         bite_finished.emit()
+    if elapsed>=total_duration+.45: _returning=false
 func sample(time: float) -> void:
     if frames.is_empty(): return
     var index: int = 0
@@ -63,7 +69,7 @@ func sample(time: float) -> void:
         var frame: int = POSES[mini(index+layer_index,POSES.size()-1)]
         layers[layer_index].texture=frames[frame]
         layers[layer_index].position=-bases[frame]
-        layers[layer_index].get_node("Tongue").configure(frame,time)
+        layers[layer_index].get_node("Tongue").configure(frame,time,total_duration,_initial_tongue)
         layers[layer_index].modulate.a=(1-blend) if layer_index==0 else blend
     var charge: float = smoothstep(.08,.44,time)*(1-smoothstep(.46,.535,time))
     var strike: float = smoothstep(.49,.55,time)*(1-smoothstep(.63,.82,time))

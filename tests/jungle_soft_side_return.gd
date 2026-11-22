@@ -30,7 +30,7 @@ func run():
         body.global_position = Vector2(34 if direction<0 else 1886,25000)
         check(body.move_and_collide(Vector2(direction*160,0),true)==null,"The former wall has no hard collision across the swing zone")
         body.global_position = Vector2(assist.left_edge if direction<0 else assist.right_edge,25000)
-        body.velocity = Vector2(direction*3000,-300)
+        body.velocity = Vector2(direction*3000*body.get_node("Movement").momentum_flight_speed,-300)
         var max_outside: float = 0
         var returned: bool = false
         var max_jump: float = 0

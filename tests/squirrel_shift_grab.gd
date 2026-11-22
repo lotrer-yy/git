@@ -43,7 +43,7 @@ func run():
     Input.action_release(&"possess")
     climber._physics_process(.01)
     check(climber.vine==null and target.rider==null,"Releasing Shift actually detaches the squirrel")
-    check(body.velocity.is_equal_approx(Vector2(-1242.5,-sqrt(2*2200*450))),"Release keeps sideways momentum while strongly boosting upward height")
+    check(body.velocity.is_equal_approx(Vector2(-1242.5,-sqrt(2*2200*450))*.8),"Release keeps sideways momentum while strongly boosting upward height")
     reader.move_axis = 0
     reader.jump_held = false
     var motor = body.get_node("Movement")
@@ -82,7 +82,7 @@ func run():
         var inherited: Vector2 = body.velocity
         Input.action_release(&"possess")
         climber._physics_process(1.0/120)
-        check(climber.vine==null and signf(body.velocity.x)==signf(inherited.x) and body.velocity.length()>inherited.length()*1.5,"Shift release boosts the actual swing speed while preserving its sideways direction")
+        check(climber.vine==null and signf(body.velocity.x)==signf(inherited.x) and body.velocity.length()>inherited.length()*1.2,"Shift release boosts the actual swing speed while preserving its sideways direction")
         check(body.velocity.x*direction>160,"Releasing during left/right swing throws the squirrel in that direction")
         motor.reset()
         check(not motor._carried_momentum,"Reset clears the rope launch state for normal ground jumps")

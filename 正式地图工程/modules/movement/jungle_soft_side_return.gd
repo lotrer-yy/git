@@ -15,7 +15,9 @@ func _physics_process(delta: float) -> void:
     var depth: float = left_edge-x if x<left_edge else (right_edge-x if x>right_edge else 0.0)
     if is_zero_approx(depth): return
     var inward: float = signf(depth)
-    var speed: float = body.velocity.dot(layout.global_transform.x.normalized())
+    var motor = body.get_node("Movement")
+    var flight_scale: float = motor.momentum_flight_speed if motor._carried_momentum else 1.0
+    var speed: float = body.velocity.dot(layout.global_transform.x.normalized())/flight_scale
     # 在边缘处力度为零，越出去回拉越明显。顺着回来的方向不施加刹车。
     var weight: float = smoothstep(0,180,absf(depth))
     var acceleration: float = depth*stiffness
@@ -26,4 +28,4 @@ func _physics_process(delta: float) -> void:
         var local_impulse: Vector2 = rope.global_transform.basis_xform_inv(impulse)
         rope.rope.add_velocity(rope.grip_length,local_impulse)
     else:
-        body.velocity+=impulse
+        body.velocity+=impulse*flight_scale*flight_scale

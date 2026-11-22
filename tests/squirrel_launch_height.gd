@@ -40,7 +40,7 @@ func run():
     climber.adopt_vine(rope)
     rope._rider_velocity = Vector2(900,0)
     climber.detach(false)
-    check(body.velocity.y < -1200,"A fast horizontal swing gains meaningful lift when released at the bottom")
+    check(body.velocity.y < -1000,"A fast horizontal swing gains meaningful lift when released at the bottom")
     rope.catch(body,Vector2.ZERO,body.global_position)
     climber.adopt_vine(rope)
     rope._rider_velocity = Vector2(400,300)

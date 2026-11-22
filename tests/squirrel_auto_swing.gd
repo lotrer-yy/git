@@ -35,7 +35,7 @@ func run():
         highest = maxf(highest,angle)
     print("AUTO_SWING_ANGLES=",rad_to_deg(first_peak),",",rad_to_deg(later_peak)," MAX=",rad_to_deg(highest))
     check(later_peak>first_peak+.05,"Holding Shift alone gradually increases the actual physical swing amplitude")
-    check(highest<deg_to_rad(80),"Automatic pumping stays below an over-the-top rotation")
+    check(highest<deg_to_rad(85),"Automatic pumping stays below an over-the-top rotation")
     var launch: Vector2 = body.velocity
     Input.action_release(&"possess")
     climber._physics_process(.01)

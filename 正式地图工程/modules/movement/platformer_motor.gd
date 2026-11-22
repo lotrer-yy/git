@@ -22,6 +22,7 @@ signal facing_changed(direction: float)
 @export_range(0.0, 0.3) var coyote_time: float = 0.12
 @export_range(0.0, 0.3) var jump_buffer_time: float = 0.12
 @export_range(0.1, 1.0) var jump_release_multiplier: float = 0.48
+@export_range(.5,1) var momentum_flight_speed: float = 1.0
 @export var fast_fall_multiplier: float = 1.65
 
 var body: CharacterBody2D
@@ -46,18 +47,19 @@ func _physics_process(delta: float) -> void:
 	if grounded_before: _carried_momentum = false
 	_coyote_left = coyote_time if grounded_before else maxf(0.0, _coyote_left - delta)
 	_buffer_left = jump_buffer_time if reader.jump_pressed else maxf(0.0, _buffer_left - delta)
+	var flight_scale: float = momentum_flight_speed if _carried_momentum else 1.0
 	var axis: float = reader.move_axis
 	var response: float = braking if is_zero_approx(axis) else acceleration
 	if not grounded_before:
 		response *= air_control
-		if _carried_momentum and (is_zero_approx(axis) or body.velocity.x*axis>move_speed): response = 0
-	body.velocity.x = move_toward(body.velocity.x, axis * move_speed, response * delta)
+		if _carried_momentum and (is_zero_approx(axis) or body.velocity.x*axis>move_speed*flight_scale): response = 0
+	body.velocity.x = move_toward(body.velocity.x, axis * move_speed*flight_scale, response * flight_scale*flight_scale * delta)
 	if not is_zero_approx(axis) and signf(axis) != facing:
 		facing = signf(axis)
 		facing_changed.emit(facing)
 	if not grounded_before:
 		var gravity_scale: float = fast_fall_multiplier if reader.down_held and body.velocity.y > 0.0 else 1.0
-		body.velocity.y = minf(body.velocity.y + gravity * gravity_scale * delta, max_fall_speed)
+		body.velocity.y = minf(body.velocity.y + gravity * gravity_scale * flight_scale*flight_scale * delta, max_fall_speed*flight_scale)
 	var did_jump := false
 	if _buffer_left > 0.0 and _coyote_left > 0.0:
 		body.velocity.y = -jump_speed
@@ -76,7 +78,7 @@ func _physics_process(delta: float) -> void:
 func launch_with_momentum(velocity: Vector2) -> void:
 	# 绳索抛出使用真实速度，不受普通跳跃的松键截断和无输入空中刹车影响。
 	_carried_momentum = true
-	body.velocity = velocity
+	body.velocity = velocity*momentum_flight_speed
 
 func reset() -> void:
 	_carried_momentum = false

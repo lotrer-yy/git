@@ -10,11 +10,16 @@ func run():
     check(snake.frames.size()==8,"Eight distinct jaw and neck attack poses are registered")
     for i in 8:
         check(snake.frames[i].region.end.x<=snake.SHEET.get_width() and snake.frames[i].region.end.y<=snake.SHEET.get_height(),"Atlas frames stay within the alpha sheet")
-    snake.sample(.42)
+    snake.sample(0)
     var tongue = snake.layers[0].get_node("Tongue")
-    check(tongue.visible and tongue.z_index>0 and tongue.position.x>250,"Open-mouth tongue attaches to the front lip and renders ahead of the jaw")
-    snake.sample(.6)
-    check(not snake.layers[0].get_node("Tongue").visible,"Snapping bite fully retracts the tongue")
+    check(tongue.visible and tongue.position==Vector2(301,149),"Idle tongue starts inside the front lip outline")
+    var original_length: float = tongue.amount
+    snake.sample(.04)
+    check(tongue.amount<original_length and tongue.amount>0,"Tongue retracts into the mouth before anticipation")
+    for time in [.08,.15,.3,.42,.52,.56,.6,.75,.9,1.0]:
+        snake.sample(time)
+        for layer in snake.layers:
+            check(not layer.get_node("Tongue").visible,"Both animation layers hide the tongue throughout opening, lunging and snapping")
     var events: Array[String] = []
     snake.bite_started.connect(func(): events.append("bite"))
     snake.bite_finished.connect(func(): events.append("finished"))

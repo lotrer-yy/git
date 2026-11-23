@@ -6,8 +6,12 @@ var bouncer: Node
 var fold: Sprite2D
 var _sprite: Sprite2D
 var _original_material: Material
+var _clip_material: ShaderMaterial
+var _edge_profile: ImageTexture
+var _landing_open:=false
 @onready var crown: Node2D=get_parent()
 func _ready() -> void:
+    process_priority=5
     if not InputMap.has_action(&"flap"):
         InputMap.add_action(&"flap")
         for code in [KEY_W,KEY_SPACE]:
@@ -21,6 +25,16 @@ func _ready() -> void:
     crown.add_child.call_deferred(bouncer)
     fold=SPRING.new()
     fold.texture=load("res://assets/art/jungle/formal/canopy_fold.png")
+    var pixels: Image=fold.texture.get_image()
+    var edges:=Image.create(pixels.get_width(),1,false,Image.FORMAT_RF)
+    for x in pixels.get_width():
+        var edge:=1.0
+        for y in pixels.get_height():
+            if pixels.get_pixel(x,y).a>.5:
+                edge=float(y)/pixels.get_height()
+                break
+        edges.set_pixel(x,0,Color(edge,0,0))
+    _edge_profile=ImageTexture.create_from_image(edges)
     fold.offset=Vector2(0,fold.texture.get_height()*.5)
     fold.z_index=16
     fold.visible=false
@@ -28,19 +42,39 @@ func _ready() -> void:
 func begin(body: CharacterBody2D,x: float) -> void:
     _sprite=body.get_node("Visual/Sprite")
     _original_material=_sprite.material
-    var material:=ShaderMaterial.new()
-    material.shader=CLIP
-    material.set_shader_parameter("crown",load("res://assets/art/reference_map/08.png"))
-    material.set_shader_parameter("crown_origin",crown.layout.to_global(Vector2(0,16384+crown.bounce_inset)))
-    material.set_shader_parameter("map_scale",crown.layout.global_scale)
-    _sprite.material=material
+    _clip_material=ShaderMaterial.new()
+    _clip_material.shader=CLIP
+    _clip_material.set_shader_parameter("edge_profile",_edge_profile)
+    _sprite.material=_clip_material
     body.get_node("Visual").reset()
     body.get_node("VineClimber").set_physics_process(false)
     crown.layout.get_node("SoftSideReturn").set_physics_process(false)
     bouncer.begin(body,x)
+    _sync_lip()
 func pulse(x: float) -> void:
     fold.position=Vector2(x+34,crown.canopy_y(x)+crown.bounce_inset+2)
     fold.pulse()
+    _landing_open=false
+    _sync_lip()
+func _process(_delta: float) -> void:
+    if not is_instance_valid(bouncer) or not bouncer.enabled: return
+    var p: Vector2=crown.to_local(bouncer.body.global_position)
+    var surface: float=crown.canopy_y(p.x)+crown.bounce_inset
+    if not bouncer.buried and bouncer._velocity.y>0 and p.y>surface-170:
+        if not _landing_open:
+            pulse(p.x)
+            _landing_open=true
+        # Keep the opening beneath the squirrel while it crosses the lip sideways.
+        fold.position=Vector2(p.x+34,surface+2)
+    elif bouncer._velocity.y<=0:
+        _landing_open=false
+    _sync_lip()
+func _sync_lip() -> void:
+    if not is_instance_valid(_clip_material): return
+    var size: Vector2=fold.texture.get_size()*fold.global_scale.abs()
+    if not fold.visible: size=fold.texture.get_size()*crown.global_scale.abs()
+    _clip_material.set_shader_parameter("lip_origin",fold.global_position)
+    _clip_material.set_shader_parameter("lip_size",size.max(Vector2.ONE))
 func reset() -> void:
     if is_instance_valid(bouncer): bouncer.reset()
     if is_instance_valid(fold): fold.reset()

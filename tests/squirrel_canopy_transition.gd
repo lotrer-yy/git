@@ -49,6 +49,11 @@ func run():
     check(body.visible and transition.state==transition.State.COMPLETE and bounce.enabled,"Camera arrival hands directly to the old canopy bouncing behavior")
     check(body.z_index>14 and not motor.enabled and not body.get_node("Input").enabled,"Canopy bouncing owns movement and keeps the squirrel above the leaf layer")
     check(not body.transferring and not game.exit_in_progress,"Canopy arrival ends cinematic protection")
+    transition.play.fold._process(.07)
+    transition.play._sync_lip()
+    var lip_size: Vector2=transition.play._clip_material.get_shader_parameter("lip_size")
+    check(lip_size.is_equal_approx(transition.play.fold.texture.get_size()*transition.play.fold.global_scale.abs()),"Squirrel occlusion follows the actual spring-deformed fold size")
+    check(transition.play._clip_material.get_shader_parameter("lip_origin")==transition.play.fold.global_position,"Emergence is anchored to the supplied black lip, not the map outline")
     var apex: float=body.position.y
     for i in 200:
         bounce._physics_process(.01)

@@ -1,5 +1,6 @@
 extends Node
 @export var foreground_z_override: int = -1
+@export var surface_offset_y: float = 0.0
 ## 树冠内待机、按次跳出、空中转向与原地落回；与普通平台移动互斥。
 @export var jump_speed: float = 1420.0
 @export var gravity: float = 2100.0
@@ -23,7 +24,7 @@ func begin(squirrel: CharacterBody2D, x: float) -> void:
 	_velocity=Vector2.ZERO
 	body.get_node("Movement").enabled=false
 	body.get_node("Input").enabled=false
-	body.global_position=_sky.to_global(Vector2(landing_x,_sky.canopy_y(landing_x)+burial_depth))
+	body.global_position=_sky.to_global(Vector2(landing_x,_sky.canopy_y(landing_x)+surface_offset_y+burial_depth))
 	body.hide()
 	launch()
 func launch() -> void:
@@ -55,7 +56,7 @@ func _physics_process(delta: float) -> void:
 	body.velocity=_velocity*body.global_scale
 	if absf(_velocity.x)>5:
 		body.get_node("Visual/Sprite").flip_h=_velocity.x>0
-	if _velocity.y>0 and p.y>=_sky.canopy_y(p.x)+burial_depth:
+	if _velocity.y>0 and p.y>=_sky.canopy_y(p.x)+surface_offset_y+burial_depth:
 		landing_x=p.x
 		buried=true
 		_velocity=Vector2.ZERO

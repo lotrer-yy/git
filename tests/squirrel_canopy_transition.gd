@@ -54,7 +54,7 @@ func run():
         bounce._physics_process(.01)
         apex=minf(apex,body.position.y)
         if bounce.buried: break
-    check(apex<transition.canopy_y(body.position.x)-200,"First jump genuinely rises above the crown")
+    check(apex<transition.canopy_y(body.position.x)+transition.bounce_inset-200,"First jump genuinely rises above the crown")
     check(bounce.buried and not body.visible,"After falling, squirrel burrows back into the crown instead of standing on a platform")
     check(transition.play.fold.visible,"The supplied fold pulses when the squirrel lands")
     Input.action_press(&"flap")

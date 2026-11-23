@@ -17,6 +17,7 @@ func _ready() -> void:
     # Parent bouncer to the formal crown, whose coordinates and ripple interface it uses.
     bouncer=BOUNCER.new()
     bouncer.foreground_z_override=15
+    bouncer.surface_offset_y=crown.bounce_inset
     crown.add_child.call_deferred(bouncer)
     fold=SPRING.new()
     fold.texture=load("res://assets/art/jungle/formal/canopy_fold.png")
@@ -30,7 +31,7 @@ func begin(body: CharacterBody2D,x: float) -> void:
     var material:=ShaderMaterial.new()
     material.shader=CLIP
     material.set_shader_parameter("crown",load("res://assets/art/reference_map/08.png"))
-    material.set_shader_parameter("crown_origin",crown.layout.to_global(Vector2(0,16384)))
+    material.set_shader_parameter("crown_origin",crown.layout.to_global(Vector2(0,16384+crown.bounce_inset)))
     material.set_shader_parameter("map_scale",crown.layout.global_scale)
     _sprite.material=material
     body.get_node("Visual").reset()
@@ -38,7 +39,7 @@ func begin(body: CharacterBody2D,x: float) -> void:
     crown.layout.get_node("SoftSideReturn").set_physics_process(false)
     bouncer.begin(body,x)
 func pulse(x: float) -> void:
-    fold.position=Vector2(x+34,crown.canopy_y(x)+2)
+    fold.position=Vector2(x+34,crown.canopy_y(x)+crown.bounce_inset+2)
     fold.pulse()
 func reset() -> void:
     if is_instance_valid(bouncer): bouncer.reset()

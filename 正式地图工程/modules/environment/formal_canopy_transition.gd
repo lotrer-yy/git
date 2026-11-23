@@ -10,6 +10,7 @@ const CROWN=preload("res://assets/art/reference_map/08.png")
 @export var burrow_seconds: float=.45
 @export var travel_seconds: float=1.7
 @export var landing_x: float=1040.0
+@export var bounce_inset: float=180.0
 enum State { WAITING, BURROWING, TRAVELLING, EMERGING, COMPLETE }
 var state: State=State.WAITING
 var elapsed: float=0
@@ -112,7 +113,7 @@ func _begin() -> void:
     state=State.BURROWING
     elapsed=0
     _start=layout.to_local(body.global_position)
-    _landing=Vector2(landing_x,canopy_y(landing_x))
+    _landing=Vector2(landing_x,canopy_y(landing_x)+bounce_inset)
     stage.level.exit_in_progress=true
     body.get_node("VineClimber").reset()
     body.get_node("VineClimber").set_physics_process(false)

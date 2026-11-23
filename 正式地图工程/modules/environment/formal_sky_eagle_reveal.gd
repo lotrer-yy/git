@@ -6,7 +6,6 @@ signal reveal_finished
 @export var reveal_seconds: float=1.8
 @export var wide_zoom: float=1.0
 @export var eagle_final_scale: float=.84
-@export var bird_readability_scale: float=1.35
 enum State { WAITING, REVEALING, ACTIVE }
 var state: State=State.WAITING
 var elapsed: float=0
@@ -14,7 +13,6 @@ var _armed:=false
 var _start_y:=0.0
 var _rest_zoom:=Vector2.ONE
 var _bounded_wide_zoom:=Vector2.ONE
-var _rest_bird_scale:=Vector2.ONE
 var _band: int=-1
 @onready var layout: Node2D=get_parent()
 @onready var stage: Node=get_node("../..")
@@ -23,7 +21,6 @@ var _band: int=-1
 @onready var eagle: Sprite2D=$Eagle
 func _ready() -> void:
     process_priority=5
-    _rest_bird_scale=bird.get_node("Visual/Sprite").scale
     eagle.hide()
 func arm() -> void:
     if state!=State.WAITING: return
@@ -43,7 +40,6 @@ func _process(delta: float) -> void:
         camera.zoom=_rest_zoom.lerp(_bounded_wide_zoom,u)
         eagle.scale=Vector2.ONE*lerpf(eagle_final_scale*.55,eagle_final_scale,u)
         eagle.material.set_shader_parameter("reveal_alpha",smoothstep(.05,.7,elapsed/reveal_seconds))
-        bird.get_node("Visual/Sprite").scale=_rest_bird_scale*lerpf(1,bird_readability_scale,u)
         if elapsed>=reveal_seconds:
             state=State.ACTIVE
             reveal_finished.emit()
@@ -81,4 +77,3 @@ func reset() -> void:
     _band=-1
     eagle.hide()
     eagle.material.set_shader_parameter("reveal_alpha",0.0)
-    bird.get_node("Visual/Sprite").scale=_rest_bird_scale

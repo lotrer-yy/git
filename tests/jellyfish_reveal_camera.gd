@@ -41,7 +41,7 @@ func run():
     check(view.state==view.State.WIDE and abs(game.camera.zoom.x-1.0)<.001,"The encounter retains the same wide view as the eagle")
     var half: float=game.camera.get_viewport_rect().size.x*.5/game.camera.zoom.x
     check(game.camera.global_position.x-half>=-.1 and game.camera.global_position.x+half<=1920.1,"The jellyfish view stays inside the original map edges")
-    check(fish.get_node("Visual/Sprite").scale.x>rest_scale.x*1.3 and game.player==fish and fish.get_node("Input").enabled,"Fish remains readable and controllable throughout the reveal")
+    check(fish.get_node("Visual/Sprite").scale==rest_scale and game.player==fish and fish.get_node("Input").enabled,"Fish naturally scales with the camera while remaining controllable")
     fish.position.y=stage.get_node("ShoreExit").surface_y+2200
     view._process(.3)
     check(view.state==view.State.WIDE,"The near-surface quick start still gets time to see the jellyfish in the wide view")

@@ -52,7 +52,7 @@ func run():
     check(sky.state==sky.State.ACTIVE and abs(game.camera.zoom.x-1.0)<.001,"The wide view remains after the entrance")
     var half: float=game.camera.get_viewport_rect().size.x*.5/game.camera.zoom.x
     check(game.camera.global_position.x-half>=-.1 and game.camera.global_position.x+half<=1920.1,"The eagle view stops at both authored map edges")
-    check(sprite.scale.x>rest_scale.x*1.3 and sky.eagle.z_index<bird.z_index,"Bird stays readable in front of the distant eagle")
+    check(sprite.scale==rest_scale and sky.eagle.z_index<bird.z_index,"Bird keeps its world scale and naturally shrinks with the camera pullback")
     check(game.player==bird and bird.get_node("Input").enabled and bird.get_node("Movement").enabled and Engine.time_scale==1,"The eagle entrance keeps bird controls and normal game speed")
     sky.reset()
     check(not sky.eagle.visible and game.camera.zoom.is_equal_approx(Vector2.ONE*1.35) and sprite.scale==rest_scale,"Reset restores camera, character size and hidden eagle")

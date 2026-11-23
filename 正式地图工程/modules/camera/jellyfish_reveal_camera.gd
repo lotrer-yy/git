@@ -7,7 +7,6 @@ signal reveal_finished
 @export var wide_zoom: float=1.0
 @export var minimum_wide_seconds: float=2.0
 @export var restore_depth: float=2300.0
-@export var fish_readability_scale: float=1.35
 enum State { WAITING, REVEALING, WIDE, RETURNING, FINISHED }
 var state: State=State.WAITING
 var elapsed:=0.0
@@ -16,19 +15,15 @@ var _pending:=false
 var _rest_zoom:=Vector2.ONE
 var _bounded_wide_zoom:=Vector2.ONE
 var _return_zoom:=Vector2.ONE
-var _rest_scale:=Vector2.ONE
-var _return_scale:=Vector2.ONE
 @onready var stage: Node=get_parent()
 @onready var level: Node=stage.get_parent().get_parent()
 @onready var camera: FollowCamera=level.get_node_or_null("Camera")
 @onready var fish: CharacterBody2D=get_node("../Fish")
-@onready var sprite: Sprite2D=fish.get_node("Visual/Sprite")
 @onready var boss: Node2D=get_node("../JellyfishBoss")
 func _ready() -> void:
     process_priority=5
     top_level=true
     if level is Node2D: global_transform=level.global_transform
-    _rest_scale=sprite.scale
     boss.appeared.connect(func(): _pending=true)
 func _process(delta: float) -> void:
     if not is_instance_valid(camera) or not stage.active or stage.level.dead: return
@@ -52,12 +47,10 @@ func _process(delta: float) -> void:
         state=State.RETURNING
         elapsed=0
         _return_zoom=camera.zoom
-        _return_scale=sprite.scale
     elapsed+=delta
     if state==State.REVEALING:
         var u:=smoothstep(0,reveal_seconds,elapsed)
         camera.zoom=_rest_zoom.lerp(_bounded_wide_zoom,u)
-        sprite.scale=_rest_scale*lerpf(1,fish_readability_scale,u)
         if elapsed>=reveal_seconds:
             state=State.WIDE
             _wide_elapsed=0
@@ -69,13 +62,11 @@ func _process(delta: float) -> void:
             return
         var u:=smoothstep(0,return_seconds,elapsed)
         camera.zoom=_return_zoom.lerp(_rest_zoom,u)
-        sprite.scale=_return_scale.lerp(_rest_scale,u)
         if elapsed>=return_seconds: _finish_return()
 func finish_for_surface() -> void:
     if state not in [State.WAITING,State.FINISHED]: _finish_return()
 func _finish_return(restore_zoom: bool=true) -> void:
     if restore_zoom: camera.zoom=_rest_zoom
-    sprite.scale=_rest_scale
     state=State.FINISHED
 func reset() -> void:
     if state not in [State.WAITING,State.FINISHED] and is_instance_valid(camera): camera.zoom=_rest_zoom
@@ -83,4 +74,3 @@ func reset() -> void:
     elapsed=0
     _wide_elapsed=0
     _pending=false
-    sprite.scale=_rest_scale

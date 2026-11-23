@@ -27,6 +27,8 @@
 [ext_resource type="Script" path="res://modules/possession/formal_canopy_possession.gd" id="canopy_possession"]
 [ext_resource type="Script" path="res://modules/camera/possession_camera.gd" id="canopy_shot"]
 
+[ext_resource type="PackedScene" path="res://scenes/levels/formal_sky_eagle_reveal.tscn" id="sky_eagle"]
+
 [sub_resource type="RectangleShape2D" id="JungleFloorShape"]
 size = Vector2(18304,256)
 
@@ -302,3 +304,5 @@ script=ExtResource("canopy_shot")
 camera_path=NodePath("../../../../Camera")
 [node name="CanopyBirdStage" type="Node" parent="."]
 script=ExtResource("canopy_bird_stage")
+
+[node name="SkyEagle" parent="." instance=ExtResource("sky_eagle")]

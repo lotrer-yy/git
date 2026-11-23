@@ -36,7 +36,7 @@ func start_segment(index: int) -> void:
         camera.make_current()
         Bgm.play_track(Bgm.Track.HELL)
 
-    elif index in [3,4]:
+    elif index in [3,4,5]:
         entry.reset_for_replay()
         entry.completed = true
         level.soul.hide()
@@ -80,4 +80,16 @@ func start_segment(index: int) -> void:
             stage.get_node("JungleHandoff")._physics_process(0)
             stage.get_node("JunglePossession")._physics_process(0)
             camera.set_follow_target(stage.fish,true)
+        if index==5:
+            var layout := stage.get_node("JungleLayout")
+            var squirrel := layout.get_node("Squirrel")
+            var possession := stage.get_node("JunglePossession")
+            possession.clear_selection()
+            possession.state = PossessionController.State.POSSESSED
+            possession.enabled = false
+            possession.soul.hide()
+            squirrel.get_node("Host").take_control()
+            level.player = squirrel
+            stage.get_node("ShoreExit").release_soul()
+            layout.get_node("CanopyTransition").preview_from_top_vine()
         Bgm.play_track(Bgm.Track.OCEAN)

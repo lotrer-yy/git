@@ -163,3 +163,41 @@ func reset() -> void:
     body.transferring=false
     body.show()
     layout.get_node("BeeEncounter").enabled=true
+
+func preview_from_top_vine() -> void:
+    # 快捷试玩先呈现最上层藤蔓，再自动松手，沿真实抛物线进入树冠。
+    var climber=body.get_node("VineClimber")
+    var motor=body.get_node("Movement")
+    var reader=body.get_node("Input")
+    climber.reset()
+    climber.set_physics_process(false)
+    reader.enabled=false
+    reader.clear()
+    motor.enabled=false
+    body.set_active(true)
+    body.get_node("AirSpin").reset()
+    var vine=layout.vines[0]
+    vine.process_mode=Node.PROCESS_MODE_DISABLED
+    for i in vine.rope.points.size():
+        var point:=Vector2(0,vine.rope.segment_length*i).rotated(-1.0)
+        vine.rope.points[i]=point
+        vine.rope.previous[i]=point
+    vine.angle=1.0
+    vine.rider_offset=Vector2(78,60)
+    body.global_position=vine.to_global(vine.rope.sample(400))+vine.rider_offset
+    vine.catch(body,Vector2.ZERO,body.global_position)
+    vine.grip_length=400
+    vine._ribbon.update_points(vine.rope.points)
+    climber.adopt_vine(vine)
+    layout.get_node("BeeEncounter").reset()
+    layout.get_node("BeeEncounter").enabled=false
+    layout.camera.set_follow_target(body,true)
+    layout.camera.set_process(true)
+    body.reset_physics_interpolation()
+    await get_tree().create_timer(.35).timeout
+    vine.release()
+    vine.process_mode=Node.PROCESS_MODE_INHERIT
+    climber.vine=null
+    motor.enabled=true
+    motor.launch_with_momentum(Vector2(500,-sqrt(2*motor.gravity*450)))
+    climber.released.emit(body.velocity)

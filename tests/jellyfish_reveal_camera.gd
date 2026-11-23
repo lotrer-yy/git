@@ -22,31 +22,32 @@ func run():
         stage.get_node(name).set_physics_process(false)
     var view=stage.get_node("JellyfishReveal")
     view.set_process(false)
+    view.wide_zoom=.5 # Even a requested wider zoom must stop at the authored edges.
     var boss=stage.get_node("JellyfishBoss")
     game.camera.zoom=Vector2.ONE*1.35
     game.camera.set_follow_target(fish,true)
     game.camera.set_process(false)
     var rest_scale: Vector2=fish.get_node("Visual/Sprite").scale
-    check(view.state==view.State.WAITING and not view.margins.visible,"Ordinary swimming retains normal framing before the jellyfish arrives")
+    check(view.state==view.State.WAITING,"Ordinary swimming retains normal framing before the jellyfish arrives")
     boss._begin_entrance()
     view._process(0)
-    check(view.state==view.State.REVEALING and view.margins.visible,"The real jellyfish appeared signal starts the wide reveal")
+    check(view.state==view.State.REVEALING,"The real jellyfish appeared signal starts the wide reveal")
     var previous: float=game.camera.zoom.x
     for i in 130:
         view._process(.015)
         check(game.camera.zoom.x<=previous+.0001,"Jellyfish entrance pulls back smoothly without zoom reversal")
         previous=game.camera.zoom.x
     game.camera._process(.016)
-    check(view.state==view.State.WIDE and abs(game.camera.zoom.x-.78)<.001,"The encounter retains the same wide view as the eagle")
+    check(view.state==view.State.WIDE and abs(game.camera.zoom.x-1.0)<.001,"The encounter retains the same wide view as the eagle")
     var half: float=game.camera.get_viewport_rect().size.x*.5/game.camera.zoom.x
-    check(game.camera.global_position.x-half<=0 and game.camera.global_position.x+half>=1920,"Both ocean wall banks fit on screen")
+    check(game.camera.global_position.x-half>=-.1 and game.camera.global_position.x+half<=1920.1,"The jellyfish view stays inside the original map edges")
     check(fish.get_node("Visual/Sprite").scale.x>rest_scale.x*1.3 and game.player==fish and fish.get_node("Input").enabled,"Fish remains readable and controllable throughout the reveal")
     fish.position.y=stage.get_node("ShoreExit").surface_y+2200
     view._process(.3)
     check(view.state==view.State.WIDE,"The near-surface quick start still gets time to see the jellyfish in the wide view")
     for i in 140: view._process(.015)
     for i in 80: view._process(.015)
-    check(view.state==view.State.FINISHED and game.camera.zoom.is_equal_approx(Vector2.ONE*1.35) and not view.margins.visible,"Approaching the surface smoothly restores normal framing before the final grab")
+    check(view.state==view.State.FINISHED and game.camera.zoom.is_equal_approx(Vector2.ONE*1.35),"Approaching the surface smoothly restores normal framing before the final grab")
     check(fish.get_node("Visual/Sprite").scale==rest_scale,"Surface return restores original fish size")
     view.reset()
     fish.position.y=35000
@@ -64,6 +65,6 @@ func run():
     view._process(0)
     view._process(.6)
     view.reset()
-    check(view.state==view.State.WAITING and not view.margins.visible and game.camera.zoom.is_equal_approx(Vector2.ONE*1.35),"Restart cancels a partially completed pullback")
+    check(view.state==view.State.WAITING and game.camera.zoom.is_equal_approx(Vector2.ONE*1.35),"Restart cancels a partially completed pullback")
     print("JELLYFISH_REVEAL_CAMERA_FAILURES=",failures.size())
     quit(0 if failures.is_empty() else 1)

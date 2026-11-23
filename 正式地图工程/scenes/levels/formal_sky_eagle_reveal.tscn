@@ -2,23 +2,11 @@
 [ext_resource type="Script" path="res://modules/environment/formal_sky_eagle_reveal.gd" id="logic"]
 [ext_resource type="Texture2D" path="res://assets/art/sky/formal/eagle.png" id="art"]
 [ext_resource type="Shader" path="res://shaders/formal_sky_eagle.gdshader" id="mask"]
-[ext_resource type="Shader" path="res://shaders/formal_sky_edge_fill.gdshader" id="edge_shader"]
 [sub_resource type="ShaderMaterial" id="EagleMask"]
 resource_local_to_scene=true
 shader=ExtResource("mask")
-[sub_resource type="ShaderMaterial" id="CloudFill"]
-resource_local_to_scene=true
-shader=ExtResource("edge_shader")
 [node name="SkyEagle" type="Node2D"]
 script=ExtResource("logic")
-[node name="CloudMargins" type="ColorRect" parent="."]
-visible=false
-z_index=-1
-material=SubResource("CloudFill")
-offset_left=-1600.0
-offset_right=3520.0
-offset_bottom=18500.0
-mouse_filter=2
 [node name="Eagle" type="Sprite2D" parent="."]
 visible=false
 z_index=3

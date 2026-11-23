@@ -20,6 +20,7 @@ func run():
     var bird=layout.get_node("Bird")
     var sky=layout.get_node("SkyEagle")
     sky.set_process(false)
+    sky.wide_zoom=.5 # Even a requested wider zoom must stop at the authored edges.
     check(not sky.eagle.visible and sky.state==sky.State.WAITING,"The eagle does not appear before possessing the bird")
     var sprite=bird.get_node("Visual/Sprite")
     var rest_scale: Vector2=sprite.scale
@@ -41,19 +42,19 @@ func run():
     check(sky.state==sky.State.WAITING,"The reveal waits for possession camera recovery to finish")
     shot.active=false
     sky._process(0)
-    check(sky.state==sky.State.REVEALING and sky.eagle.visible and sky.edges.visible,"Climbing triggers the distant eagle and original-cloud margins")
+    check(sky.state==sky.State.REVEALING and sky.eagle.visible,"Climbing triggers the distant eagle and bounded wide view")
     var previous: float=game.camera.zoom.x
     for i in 130:
         sky._process(.015)
         check(game.camera.zoom.x<=previous+.0001,"The reveal continuously pulls back without reversing zoom")
         previous=game.camera.zoom.x
     game.camera._process(.016)
-    check(sky.state==sky.State.ACTIVE and abs(game.camera.zoom.x-.78)<.001,"The wide view remains after the entrance")
+    check(sky.state==sky.State.ACTIVE and abs(game.camera.zoom.x-1.0)<.001,"The wide view remains after the entrance")
     var half: float=game.camera.get_viewport_rect().size.x*.5/game.camera.zoom.x
-    check(game.camera.global_position.x-half<=0 and game.camera.global_position.x+half>=1920,"Both original cloud banks fit on screen simultaneously")
+    check(game.camera.global_position.x-half>=-.1 and game.camera.global_position.x+half<=1920.1,"The eagle view stops at both authored map edges")
     check(sprite.scale.x>rest_scale.x*1.3 and sky.eagle.z_index<bird.z_index,"Bird stays readable in front of the distant eagle")
     check(game.player==bird and bird.get_node("Input").enabled and bird.get_node("Movement").enabled and Engine.time_scale==1,"The eagle entrance keeps bird controls and normal game speed")
     sky.reset()
-    check(not sky.eagle.visible and not sky.edges.visible and game.camera.zoom.is_equal_approx(Vector2.ONE*1.35) and sprite.scale==rest_scale,"Reset restores camera, character size and hidden eagle")
+    check(not sky.eagle.visible and game.camera.zoom.is_equal_approx(Vector2.ONE*1.35) and sprite.scale==rest_scale,"Reset restores camera, character size and hidden eagle")
     print("EAGLE_SKY_REVEAL_FAILURES=",failures.size())
     quit(0 if failures.is_empty() else 1)

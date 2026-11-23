@@ -28,6 +28,8 @@
 
 [ext_resource type="Script" path="res://modules/status/fish_tentacle_stun.gd" id="fish_stun"]
 
+[ext_resource type="PackedScene" path="res://scenes/effects/jellyfish_reveal_camera.tscn" id="jellyfish_reveal"]
+
 [sub_resource type="AtlasTexture" id="StrandedFish"]
 atlas = ExtResource("stranded_art")
 region = Rect2(1087,1968,130,85)
@@ -136,3 +138,5 @@ script = ExtResource("shot")
 camera_path = NodePath("../../../Camera")
 [node name="JungleHandoff" type="Node" parent="."]
 script = ExtResource("jungle_handoff")
+
+[node name="JellyfishReveal" parent="." instance=ExtResource("jellyfish_reveal")]

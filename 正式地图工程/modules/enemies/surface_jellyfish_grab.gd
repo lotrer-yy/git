@@ -175,6 +175,8 @@ func _catch() -> void:
     _struggle_kick = 0
     _capture_origin = fish.global_position
     _pull_speed = 0
+    var reveal:=stage.get_node_or_null("JellyfishReveal")
+    if reveal!=null: reveal.finish_for_surface()
     shot.begin(stage.level.camera)
     prompt.show_prompt()
     _arm.start = _arm.to_local(fish.global_position+Vector2(0,720))

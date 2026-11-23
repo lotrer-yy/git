@@ -107,6 +107,7 @@ func _on_player_died() -> void:
     possession.clear_selection()
 
 func reset() -> void:
+    $JellyfishReveal.reset()
     fish.get_node("Stun").reset(false)
     $JungleHandoff.reset()
     $JungleLayout.reset()

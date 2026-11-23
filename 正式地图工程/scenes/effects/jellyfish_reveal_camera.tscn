@@ -1,0 +1,17 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://modules/camera/jellyfish_reveal_camera.gd" id="logic"]
+[ext_resource type="Shader" path="res://shaders/formal_ocean_edge_fill.gdshader" id="fill"]
+[sub_resource type="ShaderMaterial" id="WaterFill"]
+resource_local_to_scene=true
+shader=ExtResource("fill")
+[node name="JellyfishReveal" type="Node2D"]
+script=ExtResource("logic")
+[node name="WaterMargins" type="ColorRect" parent="."]
+visible=false
+z_index=-1
+material=SubResource("WaterFill")
+offset_left=-1600.0
+offset_right=3520.0
+offset_top=29900.0
+offset_bottom=41000.0
+mouse_filter=2

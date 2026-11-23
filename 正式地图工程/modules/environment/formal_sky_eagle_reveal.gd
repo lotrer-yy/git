@@ -18,10 +18,11 @@ var _band: int=-1
 @onready var stage: Node=get_node("../..")
 @onready var bird: CharacterBody2D=get_node("../Bird")
 @onready var camera: FollowCamera=get_node_or_null("../../../../Camera")
-@onready var eagle: Sprite2D=$Eagle
+@onready var eagle: Node2D=$Eagle
 func _ready() -> void:
     process_priority=5
     eagle.hide()
+    eagle.reset()
 func arm() -> void:
     if state!=State.WAITING: return
     _armed=true
@@ -53,6 +54,7 @@ func _begin() -> void:
     _bounded_wide_zoom=Vector2.ONE*maxf(wide_zoom,minimum_zoom)
     elapsed=0
     state=State.REVEALING
+    eagle.reset()
     eagle.show()
     eagle.scale=Vector2.ONE*eagle_final_scale*.55
     eagle.global_position=Vector2(layout.to_global(Vector2(960,0)).x,camera.global_position.y-140)
@@ -76,4 +78,5 @@ func reset() -> void:
     _armed=false
     _band=-1
     eagle.hide()
+    eagle.reset()
     eagle.material.set_shader_parameter("reveal_alpha",0.0)

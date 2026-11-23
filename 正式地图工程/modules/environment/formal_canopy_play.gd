@@ -1,11 +1,12 @@
 extends Node
 const BOUNCER=preload("res://modules/movement/canopy_bouncer.gd")
-const SPRING=preload("res://modules/visual/canopy_ripple_spring.gd")
+const SPRING=preload("res://modules/visual/formal_canopy_fold.gd")
 const CLIP=preload("res://shaders/formal_canopy_squirrel.gdshader")
 var bouncer: Node
 var fold: Sprite2D
 var _sprite: Sprite2D
 var _original_material: Material
+var _original_sprite_scale:=Vector2.ONE
 var _clip_material: ShaderMaterial
 var _edge_profile: ImageTexture
 var _landing_open:=false
@@ -35,13 +36,14 @@ func _ready() -> void:
                 break
         edges.set_pixel(x,0,Color(edge,0,0))
     _edge_profile=ImageTexture.create_from_image(edges)
-    fold.offset=Vector2(0,fold.texture.get_height()*.5)
+    fold.offset=Vector2.ZERO
     fold.z_index=16
     fold.visible=false
     crown.add_child.call_deferred(fold)
 func begin(body: CharacterBody2D,x: float) -> void:
     _sprite=body.get_node("Visual/Sprite")
     _original_material=_sprite.material
+    _original_sprite_scale=_sprite.scale
     _clip_material=ShaderMaterial.new()
     _clip_material.shader=CLIP
     _clip_material.set_shader_parameter("edge_profile",_edge_profile)
@@ -51,10 +53,18 @@ func begin(body: CharacterBody2D,x: float) -> void:
     crown.layout.get_node("SoftSideReturn").set_physics_process(false)
     bouncer.begin(body,x)
     _sync_lip()
+func _place_fold(x: float) -> void:
+    fold.position=Vector2(x+34,crown.canopy_y(x)+crown.bounce_inset+2+fold.texture.get_height()*.5)
 func pulse(x: float) -> void:
-    fold.position=Vector2(x+34,crown.canopy_y(x)+crown.bounce_inset+2)
-    fold.pulse()
-    _landing_open=false
+    _place_fold(x)
+    if bouncer._velocity.y<0:
+        # 跳出时不出现褶皱；仍沿同一入口轮廓钻出。
+        fold.reset()
+        _landing_open=false
+        _sprite.scale=_original_sprite_scale
+    elif not _landing_open:
+        fold.pulse()
+        _landing_open=true
     _sync_lip()
 func _process(_delta: float) -> void:
     if not is_instance_valid(bouncer) or not bouncer.enabled: return
@@ -63,20 +73,26 @@ func _process(_delta: float) -> void:
     if not bouncer.buried and bouncer._velocity.y>0 and p.y>surface-170:
         if not _landing_open:
             pulse(p.x)
-            _landing_open=true
         # Keep the opening beneath the squirrel while it crosses the lip sideways.
-        fold.position=Vector2(p.x+34,surface+2)
-    elif bouncer._velocity.y<=0:
+        _place_fold(p.x)
+    elif bouncer._velocity.y<0:
         _landing_open=false
+    if bouncer._velocity.y>0:
+        var sink:=smoothstep(surface-160,surface+150,p.y)
+        _sprite.scale=_original_sprite_scale*lerpf(1.0,.78,sink)
+    elif not bouncer.buried:
+        _sprite.scale=_original_sprite_scale
     _sync_lip()
 func _sync_lip() -> void:
     if not is_instance_valid(_clip_material): return
     var size: Vector2=fold.texture.get_size()*fold.global_scale.abs()
     if not fold.visible: size=fold.texture.get_size()*crown.global_scale.abs()
-    _clip_material.set_shader_parameter("lip_origin",fold.global_position)
+    _clip_material.set_shader_parameter("lip_origin",fold.global_position-Vector2(0,size.y*.5))
     _clip_material.set_shader_parameter("lip_size",size.max(Vector2.ONE))
 func reset() -> void:
     if is_instance_valid(bouncer): bouncer.reset()
     if is_instance_valid(fold): fold.reset()
-    if is_instance_valid(_sprite): _sprite.material=_original_material
+    if is_instance_valid(_sprite):
+        _sprite.material=_original_material
+        _sprite.scale=_original_sprite_scale
     crown.layout.get_node("SoftSideReturn").set_physics_process(true)

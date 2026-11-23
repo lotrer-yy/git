@@ -1,4 +1,5 @@
 extends Node
+@export var foreground_z_override: int = -1
 ## 树冠内待机、按次跳出、空中转向与原地落回；与普通平台移动互斥。
 @export var jump_speed: float = 1420.0
 @export var gravity: float = 2100.0
@@ -29,7 +30,7 @@ func launch() -> void:
 	if not enabled or not buried or released:
 		return
 	buried=false
-	body.z_index=_sky.get_node("CanopyForeground").z_index+1
+	body.z_index=foreground_z_override if foreground_z_override>=0 else _sky.get_node("CanopyForeground").z_index+1
 	body.show()
 	_velocity=Vector2(0,-jump_speed)
 	_sky.ripple_at(landing_x)

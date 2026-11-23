@@ -31,6 +31,8 @@ func run():
     var transition=layout.get_node("CanopyTransition")
     transition.set_physics_process(false)
     transition.travel.set_process(false)
+    await process_frame
+    await process_frame
     body.global_position=layout.to_global(Vector2(930,21100))
     check(not transition._can_enter(),"Flight below the canopy does not start a cinematic")
     body.global_position=layout.to_global(Vector2(930,20580))
@@ -42,21 +44,29 @@ func run():
     transition._physics_process(.46)
     check(not body.visible and transition.travel.active,"Squirrel remains hidden during the upward camera trip")
     transition.travel._process(2)
-    check(body.visible and transition.state==transition.State.EMERGING,"Camera arrival starts the canopy emergence")
-    transition._physics_process(.4)
-    check(body.z_index>14,"Emerging squirrel moves in front of the canopy")
-    transition._physics_process(.5)
-    check(transition.state==transition.State.COMPLETE and motor.enabled and not body.transferring and not game.exit_in_progress,"Landing restores normal play without retriggering")
-    check(abs(body.position.y-transition.canopy_y(body.position.x))<3,"The squirrel lands on the authored crown outline")
-    await physics_frame
-    await physics_frame
-    var query=PhysicsRayQueryParameters2D.create(body.global_position+Vector2(0,-30),body.global_position+Vector2(0,40),32)
-    var hit=body.get_world_2d().direct_space_state.intersect_ray(query)
-    check(not hit.is_empty() and hit.collider==transition._surface,"Canopy has real floor collision at the visual landing point")
-    for frame in 15:
-        await physics_frame
-        motor._physics_process(1.0/60)
-    check(body.is_on_floor(),"Normal squirrel physics remains standing on the canopy")
+    var bounce=transition.play.bouncer
+    bounce.set_physics_process(false)
+    check(body.visible and transition.state==transition.State.COMPLETE and bounce.enabled,"Camera arrival hands directly to the old canopy bouncing behavior")
+    check(body.z_index>14 and not motor.enabled and not body.get_node("Input").enabled,"Canopy bouncing owns movement and keeps the squirrel above the leaf layer")
+    check(not body.transferring and not game.exit_in_progress,"Canopy arrival ends cinematic protection")
+    var apex: float=body.position.y
+    for i in 200:
+        bounce._physics_process(.01)
+        apex=minf(apex,body.position.y)
+        if bounce.buried: break
+    check(apex<transition.canopy_y(body.position.x)-200,"First jump genuinely rises above the crown")
+    check(bounce.buried and not body.visible,"After falling, squirrel burrows back into the crown instead of standing on a platform")
+    check(transition.play.fold.visible,"The supplied fold pulses when the squirrel lands")
+    Input.action_press(&"flap")
+    bounce._physics_process(.01)
+    Input.action_release(&"flap")
+    check(not bounce.buried and body.visible and bounce._velocity.y<0,"A second jump can launch from the buried state")
+    for i in 100: transition.play.fold._process(.01)
+    check(not transition.play.fold.visible,"The fold spring finishes and disappears without scale drift")
+    Input.action_press(&"move_right")
+    for i in 30: bounce._physics_process(.01)
+    Input.action_release(&"move_right")
+    check(body.position.x>1040 and body.get_node("Visual/Sprite").flip_h,"Air steering and facing remain available during canopy jumps")
     transition.reset()
     check(transition.state==transition.State.WAITING and body.z_index==10 and layout.get_node("BeeEncounter").enabled,"Replay restores normal layers and encounters")
     print("SQUIRREL_CANOPY_TRANSITION_FAILURES=",failures.size())

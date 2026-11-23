@@ -33,7 +33,7 @@ func run():
         await physics_frame
         if transition.state==transition.State.COMPLETE: break
     check(transition.state==transition.State.COMPLETE,"With no player input, the real launch enters the crown and completes the cinematic")
-    check(not current_scene.dead and body.get_node("Input").enabled and not body.transferring,"Landing safely restores player control")
+    check(not current_scene.dead and transition.play.bouncer.enabled and not body.transferring,"Arrival safely enables canopy bouncing")
     started=0
     press_five()
     await wait_start()

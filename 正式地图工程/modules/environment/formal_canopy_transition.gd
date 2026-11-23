@@ -9,12 +9,12 @@ const CROWN=preload("res://assets/art/reference_map/08.png")
 @export var entry_max_y: float=20800.0
 @export var burrow_seconds: float=.45
 @export var travel_seconds: float=1.7
-@export var emerge_seconds: float=.85
 @export var landing_x: float=1040.0
 enum State { WAITING, BURROWING, TRAVELLING, EMERGING, COMPLETE }
 var state: State=State.WAITING
 var elapsed: float=0
 var profile:=PackedVector2Array()
+var play: Node
 var travel: Node
 var _start:=Vector2.ZERO
 var _landing:=Vector2.ZERO
@@ -35,6 +35,8 @@ func _ready() -> void:
     travel.suction_zoom=1.025
     add_child(travel)
     travel.finished.connect(_begin_emerge)
+    play=preload("res://modules/environment/formal_canopy_play.gd").new()
+    add_child(play)
 func _build_canopy() -> void:
     var material:=ShaderMaterial.new()
     material.shader=MASK
@@ -106,11 +108,6 @@ func _physics_process(delta: float) -> void:
             body.hide()
             state=State.TRAVELLING
             travel.travel(layout.camera,layout.to_global(_landing+Vector2(0,-230)))
-    elif state==State.EMERGING:
-        var u: float=clampf(elapsed/emerge_seconds,0,1)
-        body.global_position=layout.to_global(_landing+Vector2(0,lerpf(180,-2,u)-sin(u*PI)*300))
-        if u>=.4: body.z_index=15
-        if u>=1: _finish()
 func _begin() -> void:
     state=State.BURROWING
     elapsed=0
@@ -135,26 +132,19 @@ func _begin() -> void:
     travel.prepare(layout.camera,layout.camera.zoom)
     started.emit()
 func _begin_emerge() -> void:
-    state=State.EMERGING
-    elapsed=0
-    body.global_position=layout.to_global(_landing+Vector2(0,180))
-    body.show()
-    body.get_node("Visual").play_possession_pulse()
-func _finish() -> void:
     state=State.COMPLETE
-    body.get_node("VineClimber").set_physics_process(true)
     body.transferring=false
-    body.velocity=Vector2.ZERO
-    body.get_node("Movement").enabled=true
-    body.get_node("Input").enabled=true
-    body.get_node("Visual").play_selection_pulse()
     stage.level.exit_in_progress=false
+    play.begin(body,landing_x)
     layout.camera.resume_follow_from_current_position(body)
     layout.camera.set_process(true)
     body.reset_physics_interpolation()
     arrived.emit()
+func ripple_at(x: float) -> void:
+    play.pulse(x)
 func reset() -> void:
     if state!=State.WAITING and stage.has_node("ShoreExit"): stage.level.exit_in_progress=false
+    play.reset()
     travel.cancel()
     state=State.WAITING
     elapsed=0

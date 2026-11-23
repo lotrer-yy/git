@@ -66,13 +66,16 @@ func run():
     bounce._physics_process(.01)
     Input.action_release(&"flap")
     check(not bounce.buried and body.visible and bounce._velocity.y<0,"A second jump can launch from the buried state")
-    check(transition.play.fold.visible and body.get_node("Visual/Sprite").scale==Vector2.ONE,"Next jump pulses the fold again and restores squirrel size")
+    check(transition.play.fold.visible and body.get_node("Visual/Sprite").scale.x<.85,"Next jump starts small and pulses the fold again")
     for i in 100: transition.play.fold._process(.01)
     check(not transition.play.fold.visible,"The fold spring finishes and disappears without scale drift")
     Input.action_press(&"move_right")
-    for i in 30: bounce._physics_process(.01)
+    for i in 30:
+        bounce._physics_process(.01)
+        transition.play._process(.01)
     Input.action_release(&"move_right")
     check(body.position.x>1040 and body.get_node("Visual/Sprite").flip_h,"Air steering and facing remain available during canopy jumps")
+    check(body.get_node("Visual/Sprite").scale.x>.99,"Emergence smoothly restores normal size above the opening")
     var fixed_landing:=Vector2.INF
     for i in 200:
         bounce._physics_process(.01)

@@ -60,7 +60,7 @@ func pulse(x: float) -> void:
         _place_fold(x)
         fold.pulse()
         _landing_open=false
-        _sprite.scale=_original_sprite_scale
+        _sprite.scale=_original_sprite_scale*.78
     elif not _landing_open:
         _place_fold(x)
         fold.pulse()
@@ -90,7 +90,8 @@ func _process(_delta: float) -> void:
         var sink:=smoothstep(surface-160,surface+150,p.y)
         _sprite.scale=_original_sprite_scale*lerpf(1.0,.78,sink)
     elif not bouncer.buried:
-        _sprite.scale=_original_sprite_scale
+        var emerge:=1.0-smoothstep(surface-90,surface+bouncer.burial_depth,p.y)
+        _sprite.scale=_original_sprite_scale*lerpf(.78,1.0,emerge)
     _sync_lip()
 func _sync_lip() -> void:
     if not is_instance_valid(_clip_material): return

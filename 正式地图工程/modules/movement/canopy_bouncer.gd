@@ -11,6 +11,7 @@ var buried := true
 var released := false
 var body: CharacterBody2D
 var landing_x := 960.0
+var landing_target_x: float = NAN
 var _sky: Node2D
 var _velocity:=Vector2.ZERO
 func _ready() -> void:
@@ -31,6 +32,7 @@ func launch() -> void:
 	if not enabled or not buried or released:
 		return
 	buried=false
+	landing_target_x=NAN
 	body.z_index=foreground_z_override if foreground_z_override>=0 else _sky.get_node("CanopyForeground").z_index+1
 	body.show()
 	_velocity=Vector2(0,-jump_speed)
@@ -47,7 +49,11 @@ func _physics_process(delta: float) -> void:
 		if not released and Input.is_action_just_pressed(&"flap"):
 			launch()
 		return
-	if not released:
+	if is_finite(landing_target_x) and _velocity.y>0:
+		# 最后接触阶段由松鼠靠向已固定的入口，入口不再跟随玩家。
+		var here: float=_sky.to_local(body.global_position).x
+		_velocity.x=clampf((landing_target_x-here)*18,-air_speed,air_speed)
+	elif not released:
 		_velocity.x=move_toward(_velocity.x,Input.get_axis(&"move_left",&"move_right")*air_speed,1700*delta)
 	_velocity.y+=gravity*delta
 	var p:Vector2=_sky.to_local(body.global_position)+_velocity*delta
@@ -65,6 +71,7 @@ func _physics_process(delta: float) -> void:
 		_sky.ripple_at(landing_x)
 func reset() -> void:
 	enabled=false
+	landing_target_x=NAN
 	released=false
 	buried=true
 	_velocity=Vector2.ZERO

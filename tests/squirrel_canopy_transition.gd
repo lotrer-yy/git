@@ -49,7 +49,8 @@ func run():
     check(body.visible and transition.state==transition.State.COMPLETE and bounce.enabled,"Camera arrival hands directly to the old canopy bouncing behavior")
     check(body.z_index>14 and not motor.enabled and not body.get_node("Input").enabled,"Canopy bouncing owns movement and keeps the squirrel above the leaf layer")
     check(not body.transferring and not game.exit_in_progress,"Canopy arrival ends cinematic protection")
-    check(not transition.play.fold.visible,"Jumping out does not display a landing fold")
+    check(transition.play.fold.visible,"Jumping out also pops the fold from its center")
+    var locked_fold:=Vector2.INF
     var apex: float=body.position.y
     for i in 200:
         bounce._physics_process(.01)
@@ -65,13 +66,26 @@ func run():
     bounce._physics_process(.01)
     Input.action_release(&"flap")
     check(not bounce.buried and body.visible and bounce._velocity.y<0,"A second jump can launch from the buried state")
-    check(not transition.play.fold.visible and body.get_node("Visual/Sprite").scale==Vector2.ONE,"Next jump removes the landing fold and restores squirrel size")
+    check(transition.play.fold.visible and body.get_node("Visual/Sprite").scale==Vector2.ONE,"Next jump pulses the fold again and restores squirrel size")
     for i in 100: transition.play.fold._process(.01)
     check(not transition.play.fold.visible,"The fold spring finishes and disappears without scale drift")
     Input.action_press(&"move_right")
     for i in 30: bounce._physics_process(.01)
     Input.action_release(&"move_right")
     check(body.position.x>1040 and body.get_node("Visual/Sprite").flip_h,"Air steering and facing remain available during canopy jumps")
+    var fixed_landing:=Vector2.INF
+    for i in 200:
+        bounce._physics_process(.01)
+        transition.play._process(.01)
+        transition.play.fold._process(.01)
+        if transition.play._landing_open:
+            if fixed_landing==Vector2.INF:
+                fixed_landing=transition.play.fold.position
+                Input.action_press(&"move_left")
+            check(transition.play.fold.position==fixed_landing,"Late opposite steering cannot drag the locked landing fold")
+        if bounce.buried: break
+    Input.action_release(&"move_left")
+    check(bounce.buried and is_finite(bounce.landing_target_x) and abs(body.position.x-bounce.landing_target_x)<4,"The squirrel settles into the fixed opening after a sideways jump")
     transition.reset()
     check(transition.state==transition.State.WAITING and body.z_index==10 and layout.get_node("BeeEncounter").enabled,"Replay restores normal layers and encounters")
     print("SQUIRREL_CANOPY_TRANSITION_FAILURES=",failures.size())

@@ -56,25 +56,34 @@ func begin(body: CharacterBody2D,x: float) -> void:
 func _place_fold(x: float) -> void:
     fold.position=Vector2(x+34,crown.canopy_y(x)+crown.bounce_inset+2+fold.texture.get_height()*.5)
 func pulse(x: float) -> void:
-    _place_fold(x)
     if bouncer._velocity.y<0:
-        # 跳出时不出现褶皱；仍沿同一入口轮廓钻出。
-        fold.reset()
+        _place_fold(x)
+        fold.pulse()
         _landing_open=false
         _sprite.scale=_original_sprite_scale
     elif not _landing_open:
+        _place_fold(x)
         fold.pulse()
         _landing_open=true
     _sync_lip()
+func _predict_landing(p: Vector2) -> float:
+    var x: float=p.x
+    for i in 2:
+        var contact: float=crown.canopy_y(x)+crown.bounce_inset+40
+        var distance: float=maxf(0,contact-p.y)
+        var vy: float=bouncer._velocity.y
+        var time: float=(sqrt(vy*vy+2*bouncer.gravity*distance)-vy)/bouncer.gravity
+        x=clampf(p.x+bouncer._velocity.x*minf(time,.22),290,1630)
+    return x
 func _process(_delta: float) -> void:
     if not is_instance_valid(bouncer) or not bouncer.enabled: return
     var p: Vector2=crown.to_local(bouncer.body.global_position)
     var surface: float=crown.canopy_y(p.x)+crown.bounce_inset
-    if not bouncer.buried and bouncer._velocity.y>0 and p.y>surface-170:
+    if not bouncer.buried and bouncer._velocity.y>0 and p.y>surface-65:
         if not _landing_open:
-            pulse(p.x)
-        # Keep the opening beneath the squirrel while it crosses the lip sideways.
-        _place_fold(p.x)
+            var destination:=_predict_landing(p)
+            bouncer.landing_target_x=destination
+            pulse(destination)
     elif bouncer._velocity.y<0:
         _landing_open=false
     if bouncer._velocity.y>0:

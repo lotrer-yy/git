@@ -6,3 +6,6 @@ z_index=17
 collision_mask=48
 [node name="Host" parent="." index="5"]
 script=ExtResource("host")
+
+[node name="Movement" parent="." index="2"]
+flap_while_held=true

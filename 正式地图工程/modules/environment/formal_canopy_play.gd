@@ -1,5 +1,5 @@
 extends Node
-@export_range(.3,1.0) var buried_scale: float=.6
+@export_range(.3,1.0) var buried_scale: float=.4
 const BOUNCER=preload("res://modules/movement/canopy_bouncer.gd")
 const SPRING=preload("res://modules/visual/formal_canopy_fold.gd")
 const CLIP=preload("res://shaders/formal_canopy_squirrel.gdshader")

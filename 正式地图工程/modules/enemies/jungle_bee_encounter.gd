@@ -1,5 +1,6 @@
 extends Node2D
 ## 蜂巢脱落信号只生成一只蜜蜂；蜜蜂留在世界坐标，不跟随落下的蜂巢。
+@export var enabled: bool=true
 const STINGER = preload("res://modules/enemies/jungle_bee_stinger.gd")
 const BEE = preload("res://modules/enemies/jungle_bee.gd")
 @onready var stage: Node = get_node("../..")
@@ -12,7 +13,7 @@ func _ready() -> void:
     for hive in get_node("../Beehives").get_children():
         hive.dropped.connect(_spawn.bind(hive))
 func can_simulate() -> bool:
-    return stage.has_node("ShoreExit") and stage.active and stage.level.player==body and body.get_node("Host").claimed
+    return enabled and stage.has_node("ShoreExit") and stage.active and stage.level.player==body and body.get_node("Host").claimed
 func is_active() -> bool:
     return can_simulate() and not stage.level.dead
 func _on_player_defeated() -> void:

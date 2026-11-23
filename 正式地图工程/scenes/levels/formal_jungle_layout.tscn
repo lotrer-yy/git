@@ -20,6 +20,8 @@
 
 [ext_resource type="Script" path="res://modules/enemies/jungle_bee_encounter.gd" id="bee_encounter"]
 
+[ext_resource type="Script" path="res://modules/environment/formal_canopy_transition.gd" id="canopy_transition"]
+
 [sub_resource type="RectangleShape2D" id="JungleFloorShape"]
 size = Vector2(18304,256)
 
@@ -273,3 +275,6 @@ shape = SubResource("JungleFloorShape")
 
 [node name="BeeEncounter" type="Node2D" parent="."]
 script = ExtResource("bee_encounter")
+
+[node name="CanopyTransition" type="Node2D" parent="."]
+script = ExtResource("canopy_transition")

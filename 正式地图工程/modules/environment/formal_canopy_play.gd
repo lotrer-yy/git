@@ -1,4 +1,5 @@
 extends Node
+@export_range(.3,1.0) var buried_scale: float=.6
 const BOUNCER=preload("res://modules/movement/canopy_bouncer.gd")
 const SPRING=preload("res://modules/visual/formal_canopy_fold.gd")
 const CLIP=preload("res://shaders/formal_canopy_squirrel.gdshader")
@@ -60,7 +61,7 @@ func pulse(x: float) -> void:
         _place_fold(x)
         fold.pulse()
         _landing_open=false
-        _sprite.scale=_original_sprite_scale*.78
+        _sprite.scale=_original_sprite_scale*buried_scale
     elif not _landing_open:
         _place_fold(x)
         fold.pulse()
@@ -88,10 +89,10 @@ func _process(_delta: float) -> void:
         _landing_open=false
     if bouncer._velocity.y>0:
         var sink:=smoothstep(surface-160,surface+150,p.y)
-        _sprite.scale=_original_sprite_scale*lerpf(1.0,.78,sink)
+        _sprite.scale=_original_sprite_scale*lerpf(1.0,buried_scale,sink)
     elif not bouncer.buried:
         var emerge:=1.0-smoothstep(surface-90,surface+bouncer.burial_depth,p.y)
-        _sprite.scale=_original_sprite_scale*lerpf(.78,1.0,emerge)
+        _sprite.scale=_original_sprite_scale*lerpf(buried_scale,1.0,emerge)
     _sync_lip()
 func _sync_lip() -> void:
     if not is_instance_valid(_clip_material): return

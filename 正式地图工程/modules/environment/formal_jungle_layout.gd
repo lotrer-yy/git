@@ -40,6 +40,7 @@ func _update_nearby() -> void:
             vine.rider.set_active(near)
 func reset() -> void:
     $CanopyTransition.reset()
+    $CanopyBirdStage.reset()
     $BeeEncounter.reset()
     for hive in $Beehives.get_children(): hive.reset()
     for vine in vines: vine.reset()

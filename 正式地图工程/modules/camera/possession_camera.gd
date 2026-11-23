@@ -21,7 +21,7 @@ var _start_offset := Vector2.ZERO
 
 
 func _ready() -> void:
-	_camera = get_node(camera_path) as FollowCamera
+	_camera = get_node_or_null(camera_path) as FollowCamera
 	_focus = Marker2D.new()
 	_focus.name = "ShotFocus"
 	add_child(_focus)

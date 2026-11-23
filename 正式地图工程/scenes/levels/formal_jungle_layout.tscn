@@ -22,6 +22,11 @@
 
 [ext_resource type="Script" path="res://modules/environment/formal_canopy_transition.gd" id="canopy_transition"]
 
+[ext_resource type="PackedScene" path="res://scenes/actors/formal_canopy_bird.tscn" id="canopy_bird"]
+[ext_resource type="Script" path="res://modules/environment/formal_canopy_bird_stage.gd" id="canopy_bird_stage"]
+[ext_resource type="Script" path="res://modules/possession/formal_canopy_possession.gd" id="canopy_possession"]
+[ext_resource type="Script" path="res://modules/camera/possession_camera.gd" id="canopy_shot"]
+
 [sub_resource type="RectangleShape2D" id="JungleFloorShape"]
 size = Vector2(18304,256)
 
@@ -278,3 +283,22 @@ script = ExtResource("bee_encounter")
 
 [node name="CanopyTransition" type="Node2D" parent="."]
 script = ExtResource("canopy_transition")
+
+[node name="Bird" parent="." instance=ExtResource("canopy_bird")]
+position=Vector2(1040,17480)
+[node name="CanopyPossession" type="Node" parent="."]
+script=ExtResource("canopy_possession")
+soul_path=NodePath("../../../../Soul")
+camera_path=NodePath("../../../../Camera")
+shot_path=NodePath("../CanopyPossessionCamera")
+source_body_path=NodePath("../Squirrel")
+source_focus_offset=Vector2(34,-82)
+center_soul_artwork=true
+enabled=false
+selection_radius=260.0
+host_group=&"formal_canopy_birds"
+[node name="CanopyPossessionCamera" type="Node" parent="."]
+script=ExtResource("canopy_shot")
+camera_path=NodePath("../../../../Camera")
+[node name="CanopyBirdStage" type="Node" parent="."]
+script=ExtResource("canopy_bird_stage")

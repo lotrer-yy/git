@@ -1,0 +1,8 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://scenes/actors/bird.tscn" id="bird"]
+[ext_resource type="Script" path="res://modules/possession/formal_canopy_bird_host.gd" id="host"]
+[node name="Bird" instance=ExtResource("bird")]
+z_index=17
+collision_mask=48
+[node name="Host" parent="." index="5"]
+script=ExtResource("host")

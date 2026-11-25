@@ -16,6 +16,10 @@ func run():
     var menu = load("res://scenes/ui/main_menu.tscn").instantiate()
     root.add_child(menu)
     current_scene = menu
+    var first_click := count(&"ui")
+    menu.get_node("Settings").pressed.emit()
+    check(count(&"ui")==first_click+1,"First menu click sounds immediately without waiting for deferred binding")
+    sfx._bind_button(menu.get_node("Settings"))
     await process_frame
     await process_frame
     var before := count(&"ui")
@@ -54,6 +58,7 @@ func run():
     check(not sfx.cinematic_running,"Leaving the menu clears cinematic audio ownership")
     var game = load("res://scenes/levels/formal_hell_entry.tscn").instantiate()
     game.get_node("FlyingEnemies").enabled = false
+    game.get_node("RisingLava").process_mode = Node.PROCESS_MODE_DISABLED
     root.add_child(game)
     current_scene = game
     await create_timer(.85).timeout
@@ -80,8 +85,13 @@ func run():
     await create_timer(.4).timeout
     before = count(&"bounce")
     fork._swap_and_bounce()
+    var jumps_before_bounce := count(&"jump")
     await create_timer(.35).timeout
     check(count(&"bounce")==before+1,"Ball bounce audio starts with actual launch after teleport")
+    await create_timer(1.1).timeout
+    check(count(&"jump")==jumps_before_bounce+1,"Landing after the actual ball launch plays the landing sound once")
+    game.demon.get_node("Movement").landed.emit(650)
+    check(count(&"jump")==jumps_before_bounce+1,"Ball landing cannot replay on repeated floor contact")
     fork.reset()
     game.demon.get_node("Movement").enabled = false
     var manager = game.get_node("FlyingEnemies")
@@ -101,6 +111,7 @@ func run():
     brittle.reset()
     var motor = game.demon.get_node("Movement")
     game.demon.global_position = game._demon_spawn
+    motor.reset()
     motor.enabled = true
     game.player = game.demon
     var reader = game.demon.get_node("Input")
@@ -142,6 +153,7 @@ func run():
     ghost_reader.move_axis = 1
     for i in range(12): await physics_frame
     check(sfx._movement_kind==&"ghost_run" and sfx._movement.playing,"The ghost's real flat-ground movement uses the eleventh supplied cue")
+    check(absf(sfx._movement.volume_db-8.13)<.1,"Ghost footsteps use the reduced gain during actual movement")
     before = count(&"death")
     game.die(&"impact")
     game.die(&"impact")

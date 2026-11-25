@@ -10,7 +10,8 @@ func _ready() -> void:
     level.get_node("Demon/Movement").jumped.connect(_on_jump)
     level.get_node("Demon/Movement").landed.connect(_on_landed)
     level.get_node("Fork").thrown.connect(func():Sfx.play(&"fork"))
-    level.get_node("Fork").bounced.connect(func():Sfx.play(&"bounce"))
+    level.get_node("Fork").bounced.connect(_on_bounced)
+    level.get_node("Fork").interaction_reset.connect(_on_interaction_reset)
     level.get_node("FlyingEnemies").fork_thrown.connect(func():Sfx.play(&"fork"))
     for platform in level.get_node("Platforms").get_children():
         if platform.has_signal("fractured"):
@@ -45,6 +46,14 @@ func _on_landed(_impact_speed: float) -> void:
     if not _awaiting_landing: return
     _awaiting_landing = false
     if _hell_active() and level.player==level.demon: Sfx.play(&"jump")
+
+func _on_bounced() -> void:
+    _awaiting_landing = true
+    Sfx.set_movement(&"")
+    Sfx.play(&"bounce")
+
+func _on_interaction_reset() -> void:
+    _awaiting_landing = false
 
 func _on_fracture(platform: Node2D) -> void:
     if not _hell_active(): return

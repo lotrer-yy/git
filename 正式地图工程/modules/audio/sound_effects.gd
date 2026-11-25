@@ -33,11 +33,15 @@ func _ready() -> void:
     get_tree().node_added.connect(_watch_button)
 
 func _watch_button(node: Node) -> void:
-    if node is BaseButton: _bind_button.call_deferred(node)
+    if node is BaseButton: _bind_button(node)
 
 func _bind_button(button: BaseButton) -> void:
     if not is_instance_valid(button): return
-    button.pressed.connect(func():play(&"ui"))
+    if not button.pressed.is_connected(_on_ui_pressed):
+        button.pressed.connect(_on_ui_pressed)
+
+func _on_ui_pressed() -> void:
+    play(&"ui")
 
 func play(cue: StringName) -> void:
     var voice: AudioStreamPlayer

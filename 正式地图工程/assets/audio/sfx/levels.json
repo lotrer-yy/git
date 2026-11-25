@@ -102,12 +102,12 @@
   "ghost_run": {
     "file": "ghost_run.mp3",
     "source": "小幽灵奔跑.mp3",
-    "gain_db": 14.13,
+    "gain_db": 8.13,
     "duration": 2.7167,
     "active_rms_db": -38.95,
     "peak_db": -20.13,
-    "output_rms_db": -24.82,
-    "output_peak_db": -6.0
+    "output_rms_db": -30.82,
+    "output_peak_db": -12.0
   },
   "soul_exit": {
     "file": "soul_exit.mp3",

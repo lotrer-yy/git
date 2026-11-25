@@ -31,6 +31,12 @@ func _ready() -> void:
     _movement.bus = &"SFX"
     add_child(_movement)
     get_tree().node_added.connect(_watch_button)
+    get_tree().scene_changed.connect(_bind_scene_buttons)
+    _bind_scene_buttons.call_deferred()
+
+func _bind_scene_buttons() -> void:
+    for button in get_tree().root.find_children("*","BaseButton",true,false):
+        _bind_button(button)
 
 func _watch_button(node: Node) -> void:
     if node is BaseButton: _bind_button(node)

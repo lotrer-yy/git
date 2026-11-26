@@ -6,7 +6,7 @@ extends Node
 @onready var squirrel: CharacterBody2D = layout.get_node("Squirrel")
 
 func _ready() -> void:
-    stage.get_node("ShoreExit").leaped.connect(func():Sfx.play(&"fish_shore_leap"))
+    stage.get_node("ShoreExit").landed_on_shore.connect(_on_fish_landed)
     squirrel.get_node("Movement").jumped.connect(_on_jump)
     squirrel.get_node("Movement").landed.connect(_on_landed)
     var climber: Node = squirrel.get_node("VineClimber")
@@ -21,6 +21,9 @@ func _ready() -> void:
 
 func _controlled() -> bool:
     return level.player==squirrel and not level.dead and squirrel.get_node("Host").claimed
+
+func _on_fish_landed() -> void:
+    if level.player==stage.fish and not level.dead: Sfx.play(&"fish_shore_leap")
 
 func _on_jump() -> void:
     if _controlled(): Sfx.play(&"squirrel_jump")

@@ -64,7 +64,10 @@ func _on_death() -> void:
     _awaiting_landing = false
     Sfx.set_movement(&"")
     var squirrel: Node = level.get_node("OceanLink/FishStage/JungleLayout/Squirrel")
-    Sfx.play(&"squirrel_death" if level.player==squirrel else &"death")
+    var bird: Node = level.get_node("OceanLink/FishStage/JungleLayout/Bird")
+    var cue: StringName = &"squirrel_death" if level.player==squirrel else &"death"
+    if level.player==bird: cue = &"bird_death"
+    Sfx.play(cue)
 
 func _exit_tree() -> void:
     if not Sfx.cinematic_running: Sfx.set_movement(&"")

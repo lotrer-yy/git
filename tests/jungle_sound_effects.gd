@@ -35,7 +35,12 @@ func run():
     fish.get_node("Input").up_held = true
     shore._physics_process(.01)
     shore._physics_process(.01)
-    check(count(&"fish_shore_leap")==1,"Actual fish leap sounds once")
+    check(count(&"fish_shore_leap")==0,"Fish leap stays silent until actual shore landing")
+    for i in 250:
+        await physics_frame
+        shore._physics_process(1.0/Engine.physics_ticks_per_second)
+        if shore.state==shore.State.STRANDED: break
+    check(shore.state==shore.State.STRANDED and count(&"fish_shore_leap")==1,"Real shore landing sounds once")
     var layout = stage.get_node("JungleLayout")
     layout.set_process(false)
     for vine in layout.vines: vine.set_physics_process(false)

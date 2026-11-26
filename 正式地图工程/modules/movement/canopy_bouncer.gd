@@ -1,4 +1,5 @@
 extends Node
+signal jumped
 @export var foreground_z_override: int = -1
 @export var surface_offset_y: float = 0.0
 ## 树冠内待机、按次跳出、空中转向与原地落回；与普通平台移动互斥。
@@ -38,6 +39,7 @@ func launch() -> void:
 	_velocity=Vector2(0,-jump_speed)
 	_sky.ripple_at(landing_x)
 	body.get_node("Visual").play_possession_pulse()
+	jumped.emit()
 func release_host() -> void:
 	# 灵魂离开即停止向上弹跳，保留横向惯性，由重力接管下落。
 	released=true

@@ -298,5 +298,55 @@
     "peak_db": -14.54,
     "output_rms_db": -22.0,
     "output_peak_db": -9.47
+  },
+  "sky_transition": {
+    "file": "sky_transition.mp3",
+    "source": "TO天空过场.mp3",
+    "gain_db": 0.28,
+    "duration": 1.6457,
+    "active_rms_db": -24.28,
+    "peak_db": -8.21,
+    "output_rms_db": -24.0,
+    "output_peak_db": -7.94
+  },
+  "bird_death": {
+    "file": "bird_death.mp3",
+    "source": "死亡.mp3",
+    "gain_db": 4.89,
+    "duration": 0.3396,
+    "active_rms_db": -26.89,
+    "peak_db": -17.7,
+    "output_rms_db": -22.0,
+    "output_peak_db": -12.81
+  },
+  "sky_ice_break": {
+    "file": "sky_ice_break.mp3",
+    "source": "天空冰块碎.mp3",
+    "gain_db": 18.67,
+    "duration": 0.3135,
+    "active_rms_db": -43.97,
+    "peak_db": -21.67,
+    "output_rms_db": -25.3,
+    "output_peak_db": -3.0
+  },
+  "eagle_call": {
+    "file": "eagle_call.mp3",
+    "source": "天空老鹰叫.mp3",
+    "gain_db": 2.37,
+    "duration": 0.862,
+    "active_rms_db": -24.37,
+    "peak_db": -12.31,
+    "output_rms_db": -22.0,
+    "output_peak_db": -9.93
+  },
+  "eagle_flap": {
+    "file": "eagle_flap.mp3",
+    "source": "天空老鹰拍.mp3",
+    "gain_db": 20.3,
+    "duration": 0.862,
+    "active_rms_db": -44.3,
+    "peak_db": -24.69,
+    "output_rms_db": -24.0,
+    "output_peak_db": -4.38
   }
 }

@@ -1,6 +1,8 @@
 class_name VineClimber
 extends Node
 signal released(launch_velocity: Vector2)
+signal grabbed
+signal jumped_from_vine
 ## 可配置抓取与松手抛出；W/S 攀爬，自动或 A/D 借力，优先未抓过的可达藤蔓。
 const SWING_ASSIST = preload("res://modules/movement/vine_swing_assist.gd")
 @export_range(1,3) var launch_multiplier: float = 1.0
@@ -118,6 +120,7 @@ func try_grab() -> bool:
 	nearest.catch(_body,_body.velocity,jump_origin)
 	adopt_vine(nearest)
 	_motor.enabled=false
+	grabbed.emit()
 	return true
 func adopt_vine(value: SwingVine) -> void:
 	_motor.air_jumps_remaining=_motor.extra_air_jumps
@@ -143,6 +146,7 @@ func detach(jump: bool) -> void:
 	jump_origin=_body.global_position
 	_cooldown=0.3
 	released.emit(_body.velocity)
+	if jump: jumped_from_vine.emit()
 func reset() -> void:
 	visited_vines.clear()
 	_swing_assist.reset()

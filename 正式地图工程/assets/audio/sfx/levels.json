@@ -198,5 +198,105 @@
     "peak_db": -16.63,
     "output_rms_db": -22.0,
     "output_peak_db": -9.79
+  },
+  "fish_shore_leap": {
+    "file": "fish_shore_leap.mp3",
+    "source": "TO森林跃上岸.mp3",
+    "gain_db": 16.08,
+    "duration": 0.418,
+    "active_rms_db": -38.08,
+    "peak_db": -22.4,
+    "output_rms_db": -22.0,
+    "output_peak_db": -6.32
+  },
+  "vine_release": {
+    "file": "vine_release.mp3",
+    "source": "丛林藤蔓甩出.mp3",
+    "gain_db": 6.77,
+    "duration": 0.3918,
+    "active_rms_db": -28.77,
+    "peak_db": -14.72,
+    "output_rms_db": -22.0,
+    "output_peak_db": -7.95
+  },
+  "squirrel_land": {
+    "file": "squirrel_land.mp3",
+    "source": "落到沙子上.mp3",
+    "gain_db": 3.31,
+    "duration": 0.5486,
+    "active_rms_db": -25.31,
+    "peak_db": -12.65,
+    "output_rms_db": -22.0,
+    "output_peak_db": -9.33
+  },
+  "vine_grab": {
+    "file": "vine_grab.mp3",
+    "source": "落到藤曼上.mp3",
+    "gain_db": 3.0,
+    "duration": 0.2351,
+    "active_rms_db": -25.0,
+    "peak_db": -14.44,
+    "output_rms_db": -22.0,
+    "output_peak_db": -11.43
+  },
+  "bee_defeat": {
+    "file": "bee_defeat.mp3",
+    "source": "蜜蜂被撞死.mp3",
+    "gain_db": 15.97,
+    "duration": 0.7053,
+    "active_rms_db": -37.97,
+    "peak_db": -25.9,
+    "output_rms_db": -22.0,
+    "output_peak_db": -9.94
+  },
+  "bee_stinger": {
+    "file": "bee_stinger.mp3",
+    "source": "蜜蜂掉刺.mp3",
+    "gain_db": 9.99,
+    "duration": 0.1829,
+    "active_rms_db": -31.99,
+    "peak_db": -16.96,
+    "output_rms_db": -22.0,
+    "output_peak_db": -6.96
+  },
+  "bee_buzz": {
+    "file": "bee_buzz.mp3",
+    "source": "蜜蜂嗡嗡嗡.mp3",
+    "gain_db": 10.37,
+    "duration": 1.8808,
+    "active_rms_db": -38.37,
+    "peak_db": -24.35,
+    "output_rms_db": -28.0,
+    "output_peak_db": -13.98
+  },
+  "squirrel_death": {
+    "file": "squirrel_death.mp3",
+    "source": "死亡.mp3",
+    "gain_db": 4.89,
+    "duration": 0.3396,
+    "active_rms_db": -26.89,
+    "peak_db": -17.7,
+    "output_rms_db": -22.0,
+    "output_peak_db": -12.81
+  },
+  "squirrel_jump": {
+    "file": "squirrel_jump.mp3",
+    "source": "跳跃.mp3",
+    "gain_db": 7.29,
+    "duration": 0.2351,
+    "active_rms_db": -29.29,
+    "peak_db": -20.97,
+    "output_rms_db": -22.0,
+    "output_peak_db": -13.68
+  },
+  "hive_hit": {
+    "file": "hive_hit.mp3",
+    "source": "撞到蜂窝.mp3",
+    "gain_db": 5.07,
+    "duration": 0.2873,
+    "active_rms_db": -27.07,
+    "peak_db": -14.54,
+    "output_rms_db": -22.0,
+    "output_peak_db": -9.47
   }
 }

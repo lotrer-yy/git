@@ -1,4 +1,6 @@
 extends Node2D
+signal bee_spawned(bee: CharacterBody2D)
+signal stinger_fired
 ## 蜂巢脱落信号只生成一只蜜蜂；蜜蜂留在世界坐标，不跟随落下的蜂巢。
 @export var enabled: bool=true
 const STINGER = preload("res://modules/enemies/jungle_bee_stinger.gd")
@@ -28,6 +30,7 @@ func _spawn(hive: Sprite2D) -> void:
     bee.ranged=hive.bee_variant==1
     add_child(bee)
     bee.global_position=hive.to_global(Vector2(0,210))
+    bee_spawned.emit(bee)
 func player_spinning() -> bool:
     return body.get_node("AirSpin").is_invulnerable()
 func target_position() -> Vector2:
@@ -64,6 +67,7 @@ func fire_stinger(origin: Vector2,aim: Vector2) -> void:
     add_child(needle)
     needle.global_position=origin
     needle.launch(aim)
+    stinger_fired.emit()
 func _physics_process(_delta: float) -> void:
     if not can_simulate() and get_child_count()>0: reset()
 func flight_bounds() -> Rect2:

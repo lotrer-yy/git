@@ -2,6 +2,7 @@ class_name FishShoreExit
 extends Node
 ## 水下推进、出水抛物线与上岸状态分别交接，始终由玩家控制出水时机。
 signal landed_on_shore
+signal leaped
 signal died_on_shore
 enum State { SWIMMING, AIRBORNE, STRANDED, DEAD }
 @export_node_path("CharacterBody2D") var fish_path: NodePath = ^"../Fish"
@@ -51,6 +52,7 @@ func _physics_process(delta: float) -> void:
 			_visual.set_process(false)
 			_fish.motion_mode = CharacterBody2D.MOTION_MODE_GROUNDED
 			_fish.velocity.y = -leap_speed
+			leaped.emit()
 		else:
 			return
 	var just_up := _reader.up_held and not _up_was_held

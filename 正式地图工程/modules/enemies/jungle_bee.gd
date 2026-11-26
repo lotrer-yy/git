@@ -1,6 +1,7 @@
 extends CharacterBody2D
 ## 复用地狱小恶魔飞行模块；只用作者蜜蜂原图，蓄力瞄准后短暂有限追踪冲刺蜇击。
 signal stung
+signal defeated
 const FLIGHT = preload("res://modules/enemies/flying_motion.gd")
 const ART2 = preload("res://assets/art/jungle/formal/bee2.png")
 @export var ranged: bool = false
@@ -138,6 +139,7 @@ func deflect(origin: Vector2) -> void:
     if away.length_squared()<.01: away=Vector2.UP
     velocity=away*1100+(encounter.body.velocity*.25).limit_length(350)+Vector2(0,-220)
     _set_mode(Mode.DEFLECTED)
+    defeated.emit()
     encounter.bee_deflected()
     _tick_deflection(0)
 func _tick_deflection(delta: float) -> void:

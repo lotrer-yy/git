@@ -63,7 +63,8 @@ func _on_fracture(platform: Node2D) -> void:
 func _on_death() -> void:
     _awaiting_landing = false
     Sfx.set_movement(&"")
-    Sfx.play(&"death")
+    var squirrel: Node = level.get_node("OceanLink/FishStage/JungleLayout/Squirrel")
+    Sfx.play(&"squirrel_death" if level.player==squirrel else &"death")
 
 func _exit_tree() -> void:
     if not Sfx.cinematic_running: Sfx.set_movement(&"")

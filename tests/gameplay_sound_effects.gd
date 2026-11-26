@@ -11,7 +11,7 @@ func count(cue: StringName) -> int:
 func run():
     var sfx = root.get_node("Sfx")
     sfx.played.connect(func(cue):cues.append(cue))
-    check(sfx.levels.size()==20,"All twenty supplied sound effects including ocean and transition cues are available")
+    check(sfx.levels.size()==30,"All thirty supplied sound effects including jungle cues are available")
     check(AudioServer.get_bus_index("SFX")>=0 and sfx._movement.bus==&"SFX","Movement and one-shots use an independent SFX bus")
     var menu = load("res://scenes/ui/main_menu.tscn").instantiate()
     root.add_child(menu)

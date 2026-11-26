@@ -1,13 +1,13 @@
 {
   "ui": {
     "file": "ui.mp3",
-    "source": "UI点击.mp3",
-    "gain_db": 12.05,
+    "source": "UI点击(1).mp3",
+    "gain_db": 8.66,
     "duration": 0.3135,
-    "active_rms_db": -36.05,
-    "peak_db": -19.65,
+    "active_rms_db": -32.66,
+    "peak_db": -20.91,
     "output_rms_db": -24.0,
-    "output_peak_db": -7.6
+    "output_peak_db": -12.25
   },
   "arrow": {
     "file": "arrow.mp3",
